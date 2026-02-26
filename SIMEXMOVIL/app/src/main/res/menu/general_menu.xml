@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <item android:id="@+id/nav_profile" android:title="Perfil" android:icon="@drawable/ic_registration" />
+    <item android:id="@+id/nav_game" android:title="Juego" android:icon="@drawable/ic_gamecontroller" />
+    <item android:id="@+id/nav_home" android:title="Home" android:icon="@drawable/ic_homepage" />
+    <item android:id="@+id/nav_chat" android:title="Chat" android:icon="@drawable/ic_speechbubble" />
+    <item android:id="@+id/nav_settings" android:title="Config" android:icon="@drawable/settings" />
+</menu>
