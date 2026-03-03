@@ -16,43 +16,6 @@ class HomeClientActivity : AppCompatActivity() {
 
         navButton.selectedItemId = R.id.nav_home
 
-
-        navButton.setOnItemSelectedListener { item: MenuItem ->
-            when (item.itemId) {
-                R.id.nav_home -> {
-                    true
-                }
-                R.id.nav_profile -> {
-                    val intent = Intent(this, ProfileActivity::class.java)
-                    startActivity(intent)
-                    overridePendingTransition(0, 0)
-                    true
-                }
-                R.id.nav_chat -> {
-                    val intent = Intent (this, ChatActivity::class.java)
-                    startActivity(intent)
-                    overridePendingTransition(0, 0)
-                    true
-                }
-                R.id.nav_game -> {
-                    val intent = Intent(this, GameActivity::class.java)
-                    startActivity(intent)
-                    overridePendingTransition(0,0)
-                    true
-                }
-                R.id.nav_settings -> {
-                    val intent = Intent(this, SettingsActivity::class.java)
-                    startActivity(intent)
-                    overridePendingTransition(0,0)
-                    true
-                }
-                else -> false
-
-            }
-
-
-
-        }
-
+        menuConfiguration(this, navButton)
     }
 }
