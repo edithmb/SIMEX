@@ -1,4 +1,12 @@
 package com.example.simex_movil
 
-class FormActivity {
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+
+class FormActivity: AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_history_offers)
+
+    }
 }
