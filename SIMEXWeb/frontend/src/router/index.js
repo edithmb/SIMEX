@@ -21,6 +21,78 @@ const router = createRouter({
         breadcrumbParent: 'Inicio / Operaciones',
       },
     },
+    {
+      path: '/solicitudes',
+      name: 'solicitudes',
+      component: () => import('@/views/SolicitudesView.vue'),
+      meta: {
+        title: 'Solicitudes de Clientes',
+        breadcrumbParent: 'Inicio / Comercial',
+      },
+    },
+    {
+      path: '/presupuestos',
+      name: 'presupuestos',
+      component: () => import('@/views/PresupuestosView.vue'),
+      meta: {
+        title: 'Presupuestos',
+        breadcrumbParent: 'Inicio / Comercial',
+      },
+    },
+    {
+      path: '/clientes',
+      name: 'clientes',
+      component: () => import('@/views/ClientesView.vue'),
+      meta: {
+        title: 'Gestión de Clientes',
+        breadcrumbParent: 'Inicio / Comercial',
+      },
+    },
+    {
+      path: '/operaciones',
+      name: 'operaciones',
+      component: () => import('@/views/OperacionesView.vue'),
+      meta: {
+        title: 'Operaciones',
+        breadcrumbParent: 'Inicio / Operaciones',
+      },
+    },
+    {
+      path: '/productos',
+      name: 'productos',
+      component: () => import('@/views/ProductosView.vue'),
+      meta: {
+        title: 'Productos Importados',
+        breadcrumbParent: 'Inicio / Operaciones',
+      },
+    },
+    {
+      path: '/documentos',
+      name: 'documentos',
+      component: () => import('@/views/DocumentosView.vue'),
+      meta: {
+        title: 'Documentos',
+        breadcrumbParent: 'Inicio / Operaciones',
+      },
+    },
+    {
+      path: '/configuracion',
+      name: 'configuracion',
+      component: () => import('@/views/ConfiguracionView.vue'),
+      meta: {
+        title: 'Configuración',
+        breadcrumbParent: 'Inicio / Sistema',
+      },
+    },
+    {
+      path: '/usuarios',
+      name: 'usuarios',
+      component: () => import('@/views/UsuariosView.vue'),
+      meta: {
+        title: 'Gestión de Usuarios',
+        breadcrumbParent: 'Inicio / Sistema',
+      },
+    },
   ],
 })
 
