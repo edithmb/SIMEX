@@ -10,7 +10,7 @@ import AppLayout from '@/components/layout/AppLayout.vue'
 
 <style>
 /* ═══════════════════════════════════════════
-   GLOBAL STYLES — LogiTrack Pro
+   GLOBAL STYLES — LogiTrack Pro.
    ═══════════════════════════════════════════ */
 
 :root {
