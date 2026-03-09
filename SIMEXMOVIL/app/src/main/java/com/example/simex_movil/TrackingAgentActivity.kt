@@ -1,0 +1,12 @@
+package com.example.simex_movil
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+
+class TrackingAgentActivity: AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_trackingagent)
+
+    }
+}
