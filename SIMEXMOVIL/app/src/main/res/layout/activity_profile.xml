@@ -1,49 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="#F4F7FA"> <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:scrollbars="none"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toTopOf="@+id/contenedor_menu"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
 
-    <TextView
-        android:layout_width="126dp"
-        android:layout_height="52dp"
-        android:layout_marginTop="72dp"
-        android:text="Profile"
-        android:textSize="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Profile"
+            android:fontFamily="@font/plusjakartasansmedium"
+            android:textColor="#8AB242"
+            android:textSize="32sp"
+            android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/name"
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_white_circle"
+            android:backgroundTint="#B0C0D0" />
+
+        <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="176dp"
-        android:text="Name:"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.078"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginTop="8dp"
+        android:text="Peluche Corporations"
+        android:fontFamily="@font/spacegroteskbold"
+        android:textColor="#333333"
+        android:textSize="12sp" />
 
-    <EditText
-        android:layout_width="312dp"
-        android:layout_height="69dp"
-        android:layout_marginTop="152dp"
-        android:hint="maria@gmail.com"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/btn_editar_perfil"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@color/lightblue"
+            android:gravity="center"
+            android:paddingVertical="8dp"
+            android:text="Editar perfil"
+            android:fontFamily="@font/spacegroteskbold"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp" />
 
-    <include
-        layout="@layout/layout_menu_reutilizable"
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="24dp"
+            android:background="#E0E0E0" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Datos personales"
+            android:textColor="#8AB242"
+            android:fontFamily="@font/plusjakartasansmedium"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Nombre"
+            android:textColor="#333333"
+            android:textSize="12sp" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:paddingHorizontal="12dp"
+            android:text="Federico Maradonio"
+            android:textColor="#666666"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Apellido"
+            android:textColor="#333333"
+            android:textSize="12sp" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:paddingHorizontal="12dp"
+            android:text="Peluche"
+            android:textColor="#666666"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Correo electronico"
+            android:textColor="#333333"
+            android:textSize="12sp" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:paddingHorizontal="12dp"
+            android:text="Fpeluche2425@corpetion.com"
+            android:textColor="#99AAB5"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Contraseña"
+            android:textColor="#333333"
+            android:textSize="12sp" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:paddingHorizontal="12dp"
+            android:text="****************"
+            android:inputType="textPassword"
+            android:drawableTint="#8AB242"
+            android:textColor="#666666"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Dirección"
+            android:textColor="#8AB242"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Dirección"
+            android:textColor="#333333"
+            android:textSize="12sp" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:paddingHorizontal="12dp"
+            android:text="Carrer de Gràcia, 45, 3r 2a"
+            android:textColor="#666666"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Documento DNI/NIE"
+            android:textColor="#8AB242"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="40dp"> <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:text="Tu DNI se transfiere y almacena cifrado con encriptación AES. Necesitarás la clave para descargarlo."
+            android:textSize="10sp"
+            android:textColor="#666666" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@color/blue"
+                    android:gravity="center"
+                    android:paddingVertical="8dp"
+                    android:text="Subir DNI"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_fecha"
+                    android:gravity="center"
+                    android:paddingVertical="8dp"
+                    android:text="Bajar DNI"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
+
+    <FrameLayout
+        android:id="@+id/contenedor_menu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <include layout="@layout/layout_menu_reutilizable" />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
