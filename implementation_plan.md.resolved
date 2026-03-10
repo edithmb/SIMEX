@@ -1,0 +1,240 @@
+# Vista Cliente en Solicitudes — Plan de Implementación
+
+Añadir una **vista cliente** en la pestaña de Solicitudes del CRM. La vista actual ([SolicitudesView.vue](file:///Users/daniel/Desktop/SIMEX-1/SIMEXWeb/frontend/src/views/SolicitudesView.vue)) es la del Administrador/Usuario CRM. La nueva vista permitirá a los clientes:
+
+1. Ver sus solicitudes en una tabla simplificada (sin columnas internas como "Cliente" o "Acciones de presupuesto").
+2. Crear nuevas solicitudes de importación/exportación mediante un popup (modal).
+
+Se mantendrá un **toggle** (botón) en la cabecera de Solicitudes para cambiar entre vista Admin y vista Cliente.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Enfoque de toggle vs. rutas separadas:** El plan propone un sistema de toggle con un `ref` reactivo (`vistaCliente`) dentro de la misma ruta [/solicitudes](file:///Users/daniel/Desktop/SIMEX-1/SIMEXWeb/frontend/src/components/solicitudes), sin crear una ruta nueva. Esto es más sencillo para el MVP. ¿Es correcto o prefieres una ruta separada como `/solicitudes/cliente`?
+
+> [!IMPORTANT]
+> **Datos hardcodeados:** Como no hay BBD aún, se hardcodearán los orígenes, destinos, y las solicitudes de ejemplo del cliente. Cuando integres la API/Backend esto se sustituye por llamadas reales.
+
+---
+
+## Arquitectura de la Solución
+
+```mermaid
+graph TD
+    A["SolicitudesView.vue"] --> B{"vistaCliente?"}
+    B -->|false| C["Vista Admin (actual)"]
+    B -->|true| D["Vista Cliente (nueva)"]
+    D --> E["ClienteSolicitudesTable.vue"]
+    D --> F["NuevaSolicitudModal.vue"]
+    C --> G["SolicitudesStats"]
+    C --> H["SolicitudesFilters"]
+    C --> I["SolicitudesTable"]
+    C --> J["CrearPresupuestoModal"]
+```
+
+---
+
+## Proposed Changes
+
+### Componente: Solicitudes (vista principal)
+
+#### [MODIFY] [SolicitudesView.vue](file:///Users/daniel/Desktop/SIMEX-1/SIMEXWeb/frontend/src/views/SolicitudesView.vue)
+
+- Añadir `ref vistaCliente = ref(false)` para controlar qué vista se muestra.
+- Añadir un **botón toggle** en el header (`solicitudes-header`) que permita cambiar entre "Vista Admin" y "Vista Cliente".
+  - Texto del botón: `"👁 Vista Cliente"` / `"👁 Vista Admin"` según el estado.
+  - Estilo: botón pill (border-radius alto) alineado a la derecha del título.
+- Importar los nuevos componentes `ClienteSolicitudesTable` y `NuevaSolicitudModal`.
+- Añadir datos hardcodeados específicos del cliente (solicitudes con los estados: Enviada, Aceptada, Pendiente, Rechazada).
+- Condicionar la renderización con `v-if="!vistaCliente"` (vista admin) y `v-else` (vista cliente).
+- En la vista cliente mostrar:
+  - Un header con el nombre del cliente (hardcodeado, ej. "Textiles Mediterráneo S.A.").
+  - Un botón **"+ Nueva Solicitud"** que abre el modal.
+  - La tabla `ClienteSolicitudesTable`.
+- Gestionar el estado del modal `NuevaSolicitudModal` (`showNuevaSolicitud`, `openNuevaSolicitud()`, `closeNuevaSolicitud()`, `handleNuevaSolicitud()`).
+
+---
+
+### Componente: Tabla de solicitudes del cliente
+
+#### [NEW] [ClienteSolicitudesTable.vue](file:///Users/daniel/Desktop/SIMEX-1/SIMEXWeb/frontend/src/components/solicitudes/ClienteSolicitudesTable.vue)
+
+Tabla simplificada para la vista cliente. **Columnas:**
+
+| Columna | Campo |
+|---|---|
+| Referencia | `ref` |
+| Tipo de Mercancía | `tipoMercancia` |
+| Ruta | `origen → destino` |
+| Tipo de Transporte | Icono (ship/plane/truck) |
+| Fecha Deseada | `fechaDeseada` |
+| Estado | Badge con color (Enviada, Aceptada, Pendiente, Rechazada) |
+
+**Diferencias con [SolicitudesTable.vue](file:///Users/daniel/Desktop/SIMEX-1/SIMEXWeb/frontend/src/components/solicitudes/SolicitudesTable.vue) (admin):**
+- **Sin** columna "Cliente" (el cliente ya sabe quién es).
+- **Sin** columna "Acciones" (no hay botón de "Crear Presupuesto").
+- Estados diferentes: `Enviada` (azul), `Aceptada` (verde), `Pendiente` (amarillo), `Rechazada` (rojo).
+- Seguirá los mismos patrones CSS (`solicitudes-table-*`) renombrados a `cliente-table-*`.
+
+**Props:** `solicitudes: Array`
+
+**Datos hardcodeados de ejemplo** (4-5 solicitudes) que se definirán en [SolicitudesView.vue](file:///Users/daniel/Desktop/SIMEX-1/SIMEXWeb/frontend/src/views/SolicitudesView.vue):
+
+```js
+const solicitudesCliente = [
+  {
+    ref: 'SOL-2024-130',
+    tipoMercancia: 'Electrónica de consumo',
+    origen: 'Shanghai',
+    destino: 'Valencia',
+    transport: 'ship',
+    fechaDeseada: '20/04/2024',
+    status: 'Enviada',
+  },
+  {
+    ref: 'SOL-2024-131',
+    tipoMercancia: 'Textiles',
+    origen: 'Mumbai',
+    destino: 'Barcelona',
+    transport: 'ship',
+    fechaDeseada: '15/05/2024',
+    status: 'Aceptada',
+  },
+  {
+    ref: 'SOL-2024-132',
+    tipoMercancia: 'Maquinaria industrial',
+    origen: 'Frankfurt',
+    destino: 'Madrid',
+    transport: 'truck',
+    fechaDeseada: '01/04/2024',
+    status: 'Pendiente',
+  },
+  {
+    ref: 'SOL-2024-133',
+    tipoMercancia: 'Alimentos perecederos',
+    origen: 'Rotterdam',
+    destino: 'Bilbao',
+    transport: 'truck',
+    fechaDeseada: '10/03/2024',
+    status: 'Rechazada',
+  },
+]
+```
+
+---
+
+### Componente: Modal de nueva solicitud
+
+#### [NEW] [NuevaSolicitudModal.vue](file:///Users/daniel/Desktop/SIMEX-1/SIMEXWeb/frontend/src/components/solicitudes/NuevaSolicitudModal.vue)
+
+Modal para que el cliente cree una nueva solicitud de importación/exportación. Seguirá exactamente el patrón de [CrearPresupuestoModal.vue](file:///Users/daniel/Desktop/SIMEX-1/SIMEXWeb/frontend/src/components/solicitudes/CrearPresupuestoModal.vue) (Teleport → Transition → overlay → modal-box).
+
+**Campos del formulario:**
+
+| Campo | Tipo | Detalles |
+|---|---|---|
+| Cliente | Texto, readonly | Auto-rellenado con el nombre del cliente logueado (hardcodeado para MVP) |
+| Tipo de operación | Select | Importación / Exportación |
+| Tipo de mercancía | Text input | Descripción libre |
+| Volumen (m³) | Number input | — |
+| Peso Total (kg) | Number input | — |
+| Origen | Select (dropdown) | Opciones hardcodeadas: Shanghai, Mumbai, Rotterdam, Frankfurt, Miami, Shenzhen |
+| Destino | Select (dropdown) | Opciones hardcodeadas: Valencia, Barcelona, Madrid, Bilbao, Zaragoza, Sevilla |
+| Tipo de Transporte | Select | Marítimo / Aéreo / Terrestre |
+| Fecha Deseada | Date input | — |
+| Comentarios | Textarea (opcional) | — |
+
+**Estructura:**
+- **Header:** "Nueva Solicitud de Importación/Exportación" + botón cerrar (X).
+- **Body:** Formulario con grid 2 columnas (1 col en móvil).
+- **Footer:** Botón "Cancelar" + Botón "Enviar Solicitud".
+
+**Props:** `visible: Boolean`  
+**Emits:** [close](file:///Users/daniel/Desktop/SIMEX-1/SIMEXWeb/frontend/src/views/SolicitudesView.vue#102-106), `submit(formData)`
+
+**Comportamiento al enviar:**
+- Se emite el evento `submit` con los datos del formulario.
+- En [SolicitudesView.vue](file:///Users/daniel/Desktop/SIMEX-1/SIMEXWeb/frontend/src/views/SolicitudesView.vue), el handler añadirá la nueva solicitud al array `solicitudesCliente` con estado "Enviada" y una referencia auto-generada.
+
+---
+
+## Resumen Visual
+
+````carousel
+### Vista Admin (actual — sin cambios)
+```
+┌─────────────────────────────────────────────┐
+│ Solicitudes de Clientes    [👁 Vista Cliente]│
+│ Peticiones de transporte...                 │
+├─────────────────────────────────────────────┤
+│ [Stats Cards]                               │
+│ [Filtros + Búsqueda]                        │
+│ [Tabla Admin: Ref|Cliente|Mercancía|...]    │
+└─────────────────────────────────────────────┘
+```
+<!-- slide -->
+### Vista Cliente (nueva)
+```
+┌─────────────────────────────────────────────┐
+│ Mis Solicitudes             [👁 Vista Admin] │
+│ Textiles Mediterráneo S.A.                  │
+│                          [+ Nueva Solicitud]│
+├─────────────────────────────────────────────┤
+│ [Tabla Cliente: Ref|Mercancía|Ruta|...]     │
+└─────────────────────────────────────────────┘
+```
+<!-- slide -->
+### Modal "Nueva Solicitud"
+```
+┌──────────────────────────────────┐
+│ Nueva Solicitud Import/Export  X │
+├──────────────────────────────────┤
+│ Cliente: [Auto]  Tipo: [Select] │
+│ Mercancía: [____]               │
+│ Volumen: [___] Peso: [___]      │
+│ Origen: [▼]    Destino: [▼]     │
+│ Transporte: [▼] Fecha: [📅]     │
+│ Comentarios: [___________]      │
+├──────────────────────────────────┤
+│           [Cancelar] [Enviar]   │
+└──────────────────────────────────┘
+```
+````
+
+---
+
+## Archivos Afectados
+
+| Archivo | Acción | Líneas estimadas |
+|---|---|---|
+| [SolicitudesView.vue](file:///Users/daniel/Desktop/SIMEX-1/SIMEXWeb/frontend/src/views/SolicitudesView.vue) | MODIFICAR | +60 líneas |
+| `ClienteSolicitudesTable.vue` | NUEVO | ~180 líneas |
+| `NuevaSolicitudModal.vue` | NUEVO | ~350 líneas |
+
+---
+
+## Verification Plan
+
+### Verificación Visual (Browser)
+
+1. **Ejecutar el servidor de desarrollo:**
+   ```bash
+   cd /Users/daniel/Desktop/SIMEX-1/SIMEXWeb/frontend && npm run dev
+   ```
+2. **Abrir** `http://localhost:5173/solicitudes` en el navegador.
+3. **Verificar vista admin:** Comprobar que la vista actual sigue funcionando igual, con el botón "Vista Cliente" visible en el header.
+4. **Cambiar a vista cliente:** Hacer clic en "👁 Vista Cliente" y verificar:
+   - La tabla muestra las columnas correctas (Referencia, Tipo de Mercancía, Ruta, Transporte, Fecha Deseada, Estado).
+   - Las solicitudes hardcodeadas aparecen con sus badges de estado correctos.
+   - El botón "+ Nueva Solicitud" es visible.
+5. **Abrir modal:** Hacer clic en "+ Nueva Solicitud" y verificar:
+   - Todos los campos están presentes.
+   - El campo "Cliente" está auto-rellenado y es readonly.
+   - Los desplegables de Origen y Destino muestran las opciones hardcodeadas.
+   - El modal se cierra al hacer clic en X, Cancelar, o fuera del modal.
+6. **Enviar solicitud:** Rellenar el formulario y hacer clic en "Enviar Solicitud":
+   - La nueva solicitud aparece en la tabla con estado "Enviada".
+   - El modal se cierra correctamente.
+7. **Toggle de vuelta:** Hacer clic en "👁 Vista Admin" para volver a la vista original.
