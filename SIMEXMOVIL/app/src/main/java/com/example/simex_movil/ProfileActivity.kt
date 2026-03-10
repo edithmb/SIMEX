@@ -18,7 +18,4 @@ class ProfileActivity: AppCompatActivity() {
         menuConfiguration(this, navButton)
 
     }
-
-
-
 }
