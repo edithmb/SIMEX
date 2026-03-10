@@ -1,30 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="@color/white">
+
+<androidx.core.widget.NestedScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="126dp"
-        android:layout_height="52dp"
-        android:layout_marginTop="72dp"
-        android:text="Home"
-        android:textSize="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_notificatios"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.312" />
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imgPerfilHome"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@color/green"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:shapeAppearanceOverlay="@style/EstiloCirculo" />
+
+            <TextView
+                android:id="@+id/tvBienvenido"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bienvenido,"
+                android:textColor="@color/green"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginStart="16dp"
+                app:layout_constraintStart_toEndOf="@id/imgPerfilHome"
+                app:layout_constraintTop_toTopOf="@id/imgPerfilHome"
+                app:layout_constraintBottom_toTopOf="@id/tvNombreUsuario" />
+
+            <TextView
+                android:id="@+id/tvNombreUsuario"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Federico Peluche"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:layout_marginStart="16dp"
+                app:layout_constraintStart_toEndOf="@id/imgPerfilHome"
+                app:layout_constraintTop_toBottomOf="@id/tvBienvenido"
+                app:layout_constraintBottom_toBottomOf="@id/imgPerfilHome" />
+
+            <ImageView
+                android:id="@+id/btnNotificaciones"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_campana"
+                app:tint="@color/green"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <View
+                android:id="@+id/puntoNotificacion"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/bg_punto_rojo"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="@id/btnNotificaciones"
+                app:layout_constraintEnd_toEndOf="@id/btnNotificaciones"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="2dp"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Seguimientos en curso"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/inputBuscador"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/bg_caja_texto"
+            android:hint="Buscar"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:drawableEnd="@drawable/ic_buscar"
+            android:drawableTint="@color/green"
+            android:layout_marginBottom="16dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="24dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCrearSolicitud"
+                android:layout_width="0dp"
+                android:layout_height="55dp"
+                android:layout_weight="1"
+                android:text="Crear solicitud"
+                android:textAllCaps="false"
+                app:backgroundTint="@color/blue"
+                app:cornerRadius="8dp"
+                app:icon="@drawable/ic_mas"
+                android:layout_marginEnd="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPropuestas"
+                android:layout_width="0dp"
+                android:layout_height="55dp"
+                android:layout_weight="1"
+                android:text="Propuestas"
+                android:textAllCaps="false"
+                app:backgroundTint="@color/green"
+                app:cornerRadius="8dp"
+                app:icon="@drawable/ic_documento"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listaSeguimientos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
 
     <include
         layout="@layout/layout_menu_reutilizable"
@@ -33,6 +148,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
