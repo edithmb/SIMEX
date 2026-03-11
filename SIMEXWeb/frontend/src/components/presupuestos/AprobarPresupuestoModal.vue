@@ -1,49 +1,38 @@
 <script setup>
-import { reactive } from 'vue'
-
 const props = defineProps({
     visible: { type: Boolean, default: false },
+    presupuesto: { type: Object, default: null },
 })
 
-const emit = defineEmits(['close', 'submit'])
-
-const presupuestosAceptados = [
-    { ref: 'PR-2024-093', label: 'PR-2024-093 — Maquinaria Industrial Norte (€5,600)' },
-    { ref: 'PR-2024-090', label: 'PR-2024-090 — Importaciones García S.L. (€4,200)' },
-]
-
-const agentes = ['María García', 'Carlos López', 'Ana Martínez']
-
-const form = reactive({
-    presupuesto: '',
-    fechaInicio: '',
-    agente: 'María García',
-})
+const emit = defineEmits(['close', 'confirm'])
 
 function handleClose() {
-    form.presupuesto = ''
-    form.fechaInicio = ''
-    form.agente = 'María García'
     emit('close')
 }
 
-function handleSubmit() {
-    emit('submit', { ...form })
-    handleClose()
+function handleConfirm() {
+    emit('confirm')
 }
 
 function handleOverlayClick(e) {
-    if (e.target === e.currentTarget) handleClose()
+    if (e.target === e.currentTarget) {
+        handleClose()
+    }
+}
+
+function formatPrice(price) {
+    return '€' + price.toLocaleString('es-ES')
 }
 </script>
 
 <template>
     <Teleport to="body">
         <Transition name="modal">
-            <div v-if="visible" class="modal-overlay" @click="handleOverlayClick">
+            <div v-if="visible && presupuesto" class="modal-overlay" @click="handleOverlayClick">
                 <div class="modal-box">
+                    <!-- Header -->
                     <div class="modal-header">
-                        <h3 class="modal-header-title">Crear Nueva Operación</h3>
+                        <h3 class="modal-header-title">Aprobar Presupuesto</h3>
                         <button class="modal-header-close" @click="handleClose" title="Cerrar">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -53,33 +42,36 @@ function handleOverlayClick(e) {
                         </button>
                     </div>
 
+                    <!-- Body -->
                     <div class="modal-body">
-                        <div class="modal-field">
-                            <label class="modal-label">Presupuesto Asociado</label>
-                            <select v-model="form.presupuesto" class="modal-select">
-                                <option value="" disabled>Seleccionar presupuesto aceptado...</option>
-                                <option v-for="p in presupuestosAceptados" :key="p.ref" :value="p.ref">{{ p.label }}
-                                </option>
-                            </select>
-                            <span class="modal-hint">Solo se muestran presupuestos con estado 'Aceptado'</span>
-                        </div>
-                        <div class="modal-grid">
-                            <div class="modal-field">
-                                <label class="modal-label">Fecha Estimada Inicio</label>
-                                <input v-model="form.fechaInicio" type="date" class="modal-input" />
+                        <div class="modal-detail-grid">
+                            <div class="modal-detail-item">
+                                <span class="modal-detail-key">Referencia:</span>
+                                <span class="modal-detail-ref">{{ presupuesto.reference }}</span>
                             </div>
-                            <div class="modal-field">
-                                <label class="modal-label">Agente Asignado</label>
-                                <select v-model="form.agente" class="modal-select">
-                                    <option v-for="a in agentes" :key="a" :value="a">{{ a }}</option>
-                                </select>
+                            <div class="modal-detail-item">
+                                <span class="modal-detail-key">Cliente:</span>
+                                <span class="modal-detail-val">{{ presupuesto.clientName }}</span>
+                            </div>
+                            <div class="modal-detail-item">
+                                <span class="modal-detail-key">Precio:</span>
+                                <span class="modal-detail-val">{{ formatPrice(presupuesto.price) }}</span>
+                            </div>
+                            <div class="modal-detail-item">
+                                <span class="modal-detail-key">Válido hasta:</span>
+                                <span class="modal-detail-val">{{ presupuesto.valid_until }}</span>
                             </div>
                         </div>
+
+                        <p class="modal-info-text">
+                            Al aprobar este presupuesto, se creará automáticamente una operación logística asociada.
+                        </p>
                     </div>
 
+                    <!-- Footer -->
                     <div class="modal-footer">
                         <button class="modal-footer-cancel" @click="handleClose">Cancelar</button>
-                        <button class="modal-footer-submit" @click="handleSubmit">Generar Operación</button>
+                        <button class="modal-footer-confirm" @click="handleConfirm">Confirmar Aprobación</button>
                     </div>
                 </div>
             </div>
@@ -88,6 +80,7 @@ function handleOverlayClick(e) {
 </template>
 
 <style scoped>
+/* Overlay */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -99,16 +92,20 @@ function handleOverlayClick(e) {
     padding: 24px;
 }
 
+/* Box */
 .modal-box {
     background: #ffffff;
     border-radius: 14px;
     width: 100%;
-    max-width: 500px;
+    max-width: 460px;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
 }
 
+/* Header */
 .modal-header {
     display: flex;
     align-items: center;
@@ -138,64 +135,59 @@ function handleOverlayClick(e) {
     color: var(--text-primary);
 }
 
+/* Body */
 .modal-body {
-    padding: 20px 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    padding: 20px 28px 0;
 }
 
-.modal-grid {
+.modal-detail-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 12px 24px;
+    margin-bottom: 20px;
 }
 
-.modal-field {
+.modal-detail-item {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
 }
 
-.modal-label {
-    font-size: 12.5px;
+.modal-detail-key {
+    font-size: 12px;
     font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.modal-hint {
-    font-size: 11px;
     color: var(--text-muted);
-    font-style: italic;
 }
 
-.modal-input,
-.modal-select {
-    height: 40px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 0 12px;
-    font-size: 13.5px;
-    font-family: var(--font-family);
+.modal-detail-ref {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-blue);
+}
+
+.modal-detail-val {
+    font-size: 14px;
+    font-weight: 600;
     color: var(--text-primary);
-    background: #ffffff;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    appearance: auto;
 }
 
-.modal-input:focus,
-.modal-select:focus {
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 0 3px rgba(26, 111, 181, 0.12);
-    outline: none;
+.modal-info-text {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    padding: 14px 16px;
+    background: #f0fdf4;
+    border-radius: 8px;
+    border: 1px solid #bbf7d0;
 }
 
+/* Footer */
 .modal-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 12px;
-    padding: 0 28px 24px;
+    padding: 20px 28px 24px;
 }
 
 .modal-footer-cancel {
@@ -212,20 +204,21 @@ function handleOverlayClick(e) {
     color: var(--text-primary);
 }
 
-.modal-footer-submit {
+.modal-footer-confirm {
     padding: 10px 24px;
     font-size: 13.5px;
     font-weight: 600;
     color: #ffffff;
-    background: var(--sidebar-bg);
+    background: #10b981;
     border-radius: 8px;
     transition: background 0.15s ease;
 }
 
-.modal-footer-submit:hover {
-    background: #0d2440;
+.modal-footer-confirm:hover {
+    background: #059669;
 }
 
+/* Transition */
 .modal-enter-active,
 .modal-leave-active {
     transition: opacity 0.2s ease;

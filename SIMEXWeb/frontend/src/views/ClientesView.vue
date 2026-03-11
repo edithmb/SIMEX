@@ -7,17 +7,17 @@ import NuevaEmpresaModal from '@/components/clientes/NuevaEmpresaModal.vue'
 import NuevoContactoModal from '@/components/clientes/NuevoContactoModal.vue'
 
 const clientes = [
-    { name: 'Importaciones García S.L.', initial: 'I', cif: 'B12345678', city: 'Madrid', contacts: 2, active: true, operations: 5, lastActivity: 'Hace 2 horas' },
-    { name: 'Textiles Mediterráneo S.A.', initial: 'T', cif: 'A87654321', city: 'Valencia', contacts: 3, active: true, operations: 12, lastActivity: 'Hace 1 día' },
-    { name: 'Alimentación Ibérica S.L.', initial: 'A', cif: 'B11223344', city: 'Barcelona', contacts: 1, active: true, operations: 3, lastActivity: 'Hace 3 días' },
-    { name: 'Electrónica Levante S.A.', initial: 'E', cif: 'A55667788', city: 'Alicante', contacts: 2, active: true, operations: 8, lastActivity: 'Hace 5 horas' },
-    { name: 'Maquinaria Industrial Norte', initial: 'M', cif: 'B99887766', city: 'Bilbao', contacts: 1, active: false, operations: 1, lastActivity: 'Hace 1 semana' },
-    { name: 'Farmacéutica del Sur S.A.', initial: 'F', cif: 'A11122233', city: 'Sevilla', contacts: 1, active: true, operations: 4, lastActivity: 'Hace 2 días' },
-    { name: 'Vinos y Licores Rioja S.L.', initial: 'V', cif: 'B44455566', city: 'Logroño', contacts: 1, active: false, operations: 0, lastActivity: 'Hace 1 mes' },
-    { name: 'Autopartes Castilla S.A.', initial: 'A', cif: 'A77788899', city: 'Valladolid', contacts: 1, active: true, operations: 2, lastActivity: 'Hace 4 días' },
+    { id: 1, company_name: 'Importaciones García S.L.', initial: 'I', vat_number: 'B12345678', address: 'Calle Mayor 15, 3º', country: 'España', postal_code: '28001', contact_name: 'Juan García López', email: 'jgarcia@importaciones.com', phone: '+34 912 345 678', active: true, operations: 5, lastActivity: 'Hace 2 horas' },
+    { id: 2, company_name: 'Textiles Mediterráneo S.A.', initial: 'T', vat_number: 'A87654321', address: 'Av. del Puerto 42', country: 'España', postal_code: '46021', contact_name: 'Elena Martí Soler', email: 'emarti@textiles.com', phone: '+34 963 456 789', active: true, operations: 12, lastActivity: 'Hace 1 día' },
+    { id: 3, company_name: 'Alimentación Ibérica S.L.', initial: 'A', vat_number: 'B11223344', address: 'Carrer de la Marina 200', country: 'España', postal_code: '08013', contact_name: 'Pere Casals Vidal', email: 'pcasals@alimentacion.com', phone: '+34 934 567 890', active: true, operations: 3, lastActivity: 'Hace 3 días' },
+    { id: 4, company_name: 'Electrónica Levante S.A.', initial: 'E', vat_number: 'A55667788', address: 'Pol. Ind. Las Atalayas, Nave 12', country: 'España', postal_code: '03114', contact_name: 'Rosa Díaz Fernández', email: 'rdiaz@electronica.com', phone: '+34 965 678 901', active: true, operations: 8, lastActivity: 'Hace 5 horas' },
+    { id: 5, company_name: 'Maquinaria Industrial Norte', initial: 'M', vat_number: 'B99887766', address: 'Gran Vía 28', country: 'España', postal_code: '48001', contact_name: 'Iñaki Etxeberria', email: 'ietxe@maquinaria.com', phone: '+34 944 789 012', active: false, operations: 1, lastActivity: 'Hace 1 semana' },
+    { id: 6, company_name: 'Farmacéutica del Sur S.A.', initial: 'F', vat_number: 'A11122233', address: 'Av. de la Constitución 5', country: 'España', postal_code: '41001', contact_name: 'Carmen Ruiz Ortega', email: 'cruiz@farmasur.com', phone: '+34 954 890 123', active: true, operations: 4, lastActivity: 'Hace 2 días' },
+    { id: 7, company_name: 'Vinos y Licores Rioja S.L.', initial: 'V', vat_number: 'B44455566', address: 'Calle Portales 8', country: 'España', postal_code: '26001', contact_name: 'Miguel Ángel López', email: 'malopez@vinosrioja.com', phone: '+34 941 234 567', active: false, operations: 0, lastActivity: 'Hace 1 mes' },
+    { id: 8, company_name: 'Autopartes Castilla S.A.', initial: 'A', vat_number: 'A77788899', address: 'Pol. Ind. San Cristóbal, Nave 5', country: 'España', postal_code: '47012', contact_name: 'Luis Hernández', email: 'lhernandez@autopartes.com', phone: '+34 983 345 678', active: true, operations: 2, lastActivity: 'Hace 4 días' },
 ]
 
-const empresaNames = clientes.map((c) => c.name)
+const empresaNames = clientes.map((c) => c.company_name)
 
 const activeTab = ref('empresas')
 const searchQuery = ref('')
@@ -26,7 +26,7 @@ const filteredClientes = computed(() => {
     if (!searchQuery.value.trim()) return clientes
     const q = searchQuery.value.toLowerCase()
     return clientes.filter(
-        (c) => c.name.toLowerCase().includes(q) || c.cif.toLowerCase().includes(q) || c.city.toLowerCase().includes(q),
+        (c) => c.company_name.toLowerCase().includes(q) || c.vat_number.toLowerCase().includes(q) || c.country.toLowerCase().includes(q),
     )
 })
 

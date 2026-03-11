@@ -1,6 +1,7 @@
 <script setup>
 const props = defineProps({
   solicitudes: { type: Array, required: true },
+  role: { type: String, default: 'admin' },
 })
 
 const emit = defineEmits(['crear-presupuesto'])
@@ -11,85 +12,70 @@ const emit = defineEmits(['crear-presupuesto'])
     <table class="solicitudes-table">
       <thead>
         <tr>
-          <th>Referencia</th>
+          <th>ID</th>
           <th>Cliente</th>
-          <th>Mercancía</th>
-          <th>Ruta</th>
-          <th>Transp.</th>
-          <th>Fecha Deseada</th>
+          <th>Volumen (m³)</th>
+          <th>Peso (kg)</th>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Fecha</th>
           <th>Estado</th>
-          <th>Acciones</th>
+          <th v-if="role === 'admin'">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="sol in solicitudes" :key="sol.ref">
-          <!-- Referencia -->
+        <tr v-for="sol in solicitudes" :key="sol.id">
+          <!-- ID -->
           <td>
-            <span class="solicitudes-table-ref">{{ sol.ref }}</span>
+            <span class="solicitudes-table-ref">{{ sol.id }}</span>
           </td>
 
           <!-- Cliente -->
           <td>
-            <span class="solicitudes-table-client">{{ sol.client }}</span>
+            <span class="solicitudes-table-client">{{ sol.clientName }}</span>
           </td>
 
-          <!-- Mercancía -->
+          <!-- Volumen -->
           <td>
-            <span class="solicitudes-table-goods">{{ sol.goods }}</span>
+            <span class="solicitudes-table-volume">{{ sol.volume_m3 }}</span>
           </td>
 
-          <!-- Ruta -->
+          <!-- Peso -->
           <td>
-            <span class="solicitudes-table-route">{{ sol.routeFrom }} → {{ sol.routeTo }}</span>
+            <span class="solicitudes-table-weight">{{ sol.gross_weight_kg.toLocaleString() }}</span>
           </td>
 
-          <!-- Transporte icon -->
+          <!-- Origen -->
           <td>
-            <span class="solicitudes-table-transport">
-              <!-- Ship -->
-              <svg v-if="sol.transport === 'ship'" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path
-                  d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1 .6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" />
-                <path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 7.76" />
-                <path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6" />
-                <path d="M12 10V2" />
-              </svg>
-              <!-- Plane -->
-              <svg v-else-if="sol.transport === 'plane'" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path
-                  d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
-              </svg>
-              <!-- Truck -->
-              <svg v-else-if="sol.transport === 'truck'" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="1" y="3" width="15" height="13" rx="1" />
-                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-                <circle cx="5.5" cy="18.5" r="2.5" />
-                <circle cx="18.5" cy="18.5" r="2.5" />
-              </svg>
-            </span>
+            <span class="solicitudes-table-origin">{{ sol.originName }}</span>
           </td>
 
-          <!-- Fecha Deseada -->
+          <!-- Destino -->
           <td>
-            <span class="solicitudes-table-date">{{ sol.date }}</span>
+            <span class="solicitudes-table-destination">{{ sol.destinationName }}</span>
+          </td>
+
+          <!-- Fecha -->
+          <td>
+            <span class="solicitudes-table-date">{{ sol.created_at }}</span>
           </td>
 
           <!-- Estado -->
           <td>
-            <span class="solicitudes-table-status" :style="{
-              background: sol.statusColor,
-              color: sol.statusTextColor,
-            }">
-              {{ sol.status }}
+            <span
+              class="solicitudes-table-status"
+              :style="{
+                background: sol.hasOffer ? '#dbeafe' : '#fef3c7',
+                color: sol.hasOffer ? '#1a6fb5' : '#b45309',
+              }"
+            >
+              {{ sol.hasOffer ? 'Presupuestada' : 'Enviada' }}
             </span>
           </td>
 
-          <!-- Acciones -->
-          <td>
-            <button v-if="sol.status === 'Pendiente'" class="solicitudes-table-action-btn"
+          <!-- Acciones (admin only) -->
+          <td v-if="role === 'admin'">
+            <button v-if="!sol.hasOffer" class="solicitudes-table-action-btn"
               @click="emit('crear-presupuesto', sol)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -98,13 +84,13 @@ const emit = defineEmits(['crear-presupuesto'])
               </svg>
               Crear Presupuesto
             </button>
-            <span v-else-if="sol.status === 'Presupuestada'" class="solicitudes-table-action-sent">
+            <span v-else class="solicitudes-table-action-sent">
               Presupuesto enviado
             </span>
           </td>
         </tr>
         <tr v-if="solicitudes.length === 0">
-          <td colspan="8" class="solicitudes-table-empty">
+          <td :colspan="role === 'admin' ? 9 : 8" class="solicitudes-table-empty">
             No se encontraron solicitudes con los filtros aplicados.
           </td>
         </tr>
@@ -157,13 +143,12 @@ const emit = defineEmits(['crear-presupuesto'])
   border-bottom: none;
 }
 
-/* Reference */
+/* ID */
 .solicitudes-table-ref {
   font-size: 12px;
   font-weight: 600;
   color: var(--accent-blue);
   line-height: 1.5;
-  word-break: break-all;
 }
 
 /* Client */
@@ -172,25 +157,28 @@ const emit = defineEmits(['crear-presupuesto'])
   color: var(--text-primary);
 }
 
-/* Goods */
-.solicitudes-table-goods {
+/* Volume */
+.solicitudes-table-volume {
   color: var(--text-secondary);
   font-size: 13px;
 }
 
-/* Route */
-.solicitudes-table-route {
+/* Weight */
+.solicitudes-table-weight {
   color: var(--text-secondary);
   font-size: 13px;
-  white-space: nowrap;
 }
 
-/* Transport */
-.solicitudes-table-transport {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Origin */
+.solicitudes-table-origin {
   color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* Destination */
+.solicitudes-table-destination {
+  color: var(--text-secondary);
+  font-size: 13px;
 }
 
 /* Date */

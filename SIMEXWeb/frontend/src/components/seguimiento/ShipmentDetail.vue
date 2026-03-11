@@ -1,7 +1,17 @@
 <script setup>
 const props = defineProps({
   shipment: { type: Object, required: true },
+  role: { type: String, default: 'admin' },
 })
+
+const emit = defineEmits(['update-status'])
+
+function formatDate(dateStr) {
+  if (!dateStr) return 'Pendiente'
+  const d = new Date(dateStr)
+  const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
+}
 </script>
 
 <template>
@@ -13,7 +23,7 @@ const props = defineProps({
         <span
           class="detail-status"
           :style="{ background: shipment.statusColor, color: shipment.statusTextColor }"
-        >{{ shipment.status }}</span>
+        >{{ shipment.statusLabel }}</span>
       </div>
       <div class="detail-header-right">
         <span class="detail-transport-badge">
@@ -41,6 +51,18 @@ const props = defineProps({
           {{ shipment.incoterm }}
         </span>
       </div>
+    </div>
+
+    <!-- Admin Status Control -->
+    <div v-if="role === 'admin'" class="detail-step-control">
+      <label class="detail-step-label">Cambiar Estado:</label>
+      <select class="detail-step-select" :value="shipment.status" @change="$emit('update-status', shipment.id, $event.target.value)">
+        <option value="preparacion">Preparación</option>
+        <option value="transporte">Transporte</option>
+        <option value="aduanas">Aduanas</option>
+        <option value="entrega">Entrega</option>
+        <option value="completado">Completado</option>
+      </select>
     </div>
 
     <!-- Client & Route -->
@@ -126,6 +148,37 @@ const props = defineProps({
             <div v-for="item in shipment.data" :key="item.label" class="data-item">
               <span class="data-item-label">{{ item.label }}</span>
               <span class="data-item-value">{{ item.value }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fechas del Envío -->
+        <div class="data-block">
+          <h3 class="detail-section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            Fechas del Envío
+          </h3>
+          <div class="data-grid">
+            <div class="data-item">
+              <span class="data-item-label">ETD (Salida Estimada)</span>
+              <span class="data-item-value">{{ formatDate(shipment.etd) }}</span>
+            </div>
+            <div class="data-item">
+              <span class="data-item-label">ETA (Llegada Estimada)</span>
+              <span class="data-item-value">{{ formatDate(shipment.eta) }}</span>
+            </div>
+            <div class="data-item">
+              <span class="data-item-label">ATD (Salida Real)</span>
+              <span class="data-item-value">{{ formatDate(shipment.atd) }}</span>
+            </div>
+            <div class="data-item">
+              <span class="data-item-label">ATA (Llegada Real)</span>
+              <span class="data-item-value">{{ formatDate(shipment.ata) }}</span>
             </div>
           </div>
         </div>
@@ -225,6 +278,35 @@ const props = defineProps({
   font-size: 11px;
   font-weight: 700;
   color: #ffffff;
+}
+
+/* Step Control */
+.detail-step-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--page-bg);
+  border-radius: 8px;
+}
+
+.detail-step-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.detail-step-select {
+  height: 36px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-family: var(--font-family);
+  color: var(--text-primary);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  appearance: auto;
 }
 
 /* Client & Route */

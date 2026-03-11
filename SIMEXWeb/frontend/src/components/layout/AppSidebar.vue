@@ -1,41 +1,50 @@
 <script setup>
-import { shallowRef } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useRoleStore } from '@/stores/role'
 
 const route = useRoute()
+const roleStore = useRoleStore()
 
-const menuSections = [
+const allMenuSections = [
   {
     label: 'PRINCIPAL',
     items: [
-      { name: 'Panel de Control', icon: 'dashboard', route: '/' },
-      { name: 'Seguimiento', icon: 'tracking', route: '/seguimiento' },
+      { name: 'Panel de Control', icon: 'dashboard', route: '/', roles: ['admin', 'cliente'] },
+      { name: 'Seguimiento', icon: 'tracking', route: '/seguimiento', roles: ['admin', 'cliente'] },
     ],
   },
   {
     label: 'COMERCIAL',
     items: [
-      { name: 'Solicitudes', icon: 'solicitudes', route: '/solicitudes' },
-      { name: 'Presupuestos', icon: 'presupuestos', route: '/presupuestos' },
-      { name: 'Clientes', icon: 'clientes', route: '/clientes' },
+      { name: 'Solicitudes', icon: 'solicitudes', route: '/solicitudes', roles: ['admin', 'cliente'] },
+      { name: 'Presupuestos', icon: 'presupuestos', route: '/presupuestos', roles: ['admin', 'cliente'] },
     ],
   },
   {
-    label: 'OPERACIONES',
+    label: 'GESTIÓN',
     items: [
-      { name: 'Operaciones', icon: 'operaciones', route: '/operaciones' },
-      { name: 'Productos', icon: 'productos', route: '/productos' },
-      { name: 'Documentos', icon: 'documentos', route: '/documentos' },
+      { name: 'Clientes', icon: 'clientes', route: '/clientes', roles: ['admin'] },
+      { name: 'Documentos', icon: 'documentos', route: '/documentos', roles: ['admin', 'cliente'] },
     ],
   },
   {
     label: 'SISTEMA',
     items: [
-      { name: 'Configuración', icon: 'configuracion', route: '/configuracion' }, 
-      { name: 'Usuarios', icon: 'usuarios', route: '/usuarios' },
+      { name: 'Configuración', icon: 'configuracion', route: '/configuracion', roles: ['admin'] },
+      { name: 'Usuarios', icon: 'usuarios', route: '/usuarios', roles: ['admin'] },
     ],
   },
 ]
+
+const menuSections = computed(() => {
+  return allMenuSections
+    .map(section => ({
+      ...section,
+      items: section.items.filter(item => item.roles.includes(roleStore.currentRole))
+    }))
+    .filter(section => section.items.length > 0)
+})
 
 const isActive = (itemRoute) => {
   return route.path === itemRoute
@@ -53,8 +62,8 @@ const isActive = (itemRoute) => {
         </svg>
       </div>
       <div class="sidebar-logo-text">
-        <span class="sidebar-logo-title">LogiTrack Pro</span>
-        <span class="sidebar-logo-subtitle">Logística Internacional</span>
+        <span class="sidebar-logo-title">SIMEX</span>
+        <span class="sidebar-logo-subtitle">Comercio Internacional</span>
       </div>
     </div>
 
@@ -105,17 +114,6 @@ const isActive = (itemRoute) => {
               <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
-            <!-- Operaciones -->
-            <svg v-else-if="item.icon === 'operaciones'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-            <!-- Productos -->
-            <svg v-else-if="item.icon === 'productos'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-              <line x1="12" y1="22.08" x2="12" y2="12" />
-            </svg>
             <!-- Documentos -->
             <svg v-else-if="item.icon === 'documentos'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
@@ -136,12 +134,25 @@ const isActive = (itemRoute) => {
       </div>
     </nav>
 
+    <!-- Role Switcher -->
+    <div class="sidebar-role-switcher">
+      <span class="sidebar-role-switcher-label">VISTA ACTIVA</span>
+      <select
+        class="sidebar-role-switcher-select"
+        :value="roleStore.currentRole"
+        @change="roleStore.setRole($event.target.value)"
+      >
+        <option value="admin">Administrador</option>
+        <option value="cliente">Cliente</option>
+      </select>
+    </div>
+
     <!-- User Footer -->
     <div class="sidebar-user">
-      <div class="sidebar-user-avatar">MG</div>
+      <div class="sidebar-user-avatar">{{ roleStore.isAdmin ? 'MG' : 'JR' }}</div>
       <div class="sidebar-user-info">
-        <span class="sidebar-user-name">María García</span>
-        <span class="sidebar-user-role">Operadora Logística</span>
+        <span class="sidebar-user-name">{{ roleStore.isAdmin ? 'María García' : 'Javier Ruiz' }}</span>
+        <span class="sidebar-user-role">{{ roleStore.isAdmin ? 'Administradora' : 'Cliente' }}</span>
       </div>
       <button class="sidebar-user-logout" title="Cerrar sesión">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -261,6 +272,42 @@ const isActive = (itemRoute) => {
   white-space: nowrap;
 }
 
+/* Role Switcher */
+.sidebar-role-switcher {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-role-switcher-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--sidebar-section);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 8px;
+}
+
+.sidebar-role-switcher-select {
+  width: 100%;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-family: var(--font-family);
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  appearance: auto;
+}
+
+.sidebar-role-switcher-select option {
+  background: var(--sidebar-bg);
+  color: #ffffff;
+}
+
 /* User Footer */
 .sidebar-user {
   display: flex;
@@ -268,7 +315,6 @@ const isActive = (itemRoute) => {
   gap: 10px;
   padding: 16px 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  margin-top: auto;
 }
 
 .sidebar-user-avatar {

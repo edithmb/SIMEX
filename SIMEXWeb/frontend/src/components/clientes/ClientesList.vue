@@ -12,30 +12,32 @@ function getAvatarColor(index) {
 
 <template>
     <div class="clientes-list">
-        <div v-for="(c, i) in clientes" :key="c.name" class="clientes-card">
+        <div v-for="(c, i) in clientes" :key="c.company_name" class="clientes-card">
             <div class="clientes-card-left">
                 <div class="clientes-card-avatar" :style="{ background: getAvatarColor(i) }">
                     {{ c.initial }}
                 </div>
                 <div class="clientes-card-info">
                     <div class="clientes-card-top">
-                        <span class="clientes-card-name">{{ c.name }}</span>
+                        <span class="clientes-card-name">{{ c.company_name }}</span>
                         <span class="clientes-card-status"
                             :style="{ background: c.active ? '#d1fae5' : '#e5e7eb', color: c.active ? '#047857' : '#6b7280' }">
                             {{ c.active ? 'Activa' : 'Inactiva' }}
                         </span>
                     </div>
                     <div class="clientes-card-meta">
-                        <span>CIF: {{ c.cif }}</span>
+                        <span>NIF: {{ c.vat_number }}</span>
                         <span class="clientes-card-dot">●</span>
-                        <span>{{ c.city }}</span>
+                        <span>{{ c.country }}</span>
+                        <span class="clientes-card-dot">●</span>
+                        <span>{{ c.postal_code }}</span>
                         <span class="clientes-card-dot">●</span>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
                         </svg>
-                        <span>{{ c.contacts }} contacto{{ c.contacts !== 1 ? 's' : '' }}</span>
+                        <span>{{ c.contact_name }}</span>
                     </div>
                 </div>
             </div>

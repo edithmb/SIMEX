@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, watch } from 'vue'
+import { reactive } from 'vue'
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
@@ -7,44 +7,32 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'submit'])
 
-const roleOptions = [
-    { id: 1, name: 'Administrador' },
-    { id: 2, name: 'Operador' },
-    { id: 3, name: 'Cliente' },
-]
-
-const clientOptions = [
-    { id: null, name: '-- Sin cliente asociado --' },
-    { id: 1, name: 'Importaciones García S.L.' },
-    { id: 2, name: 'Textiles Mediterráneo S.A.' },
-    { id: 3, name: 'Alimentación Ibérica S.L.' },
-    { id: 4, name: 'Electrónica Levante S.A.' },
-    { id: 5, name: 'Maquinaria Industrial Norte' },
-]
-
 const form = reactive({
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone_number: '',
-    role_id: 2,
-    client_id: null,
-    is_active: true,
+    origin: '',
+    destination: '',
+    volume_m3: '',
+    gross_weight_kg: '',
+    comments: '',
 })
 
-// Reset client_id when role is not Cliente
-watch(() => form.role_id, (val) => {
-    if (val !== 3) form.client_id = null
-})
+const locationOptions = [
+    { value: '', label: 'Seleccionar...' },
+    { value: 'Almacén Principal - Calle Industrial 15, Valencia', label: 'Almacén Principal - Calle Industrial 15, Valencia' },
+    { value: 'Nave Logística - Pol. Ind. Norte, Coslada, Madrid', label: 'Nave Logística - Pol. Ind. Norte, Coslada, Madrid' },
+    { value: 'Almacén Frigorífico - Zona Franca, Barcelona', label: 'Almacén Frigorífico - Zona Franca, Barcelona' },
+    { value: 'Fábrica Shanghai - Pudong District, China', label: 'Fábrica Shanghai - Pudong District, China' },
+    { value: 'Almacén Rotterdam - Europoort, Países Bajos', label: 'Almacén Rotterdam - Europoort, Países Bajos' },
+    { value: 'Centro Distribución Miami - NW 25th St, Florida, EEUU', label: 'Centro Distribución Miami - NW 25th St, Florida, EEUU' },
+    { value: 'Fábrica Shenzhen - Guangdong, China', label: 'Fábrica Shenzhen - Guangdong, China' },
+    { value: 'Almacén Frankfurt - Hessen, Alemania', label: 'Almacén Frankfurt - Hessen, Alemania' },
+]
 
 function resetForm() {
-    form.first_name = ''
-    form.last_name = ''
-    form.email = ''
-    form.phone_number = ''
-    form.role_id = 2
-    form.client_id = null
-    form.is_active = true
+    form.origin = ''
+    form.destination = ''
+    form.volume_m3 = ''
+    form.gross_weight_kg = ''
+    form.comments = ''
 }
 
 function handleClose() {
@@ -54,11 +42,13 @@ function handleClose() {
 
 function handleSubmit() {
     emit('submit', { ...form })
-    handleClose()
+    resetForm()
 }
 
 function handleOverlayClick(e) {
-    if (e.target === e.currentTarget) handleClose()
+    if (e.target === e.currentTarget) {
+        handleClose()
+    }
 }
 </script>
 
@@ -67,8 +57,9 @@ function handleOverlayClick(e) {
         <Transition name="modal">
             <div v-if="visible" class="modal-overlay" @click="handleOverlayClick">
                 <div class="modal-box">
+                    <!-- Header -->
                     <div class="modal-header">
-                        <h3 class="modal-header-title">Añadir Nuevo Usuario</h3>
+                        <h3 class="modal-header-title">Nueva Solicitud de Transporte</h3>
                         <button class="modal-header-close" @click="handleClose" title="Cerrar">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -78,54 +69,54 @@ function handleOverlayClick(e) {
                         </button>
                     </div>
 
+                    <!-- Form Body -->
                     <div class="modal-body">
+                        <!-- Origen -->
+                        <div class="modal-field">
+                            <label class="modal-label">Origen</label>
+                            <select v-model="form.origin" class="modal-select">
+                                <option v-for="opt in locationOptions" :key="opt.value" :value="opt.value">
+                                    {{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Destino -->
+                        <div class="modal-field">
+                            <label class="modal-label">Destino</label>
+                            <select v-model="form.destination" class="modal-select">
+                                <option v-for="opt in locationOptions" :key="opt.value" :value="opt.value">
+                                    {{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Volumen / Peso (2-column) -->
                         <div class="modal-grid">
                             <div class="modal-field">
-                                <label class="modal-label">Nombre</label>
-                                <input v-model="form.first_name" type="text" class="modal-input"
-                                    placeholder="Ej. Juan" />
+                                <label class="modal-label">Volumen (m³)</label>
+                                <input v-model="form.volume_m3" type="number" class="modal-input"
+                                    placeholder="Ej. 45" />
                             </div>
                             <div class="modal-field">
-                                <label class="modal-label">Apellidos</label>
-                                <input v-model="form.last_name" type="text" class="modal-input"
-                                    placeholder="Ej. Pérez García" />
-                            </div>
-                            <div class="modal-field">
-                                <label class="modal-label">Email</label>
-                                <input v-model="form.email" type="email" class="modal-input"
-                                    placeholder="juan@ejemplo.com" />
-                            </div>
-                            <div class="modal-field">
-                                <label class="modal-label">Teléfono</label>
-                                <input v-model="form.phone_number" type="text" class="modal-input"
-                                    placeholder="+34 600 000 000" />
-                            </div>
-                            <div class="modal-field">
-                                <label class="modal-label">Rol</label>
-                                <select v-model="form.role_id" class="modal-select">
-                                    <option v-for="r in roleOptions" :key="r.id" :value="r.id">{{ r.name }}</option>
-                                </select>
-                            </div>
-                            <div v-if="form.role_id === 3" class="modal-field">
-                                <label class="modal-label">Cliente Asociado</label>
-                                <select v-model="form.client_id" class="modal-select">
-                                    <option v-for="c in clientOptions" :key="c.id" :value="c.id">{{ c.name }}</option>
-                                </select>
+                                <label class="modal-label">Peso Bruto (kg)</label>
+                                <input v-model="form.gross_weight_kg" type="number" class="modal-input"
+                                    placeholder="Ej. 12450" />
                             </div>
                         </div>
-                        <div class="modal-field modal-field--toggle">
-                            <label class="modal-label">Estado</label>
-                            <label class="modal-toggle">
-                                <input type="checkbox" v-model="form.is_active" class="modal-toggle-input" />
-                                <span class="modal-toggle-slider"></span>
-                                <span class="modal-toggle-label">{{ form.is_active ? 'Activo' : 'Inactivo' }}</span>
-                            </label>
+
+                        <!-- Comentarios -->
+                        <div class="modal-field modal-field--full">
+                            <label class="modal-label">Comentarios</label>
+                            <textarea v-model="form.comments" class="modal-textarea"
+                                placeholder="Descripción de la mercancía, condiciones especiales..." rows="3"></textarea>
                         </div>
                     </div>
 
+                    <!-- Footer -->
                     <div class="modal-footer">
                         <button class="modal-footer-cancel" @click="handleClose">Cancelar</button>
-                        <button class="modal-footer-submit" @click="handleSubmit">Crear Usuario</button>
+                        <button class="modal-footer-submit" @click="handleSubmit">Enviar Solicitud</button>
                     </div>
                 </div>
             </div>
@@ -134,6 +125,7 @@ function handleOverlayClick(e) {
 </template>
 
 <style scoped>
+/* Overlay */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -145,16 +137,20 @@ function handleOverlayClick(e) {
     padding: 24px;
 }
 
+/* Box */
 .modal-box {
     background: #ffffff;
     border-radius: 14px;
     width: 100%;
-    max-width: 580px;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
 }
 
+/* Header */
 .modal-header {
     display: flex;
     align-items: center;
@@ -184,8 +180,9 @@ function handleOverlayClick(e) {
     color: var(--text-primary);
 }
 
+/* Body */
 .modal-body {
-    padding: 20px 28px;
+    padding: 20px 28px 0;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -203,8 +200,8 @@ function handleOverlayClick(e) {
     gap: 6px;
 }
 
-.modal-field--toggle {
-    gap: 8px;
+.modal-field--full {
+    margin-bottom: 8px;
 }
 
 .modal-label {
@@ -222,7 +219,7 @@ function handleOverlayClick(e) {
     font-size: 13.5px;
     font-family: var(--font-family);
     color: var(--text-primary);
-    background: var(--page-bg);
+    background: #ffffff;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
     appearance: auto;
 }
@@ -238,60 +235,35 @@ function handleOverlayClick(e) {
     color: var(--text-muted);
 }
 
-/* Toggle */
-.modal-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-}
-
-.modal-toggle-input {
-    display: none;
-}
-
-.modal-toggle-slider {
-    position: relative;
-    width: 40px;
-    height: 22px;
-    background: #d1d5db;
-    border-radius: 11px;
-    transition: background 0.2s ease;
-    flex-shrink: 0;
-}
-
-.modal-toggle-slider::after {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 16px;
-    height: 16px;
-    background: #ffffff;
-    border-radius: 50%;
-    transition: transform 0.2s ease;
-}
-
-.modal-toggle-input:checked + .modal-toggle-slider {
-    background: #047857;
-}
-
-.modal-toggle-input:checked + .modal-toggle-slider::after {
-    transform: translateX(18px);
-}
-
-.modal-toggle-label {
-    font-size: 13px;
-    font-weight: 500;
+.modal-textarea {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13.5px;
+    font-family: var(--font-family);
     color: var(--text-primary);
+    background: #ffffff;
+    resize: vertical;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.modal-textarea:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(26, 111, 181, 0.12);
+    outline: none;
+}
+
+.modal-textarea::placeholder {
+    color: var(--text-muted);
+}
+
+/* Footer */
 .modal-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 12px;
-    padding: 0 28px 24px;
+    padding: 20px 28px 24px;
 }
 
 .modal-footer-cancel {
@@ -322,6 +294,7 @@ function handleOverlayClick(e) {
     background: #0d2440;
 }
 
+/* Transition */
 .modal-enter-active,
 .modal-leave-active {
     transition: opacity 0.2s ease;
@@ -343,5 +316,15 @@ function handleOverlayClick(e) {
 
 .modal-leave-to .modal-box {
     transform: scale(0.95) translateY(10px);
+}
+
+@media (max-width: 600px) {
+    .modal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-box {
+        max-height: 95vh;
+    }
 }
 </style>

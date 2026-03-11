@@ -1,49 +1,49 @@
 <script setup>
-import { reactive } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
+    presupuesto: { type: Object, default: null },
 })
 
-const emit = defineEmits(['close', 'submit'])
+const emit = defineEmits(['close', 'confirm'])
 
-const categories = ['Electrónica', 'Textil', 'Maquinaria', 'Alimentación', 'Química']
-const origins = ['China', 'India', 'Alemania', 'España', 'USA', 'Taiwán', 'Vietnam', 'Italia']
+const reason = ref('')
 
-const form = reactive({
-    name: '',
-    sku: '',
-    category: 'Electrónica',
-    stock: 0,
-    origin: 'China',
-})
+watch(
+    () => props.visible,
+    (val) => {
+        if (val) {
+            reason.value = ''
+        }
+    },
+)
 
 function handleClose() {
-    form.name = ''
-    form.sku = ''
-    form.category = 'Electrónica'
-    form.stock = 0
-    form.origin = 'China'
     emit('close')
 }
 
-function handleSubmit() {
-    emit('submit', { ...form })
-    handleClose()
+function handleConfirm() {
+    if (reason.value.trim()) {
+        emit('confirm', reason.value.trim())
+    }
 }
 
 function handleOverlayClick(e) {
-    if (e.target === e.currentTarget) handleClose()
+    if (e.target === e.currentTarget) {
+        handleClose()
+    }
 }
 </script>
 
 <template>
     <Teleport to="body">
         <Transition name="modal">
-            <div v-if="visible" class="modal-overlay" @click="handleOverlayClick">
+            <div v-if="visible && presupuesto" class="modal-overlay" @click="handleOverlayClick">
                 <div class="modal-box">
+                    <!-- Header -->
                     <div class="modal-header">
-                        <h3 class="modal-header-title">Añadir Nuevo Producto</h3>
+                        <h3 class="modal-header-title">Rechazar Presupuesto</h3>
                         <button class="modal-header-close" @click="handleClose" title="Cerrar">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -53,41 +53,27 @@ function handleOverlayClick(e) {
                         </button>
                     </div>
 
+                    <!-- Body -->
                     <div class="modal-body">
+                        <div class="modal-detail-item">
+                            <span class="modal-detail-key">Referencia:</span>
+                            <span class="modal-detail-ref">{{ presupuesto.reference }}</span>
+                        </div>
+
                         <div class="modal-field">
-                            <label class="modal-label">Nombre del Producto</label>
-                            <input v-model="form.name" type="text" class="modal-input"
-                                placeholder="Ej. Motor Eléctrico" />
-                        </div>
-                        <div class="modal-grid">
-                            <div class="modal-field">
-                                <label class="modal-label">SKU / Referencia</label>
-                                <input v-model="form.sku" type="text" class="modal-input" placeholder="PRD-XX-001" />
-                            </div>
-                            <div class="modal-field">
-                                <label class="modal-label">Categoría</label>
-                                <select v-model="form.category" class="modal-select">
-                                    <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="modal-grid">
-                            <div class="modal-field">
-                                <label class="modal-label">Stock Inicial</label>
-                                <input v-model.number="form.stock" type="number" class="modal-input" min="0" />
-                            </div>
-                            <div class="modal-field">
-                                <label class="modal-label">País de Origen</label>
-                                <select v-model="form.origin" class="modal-select">
-                                    <option v-for="o in origins" :key="o" :value="o">{{ o }}</option>
-                                </select>
-                            </div>
+                            <label class="modal-label" for="reject-reason">Motivo del rechazo</label>
+                            <textarea v-model="reason" id="reject-reason" class="modal-textarea"
+                                placeholder="Indique el motivo por el cual rechaza este presupuesto..." rows="4"
+                                required></textarea>
                         </div>
                     </div>
 
+                    <!-- Footer -->
                     <div class="modal-footer">
                         <button class="modal-footer-cancel" @click="handleClose">Cancelar</button>
-                        <button class="modal-footer-submit" @click="handleSubmit">Añadir Producto</button>
+                        <button class="modal-footer-confirm" :disabled="!reason.trim()" @click="handleConfirm">
+                            Confirmar Rechazo
+                        </button>
                     </div>
                 </div>
             </div>
@@ -96,6 +82,7 @@ function handleOverlayClick(e) {
 </template>
 
 <style scoped>
+/* Overlay */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -107,16 +94,20 @@ function handleOverlayClick(e) {
     padding: 24px;
 }
 
+/* Box */
 .modal-box {
     background: #ffffff;
     border-radius: 14px;
     width: 100%;
-    max-width: 500px;
+    max-width: 460px;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
 }
 
+/* Header */
 .modal-header {
     display: flex;
     align-items: center;
@@ -146,17 +137,28 @@ function handleOverlayClick(e) {
     color: var(--text-primary);
 }
 
+/* Body */
 .modal-body {
-    padding: 20px 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    padding: 20px 28px 0;
 }
 
-.modal-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+.modal-detail-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.modal-detail-key {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.modal-detail-ref {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-blue);
 }
 
 .modal-field {
@@ -171,37 +173,35 @@ function handleOverlayClick(e) {
     color: var(--text-secondary);
 }
 
-.modal-input,
-.modal-select {
-    height: 40px;
+.modal-textarea {
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 0 12px;
+    padding: 10px 12px;
     font-size: 13.5px;
     font-family: var(--font-family);
     color: var(--text-primary);
     background: #ffffff;
+    resize: vertical;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    appearance: auto;
 }
 
-.modal-input:focus,
-.modal-select:focus {
+.modal-textarea:focus {
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 3px rgba(26, 111, 181, 0.12);
     outline: none;
 }
 
-.modal-input::placeholder {
+.modal-textarea::placeholder {
     color: var(--text-muted);
 }
 
+/* Footer */
 .modal-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 12px;
-    padding: 0 28px 24px;
+    padding: 20px 28px 24px;
 }
 
 .modal-footer-cancel {
@@ -218,20 +218,26 @@ function handleOverlayClick(e) {
     color: var(--text-primary);
 }
 
-.modal-footer-submit {
+.modal-footer-confirm {
     padding: 10px 24px;
     font-size: 13.5px;
     font-weight: 600;
     color: #ffffff;
-    background: var(--sidebar-bg);
+    background: #ef4444;
     border-radius: 8px;
     transition: background 0.15s ease;
 }
 
-.modal-footer-submit:hover {
-    background: #0d2440;
+.modal-footer-confirm:hover {
+    background: #dc2626;
 }
 
+.modal-footer-confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Transition */
 .modal-enter-active,
 .modal-leave-active {
     transition: opacity 0.2s ease;

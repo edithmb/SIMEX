@@ -1,10 +1,13 @@
 <script setup>
-import { shallowRef, computed } from 'vue'
+import { shallowRef, computed, reactive } from 'vue'
 import TrackingFilters from '@/components/seguimiento/TrackingFilters.vue'
 import ShipmentList from '@/components/seguimiento/ShipmentList.vue'
 import ShipmentDetail from '@/components/seguimiento/ShipmentDetail.vue'
+import { useRoleStore } from '@/stores/role'
 
-const shipments = [
+const roleStore = useRoleStore()
+
+const shipments = reactive([
   {
     id: 'ENV-2024-4521',
     ref: 'ENV-2024-4521',
@@ -15,11 +18,16 @@ const shipments = [
     transportLabel: 'marítimo',
     incoterm: 'CIF',
     incotermColor: '#1a6fb5',
-    status: 'En Tránsito',
+    status: 'transporte',
+    statusLabel: 'En Tránsito',
     statusColor: '#dbeafe',
     statusTextColor: '#1a6fb5',
-    progress: 55,
+    progress: 40,
     progressColor: '#10b981',
+    etd: '2024-01-20',
+    eta: '2024-02-18',
+    atd: '2024-01-22',
+    ata: null,
     timeline: [
       { name: 'Preparación Mercadería', location: 'Fábrica Origen', date: '15 Ene 2024', state: 'completed' },
       { name: 'Transporte Interior Origen', location: 'Shanghai', date: '18 Ene 2024', state: 'completed' },
@@ -52,11 +60,16 @@ const shipments = [
     transportLabel: 'marítimo',
     incoterm: 'FOB',
     incotermColor: '#1a6fb5',
-    status: 'En Aduana',
+    status: 'aduanas',
+    statusLabel: 'En Aduana',
     statusColor: '#fef3c7',
     statusTextColor: '#b45309',
-    progress: 78,
+    progress: 70,
     progressColor: '#f59e0b',
+    etd: '2024-01-14',
+    eta: '2024-01-30',
+    atd: '2024-01-15',
+    ata: '2024-01-28',
     timeline: [
       { name: 'Preparación Mercadería', location: 'Fábrica Origen', date: '10 Ene 2024', state: 'completed' },
       { name: 'Transporte Interior Origen', location: 'Rotterdam', date: '12 Ene 2024', state: 'completed' },
@@ -90,11 +103,16 @@ const shipments = [
     transportLabel: 'aéreo',
     incoterm: 'DDP',
     incotermColor: '#1a6fb5',
-    status: 'En Tránsito',
+    status: 'transporte',
+    statusLabel: 'En Tránsito',
     statusColor: '#dbeafe',
     statusTextColor: '#1a6fb5',
     progress: 40,
     progressColor: '#10b981',
+    etd: '2024-01-26',
+    eta: '2024-01-28',
+    atd: '2024-01-26',
+    ata: null,
     timeline: [
       { name: 'Recogida Mercadería', location: 'Almacén Shenzhen', date: '25 Ene 2024', state: 'completed' },
       { name: 'Consolidación Carga', location: 'Aeropuerto Shenzhen', date: '26 Ene 2024', state: 'completed' },
@@ -126,11 +144,16 @@ const shipments = [
     transportLabel: 'terrestre',
     incoterm: 'DAP',
     incotermColor: '#1a6fb5',
-    status: 'En Tránsito',
+    status: 'transporte',
+    statusLabel: 'En Tránsito',
     statusColor: '#dbeafe',
     statusTextColor: '#1a6fb5',
-    progress: 65,
+    progress: 40,
     progressColor: '#10b981',
+    etd: '2024-01-22',
+    eta: '2024-01-25',
+    atd: '2024-01-22',
+    ata: null,
     timeline: [
       { name: 'Recogida Mercadería', location: 'Fábrica Frankfurt', date: '22 Ene 2024', state: 'completed' },
       { name: 'Transporte Terrestre', location: null, date: null, state: 'active', badge: 'En Ruta', badgeColor: '#dbeafe', badgeTextColor: '#1a6fb5', detail: 'Camión: SP-4521-AB - Posición: Sur de Francia' },
@@ -159,11 +182,16 @@ const shipments = [
     transportLabel: 'marítimo',
     incoterm: 'CIF',
     incotermColor: '#1a6fb5',
-    status: 'Pendiente',
+    status: 'preparacion',
+    statusLabel: 'Pendiente',
     statusColor: '#e5e7eb',
     statusTextColor: '#4b5563',
     progress: 10,
     progressColor: '#9ca3af',
+    etd: '2024-02-10',
+    eta: '2024-03-05',
+    atd: null,
+    ata: null,
     timeline: [
       { name: 'Preparación Mercadería', location: 'Almacén Miami', date: null, state: 'active', badge: 'Preparando', badgeColor: '#e5e7eb', badgeTextColor: '#4b5563' },
       { name: 'Transporte Interior Origen', location: null, date: null, state: 'pending' },
@@ -185,7 +213,7 @@ const shipments = [
       { name: 'Certificado Sanitario', ready: false },
     ],
   },
-]
+])
 
 const selectedId = shallowRef('ENV-2024-4521')
 
@@ -195,6 +223,52 @@ const selectedShipment = computed(() => {
 
 function handleSelect(id) {
   selectedId.value = id
+}
+
+function updateShipmentStatus(id, newStatus) {
+  const shipment = shipments.find((s) => s.id === id)
+  if (!shipment) return
+
+  shipment.status = newStatus
+
+  const statusMap = {
+    preparacion: { progress: 10, progressColor: '#9ca3af', statusLabel: 'Preparación', statusColor: '#e5e7eb', statusTextColor: '#4b5563' },
+    transporte: { progress: 40, progressColor: '#10b981', statusLabel: 'En Tránsito', statusColor: '#dbeafe', statusTextColor: '#1a6fb5' },
+    aduanas: { progress: 70, progressColor: '#f59e0b', statusLabel: 'En Aduana', statusColor: '#fef3c7', statusTextColor: '#b45309' },
+    entrega: { progress: 90, progressColor: '#10b981', statusLabel: 'En Entrega', statusColor: '#dbeafe', statusTextColor: '#1a6fb5' },
+    completado: { progress: 100, progressColor: '#6b8e23', statusLabel: 'Completado', statusColor: '#d1fae5', statusTextColor: '#047857' },
+  }
+
+  const cfg = statusMap[newStatus]
+  if (cfg) {
+    shipment.progress = cfg.progress
+    shipment.progressColor = cfg.progressColor
+    shipment.statusLabel = cfg.statusLabel
+    shipment.statusColor = cfg.statusColor
+    shipment.statusTextColor = cfg.statusTextColor
+  }
+
+  // Recalculate timeline step states
+  const steps = shipment.timeline
+  const statusOrder = ['preparacion', 'transporte', 'aduanas', 'entrega', 'completado']
+  const currentIdx = statusOrder.indexOf(newStatus)
+  const totalSteps = steps.length
+
+  if (newStatus === 'completado') {
+    steps.forEach((step) => { step.state = 'completed' })
+  } else {
+    // Map status index to approximate timeline step
+    const activeStepIdx = Math.min(Math.round((currentIdx / (statusOrder.length - 1)) * (totalSteps - 1)), totalSteps - 1)
+    steps.forEach((step, i) => {
+      if (i < activeStepIdx) {
+        step.state = 'completed'
+      } else if (i === activeStepIdx) {
+        step.state = 'active'
+      } else {
+        step.state = 'pending'
+      }
+    })
+  }
 }
 </script>
 
@@ -213,7 +287,11 @@ function handleSelect(id) {
         />
       </div>
       <div class="seguimiento-detail-col">
-        <ShipmentDetail :shipment="selectedShipment" />
+        <ShipmentDetail
+          :shipment="selectedShipment"
+          :role="roleStore.currentRole"
+          @update-status="updateShipmentStatus"
+        />
       </div>
     </div>
   </div>
