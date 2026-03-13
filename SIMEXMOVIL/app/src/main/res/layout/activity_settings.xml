@@ -1,106 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#F4F7FA"> <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:scrollbars="none"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toTopOf="@+id/contenedor_menu"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="40dp"
+            android:text="Configuraciones"
+            android:textColor="#8AB242"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Personal"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Personal Documentation"
-                android:textColor="#000000"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp"/>
+            android:background="@drawable/bg_box_settings"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
 
             <TextView
                 android:id="@+id/txv_documentation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Documentation"
-                android:textSize="16sp"
+                android:text="Gestionar ofertas"
+                android:textSize="14sp"
+                android:textColor="#333333"
                 android:paddingVertical="12dp"
                 android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
                 android:drawableStart="@drawable/ic_documents"
-                />
-
-            <TextView
-                android:id="@+id/txv_history"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Request History"
-                android:textSize="16sp"
-                android:paddingVertical="12dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:drawableStart="@drawable/ic_history"
-                />
+                android:drawableEnd="@drawable/ic_back"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#E0E0E0"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Settings"
-                android:textColor="#000000"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp"/>
+                android:background="#D0D8E0" />
 
             <TextView
                 android:id="@+id/txv_language"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Language"
-                android:textSize="16sp"
+                android:text="Idiomas"
+                android:textSize="14sp"
+                android:textColor="#333333"
                 android:paddingVertical="12dp"
                 android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
                 android:drawableStart="@drawable/ic_languaje"
-                />
+                android:drawableEnd="@drawable/ic_back"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D0D8E0" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingVertical="12dp"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Modo Oscuro"
-                    android:textSize="16sp"
-                    android:drawableStart="@drawable/ic_moon"
-                    android:drawablePadding="16dp"/>
-
-                <Switch
-                    android:id="@+id/switch_dark_mode"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="12dp"
+                android:paddingVertical="8dp"
                 android:gravity="center_vertical">
 
                 <TextView
@@ -108,44 +96,116 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Notificaciones"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
+                    android:textColor="#333333"
                     android:drawableStart="@drawable/ic_notifications"
-                    android:drawablePadding="16dp"/>
+                    android:drawablePadding="16dp"
+                    android:gravity="center_vertical"/>
 
                 <Switch
                     android:id="@+id/switch_notificaciones"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:thumbTint="#FFFFFF"
+                    android:trackTint="#8AB242" />
             </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="General"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_box_settings"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:layout_marginBottom="40dp"> <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="8dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Tema"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:drawableStart="@drawable/ic_moon"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
+
+            <Switch
+                android:id="@+id/switch_dark_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:thumbTint="#FFFFFF"
+                android:trackTint="#8AB242" />
+        </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D0D8E0" />
 
             <TextView
                 android:id="@+id/txv_contact"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Contact Us"
-                android:textSize="16sp"
+                android:text="Contacto"
+                android:textSize="14sp"
+                android:textColor="#333333"
                 android:paddingVertical="12dp"
                 android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
                 android:drawableStart="@drawable/ic_support"
-                />
+                android:drawableEnd="@drawable/ic_back"
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D0D8E0" />
 
             <TextView
                 android:id="@+id/txv_logout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Log Out"
-                android:textColor="#D32F2F"
-                android:textSize="16sp"
+                android:text="Salir"
+                android:textColor="#F44336"
+                android:textSize="14sp"
                 android:paddingVertical="12dp"
                 android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
                 android:drawableStart="@drawable/ic_logout"
-                />
+                android:drawablePadding="16dp"
+                android:gravity="center_vertical"/>
+
         </LinearLayout>
+    </LinearLayout>
+</ScrollView>
 
+    <FrameLayout
+        android:id="@+id/contenedor_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    </ScrollView>
+        <include layout="@layout/layout_menu_reutilizable" />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
