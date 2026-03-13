@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -26,6 +27,8 @@ class CommercialOffer extends Model
         'updated_by',
     ];
 
+    protected $attributes = ['status' => 'draft'];
+
     protected function casts(): array
     {
         return [
@@ -34,6 +37,21 @@ class CommercialOffer extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    public function scopeDraft(Builder $query): Builder
+    {
+        return $query->where('status', 'draft');
+    }
+
+    public function scopeAccepted(Builder $query): Builder
+    {
+        return $query->where('status', 'accepted');
+    }
+
+    public function scopeRejected(Builder $query): Builder
+    {
+        return $query->where('status', 'rejected');
     }
 
     public function clientRequest(): BelongsTo
