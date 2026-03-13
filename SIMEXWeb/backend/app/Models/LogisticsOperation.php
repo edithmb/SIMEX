@@ -43,7 +43,7 @@ class LogisticsOperation extends Model
 
     public function scopeCompleted(Builder $query): Builder
     {
-        return $query->whereNotNull('completed_at');
+        return $query->where('status', 'completed')->whereNotNull('completed_at');
     }
 
     public function scopeByStatus(Builder $query, string $status): Builder
