@@ -75,6 +75,15 @@ const router = createRouter({
         breadcrumbParent: 'Inicio / Sistema',
       },
     },
+    {
+      path: '/datos-maestros',
+      name: 'datos-maestros',
+      component: () => import('@/views/DatosMaestrosView.vue'),
+      meta: {
+        title: 'Datos Maestros',
+        breadcrumbParent: 'Inicio / Sistema',
+      },
+    },
   ],
 })
 
