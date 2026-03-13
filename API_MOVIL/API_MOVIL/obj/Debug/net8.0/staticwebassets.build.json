@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "HwBpDqcqYISIzvicYDCiMlMZ7j5v2Q4xhfTTeMbrHk8=",
+  "Source": "API_MOVIL",
+  "BasePath": "_content/API_MOVIL",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
