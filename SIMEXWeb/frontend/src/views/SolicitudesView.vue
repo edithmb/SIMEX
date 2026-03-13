@@ -81,12 +81,12 @@ function handleSolicitudSubmit(data) {
 <template>
   <div class="solicitudes">
     <!-- Page Heading -->
-    <div :class="['solicitudes-header', { 'solicitudes-header--with-btn': roleStore.isCliente }]">
+    <div :class="['solicitudes-header', { 'solicitudes-header--with-btn': roleStore.isCliente || roleStore.isAdmin }]">
       <div class="solicitudes-header-text">
         <h2 class="solicitudes-header-title">Solicitudes de Clientes</h2>
         <p class="solicitudes-header-subtitle">Peticiones de transporte recibidas pendientes de cotización.</p>
       </div>
-      <button v-if="roleStore.isCliente" class="solicitudes-header-btn" @click="openSolicitudModal">
+      <button v-if="roleStore.isCliente || roleStore.isAdmin" class="solicitudes-header-btn" @click="openSolicitudModal">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
           stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19" />

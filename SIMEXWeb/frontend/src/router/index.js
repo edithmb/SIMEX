@@ -65,16 +65,7 @@ const router = createRouter({
         title: 'Configuración',
         breadcrumbParent: 'Inicio / Sistema',
       },
-    },
-    {
-      path: '/usuarios',
-      name: 'usuarios',
-      component: () => import('@/views/UsuariosView.vue'),
-      meta: {
-        title: 'Gestión de Usuarios',
-        breadcrumbParent: 'Inicio / Sistema',
-      },
-    },
+    }
   ],
 })
 

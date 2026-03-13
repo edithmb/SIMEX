@@ -1,31 +1,9 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useRoleStore } from '@/stores/role'
-import DocumentosStats from '@/components/documentos/DocumentosStats.vue'
-import DocumentosTable from '@/components/documentos/DocumentosTable.vue'
 import SubirDocumentoModal from '@/components/documentos/SubirDocumentoModal.vue'
 
 const roleStore = useRoleStore()
-
-// ── Admin data ──
-const documentos = [
-    { name: 'Bill of Lading - OP-2024-158.pdf', type: 'PDF', operation: 'OP-2024-158', date: '15/01/2024', size: '2.4 MB', status: 'Aprobado' },
-    { name: 'Factura Comercial_Textiles.xlsx', type: 'Excel', operation: 'OP-2024-158', date: '14/01/2024', size: '1.1 MB', status: 'Aprobado' },
-    { name: 'Certificado de Origen_Miami.pdf', type: 'PDF', operation: 'OP-2024-159', date: '20/01/2024', size: '850 KB', status: 'Pendiente' },
-    { name: 'Packing List_Alimentacion.pdf', type: 'PDF', operation: 'OP-2024-160', date: '10/01/2024', size: '1.5 MB', status: 'Aprobado' },
-    { name: 'DUA Importación_Shenzhen.pdf', type: 'PDF', operation: 'OP-2024-161', date: '05/12/2023', size: '3.2 MB', status: 'Aprobado' },
-    { name: 'Seguro Transporte_Frankfurt.pdf', type: 'PDF', operation: 'OP-2024-162', date: '18/01/2024', size: '1.8 MB', status: 'Pendiente' },
-]
-
-const searchQuery = ref('')
-
-const filteredDocumentos = computed(() => {
-    if (!searchQuery.value.trim()) return documentos
-    const q = searchQuery.value.toLowerCase()
-    return documentos.filter(
-        (d) => d.name.toLowerCase().includes(q) || d.operation.toLowerCase().includes(q),
-    )
-})
 
 const showModal = ref(false)
 
@@ -99,91 +77,69 @@ function mockUpload(doc) {
 
 <template>
     <div class="documentos">
-        <!-- ── Admin view ── -->
-        <template v-if="roleStore.isAdmin">
-            <div class="documentos-header">
-                <h2 class="documentos-header-title">Gestión Documental</h2>
-                <button class="documentos-header-btn" @click="showModal = true">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="17 8 12 3 7 8" />
-                        <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                    Subir Documento
-                </button>
+        <!-- Header -->
+        <div :class="['documentos-header', { 'documentos-header--with-btn': roleStore.isAdmin }]">
+            <div class="documentos-header-text">
+                <h2 class="documentos-header-title">{{ roleStore.isAdmin ? 'Gestión Documental' : 'Mis Documentos' }}</h2>
             </div>
-            <DocumentosStats />
-
-            <!-- Search -->
-            <div class="documentos-search-wrapper">
-                <svg class="documentos-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <button v-if="roleStore.isAdmin" class="documentos-header-btn" @click="showModal = true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
-                <input type="text" class="documentos-search-input" placeholder="Buscar por nombre o referencia..."
-                    v-model="searchQuery" id="documentos-search" />
+                Subir Documento
+            </button>
+        </div>
+
+        <!-- Filter buttons -->
+        <div class="doc-client-filters">
+            <button v-for="f in clientFilters" :key="f"
+                :class="['doc-client-filter-btn', { 'doc-client-filter-btn--active': activeDocFilter === f }]"
+                @click="activeDocFilter = f">
+                {{ f }}
+            </button>
+        </div>
+
+        <!-- Operation cards -->
+        <div v-for="op in filteredOperationDocs" :key="op.operationRef" class="doc-operation-card">
+            <div class="doc-operation-header">
+                <span class="doc-operation-ref">{{ op.operationRef }}</span>
+                <span class="doc-operation-route">{{ op.route }}</span>
             </div>
-
-            <DocumentosTable :documentos="filteredDocumentos" />
-
-            <SubirDocumentoModal :visible="showModal" @close="showModal = false" @submit="handleSubmit" />
-        </template>
-
-        <!-- ── Client view ── -->
-        <template v-else>
-            <!-- Header -->
-            <div class="documentos-header">
-                <h2 class="documentos-header-title">Mis Documentos</h2>
-            </div>
-
-            <!-- Filter buttons -->
-            <div class="doc-client-filters">
-                <button v-for="f in clientFilters" :key="f"
-                    :class="['doc-client-filter-btn', { 'doc-client-filter-btn--active': activeDocFilter === f }]"
-                    @click="activeDocFilter = f">
-                    {{ f }}
-                </button>
-            </div>
-
-            <!-- Operation cards -->
-            <div v-for="op in filteredOperationDocs" :key="op.operationRef" class="doc-operation-card">
-                <div class="doc-operation-header">
-                    <span class="doc-operation-ref">{{ op.operationRef }}</span>
-                    <span class="doc-operation-route">{{ op.route }}</span>
-                </div>
-                <div class="doc-operation-list">
-                    <div v-for="doc in op.filteredDocs" :key="doc.id" class="doc-operation-item">
-                        <div class="doc-operation-item-left">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                <polyline points="14 2 14 8 20 8" />
+            <div class="doc-operation-list">
+                <div v-for="doc in op.filteredDocs" :key="doc.id" class="doc-operation-item">
+                    <div class="doc-operation-item-left">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                        <span class="doc-operation-item-name">{{ doc.type }}</span>
+                    </div>
+                    <div class="doc-operation-item-right">
+                        <span v-if="doc.status === 'subido'"
+                            class="doc-status-badge doc-status-badge--subido">Subido</span>
+                        <span v-else-if="doc.status === 'urgente'"
+                            class="doc-status-badge doc-status-badge--urgente">Urgente</span>
+                        <span v-else
+                            class="doc-status-badge doc-status-badge--pendiente">Pendiente</span>
+                        <button v-if="doc.status !== 'subido'" class="doc-upload-btn" @click="mockUpload(doc)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
                             </svg>
-                            <span class="doc-operation-item-name">{{ doc.type }}</span>
-                        </div>
-                        <div class="doc-operation-item-right">
-                            <span v-if="doc.status === 'subido'"
-                                class="doc-status-badge doc-status-badge--subido">Subido</span>
-                            <span v-else-if="doc.status === 'urgente'"
-                                class="doc-status-badge doc-status-badge--urgente">Urgente</span>
-                            <span v-else
-                                class="doc-status-badge doc-status-badge--pendiente">Pendiente</span>
-                            <button v-if="doc.status !== 'subido'" class="doc-upload-btn" @click="mockUpload(doc)">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                    <polyline points="17 8 12 3 7 8" />
-                                    <line x1="12" y1="3" x2="12" y2="15" />
-                                </svg>
-                                Subir
-                            </button>
-                        </div>
+                            Subir
+                        </button>
                     </div>
                 </div>
             </div>
-        </template>
+        </div>
+
+        <SubirDocumentoModal :visible="showModal" @close="showModal = false" @submit="handleSubmit" />
     </div>
 </template>
 
@@ -196,8 +152,20 @@ function mockUpload(doc) {
 
 .documentos-header {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.documentos-header--with-btn {
+    flex-direction: row;
     justify-content: space-between;
+    align-items: center;
+}
+
+.documentos-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .documentos-header-title {
@@ -223,42 +191,7 @@ function mockUpload(doc) {
     background: #0d2440;
 }
 
-.documentos-search-wrapper {
-    background: var(--card-bg);
-    border-radius: var(--card-radius);
-    box-shadow: var(--card-shadow);
-    padding: 16px 22px;
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.documentos-search-icon {
-    position: absolute;
-    left: 36px;
-    color: var(--text-muted);
-    pointer-events: none;
-}
-
-.documentos-search-input {
-    width: 100%;
-    height: 40px;
-    background: var(--page-bg);
-    border-radius: 20px;
-    padding: 0 16px 0 40px;
-    font-size: 13px;
-    color: var(--text-primary);
-}
-
-.documentos-search-input::placeholder {
-    color: var(--text-muted);
-}
-
-.documentos-search-input:focus {
-    box-shadow: 0 0 0 2px rgba(26, 111, 181, 0.2);
-}
-
-/* ── Client view ── */
+/* ── Filters & cards ── */
 .doc-client-filters {
     background: var(--card-bg);
     border-radius: var(--card-radius);
