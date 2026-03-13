@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -17,7 +18,10 @@ class LogisticsOperation extends Model
         'atd',
         'ata',
         'odoo_id',
+        'completed_at',
     ];
+
+    protected $attributes = ['status' => 'preparation'];
 
     protected function casts(): array
     {
@@ -30,6 +34,21 @@ class LogisticsOperation extends Model
             'updated_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
+    }
+
+    public function scopeInPreparation(Builder $query): Builder
+    {
+        return $query->where('status', 'preparation');
+    }
+
+    public function scopeCompleted(Builder $query): Builder
+    {
+        return $query->whereNotNull('completed_at');
+    }
+
+    public function scopeByStatus(Builder $query, string $status): Builder
+    {
+        return $query->where('status', $status);
     }
 
     public function commercialOffer(): BelongsTo
