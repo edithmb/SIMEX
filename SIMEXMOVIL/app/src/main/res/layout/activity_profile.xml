@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="70dp"
         android:text="Perfil"
+        android:textColor="#8AB242"
         android:textSize="40dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -28,6 +29,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp" />
+
+    <ImageView
+        android:id="@+id/iconoEditarFoto"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="@drawable/bg_white_circle"
+        android:backgroundTint="#8AB242"
+        android:padding="6dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/imgPerfil"
+        app:layout_constraintEnd_toEndOf="@id/imgPerfil" />
 
     <TextView
         android:id="@+id/nombreEmpresa"
@@ -49,7 +61,7 @@
         android:layout_marginEnd="60dp"
         android:layout_marginTop="16dp"
         android:text="Editar Perfil"
-        android:backgroundTint="@color/light_blue"
+        android:backgroundTint="#5C82B1"
         app:cornerRadius="10dp"
         app:layout_constraintTop_toBottomOf="@id/nombreEmpresa"
         app:layout_constraintStart_toStartOf="parent"
@@ -75,12 +87,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Datos personales"
-                android:textColor="@color/green"
+                android:textColor="#8AB242"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="16dp" /> <TextView
-            style="@style/EstiloEtiquetaFormulario"
-            android:text="Nombre completo" />
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                style="@style/EstiloEtiquetaFormulario"
+                android:text="Nombre completo" />
             <EditText
                 android:id="@+id/inputName"
                 style="@style/EstiloInputFormulario"
@@ -97,6 +111,7 @@
                 android:inputType="textEmailAddress"/>
 
             <TextView
+                android:id="@+id/labelPassword"
                 style="@style/EstiloEtiquetaFormulario"
                 android:text="Contraseña" />
             <EditText
@@ -104,6 +119,17 @@
                 style="@style/EstiloInputFormulario"
                 android:hint="ledys"
                 android:inputType="textPassword"/>
+
+            <TextView
+                android:id="@+id/labelConfirmarPass"
+                style="@style/EstiloEtiquetaFormulario"
+                android:text="Confirmar contraseña"
+                android:visibility="gone" />
+            <EditText
+                android:id="@+id/inputConfirmarPass"
+                style="@style/EstiloInputFormulario"
+                android:inputType="textPassword"
+                android:visibility="gone" />
 
             <TextView
                 style="@style/EstiloEtiquetaFormulario"
@@ -118,7 +144,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Dirección"
-                android:textColor="@color/green"
+                android:textColor="#8AB242"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="16dp"
@@ -151,66 +177,11 @@
                 android:hint="ej. 08012"
                 android:inputType="textPersonName"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Documento DNI/NIE"
-                android:textColor="@color/green"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp"
-                android:layout_marginTop="30dp"/>
+        </LinearLayout>
+    </ScrollView>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_tarjeta_gris"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/tvNombreArchivoDni"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:background="@drawable/bg_caja_blanca"
-                    android:layout_marginBottom="16dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSubirDni"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        android:text="Subir DNI"
-                        android:textAllCaps="false"
-                        app:backgroundTint="#155196"
-                        app:cornerRadius="8dp"
-                        app:icon="@drawable/ic_subir" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnBajarDni"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        android:text="Bajar DNI"
-                        android:textAllCaps="false"
-                        app:backgroundTint="#90A93E"
-                        app:cornerRadius="8dp"
-                        app:icon="@drawable/ic_bajar" />
-                </LinearLayout>
-            </LinearLayout>
-
-        </LinearLayout> </ScrollView>
-
-    <include
+    <FrameLayout
         android:id="@+id/bottom_navigation"
-        layout="@layout/layout_menu_reutilizable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
