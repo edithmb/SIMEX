@@ -32,7 +32,6 @@ const allMenuSections = [
     label: 'SISTEMA',
     items: [
       { name: 'Configuración', icon: 'configuracion', route: '/configuracion', roles: ['admin'] },
-      { name: 'Usuarios', icon: 'usuarios', route: '/usuarios', roles: ['admin'] },
       { name: 'Datos Maestros', icon: 'maestros', route: '/datos-maestros', roles: ['admin'] },
     ],
   },

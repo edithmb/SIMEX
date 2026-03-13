@@ -67,15 +67,6 @@ const router = createRouter({
       },
     },
     {
-      path: '/usuarios',
-      name: 'usuarios',
-      component: () => import('@/views/UsuariosView.vue'),
-      meta: {
-        title: 'Gestión de Usuarios',
-        breadcrumbParent: 'Inicio / Sistema',
-      },
-    },
-    {
       path: '/datos-maestros',
       name: 'datos-maestros',
       component: () => import('@/views/DatosMaestrosView.vue'),
