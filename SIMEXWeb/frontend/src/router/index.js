@@ -45,25 +45,7 @@ const router = createRouter({
       component: () => import('@/views/ClientesView.vue'),
       meta: {
         title: 'Gestión de Clientes',
-        breadcrumbParent: 'Inicio / Comercial',
-      },
-    },
-    {
-      path: '/operaciones',
-      name: 'operaciones',
-      component: () => import('@/views/OperacionesView.vue'),
-      meta: {
-        title: 'Operaciones',
-        breadcrumbParent: 'Inicio / Operaciones',
-      },
-    },
-    {
-      path: '/productos',
-      name: 'productos',
-      component: () => import('@/views/ProductosView.vue'),
-      meta: {
-        title: 'Productos Importados',
-        breadcrumbParent: 'Inicio / Operaciones',
+        breadcrumbParent: 'Inicio / Gestión',
       },
     },
     {
@@ -72,7 +54,7 @@ const router = createRouter({
       component: () => import('@/views/DocumentosView.vue'),
       meta: {
         title: 'Documentos',
-        breadcrumbParent: 'Inicio / Operaciones',
+        breadcrumbParent: 'Inicio / Gestión',
       },
     },
     {
@@ -85,11 +67,11 @@ const router = createRouter({
       },
     },
     {
-      path: '/usuarios',
-      name: 'usuarios',
-      component: () => import('@/views/UsuariosView.vue'),
+      path: '/datos-maestros',
+      name: 'datos-maestros',
+      component: () => import('@/views/DatosMaestrosView.vue'),
       meta: {
-        title: 'Gestión de Usuarios',
+        title: 'Datos Maestros',
         breadcrumbParent: 'Inicio / Sistema',
       },
     },

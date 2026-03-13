@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
@@ -7,18 +7,48 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'submit'])
 
-const roles = ['Administrador', 'Operador/a', 'Cliente']
+const roleOptions = [
+    { id: 1, name: 'Administrador' },
+    { id: 2, name: 'Operador' },
+    { id: 3, name: 'Cliente' },
+]
+
+const clientOptions = [
+    { id: null, name: '-- Sin cliente asociado --' },
+    { id: 1, name: 'Importaciones García S.L.' },
+    { id: 2, name: 'Textiles Mediterráneo S.A.' },
+    { id: 3, name: 'Alimentación Ibérica S.L.' },
+    { id: 4, name: 'Electrónica Levante S.A.' },
+    { id: 5, name: 'Maquinaria Industrial Norte' },
+]
 
 const form = reactive({
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
-    rol: 'Operador/a',
+    phone_number: '',
+    role_id: 2,
+    client_id: null,
+    is_active: true,
 })
 
-function handleClose() {
-    form.name = ''
+// Reset client_id when role is not Cliente
+watch(() => form.role_id, (val) => {
+    if (val !== 3) form.client_id = null
+})
+
+function resetForm() {
+    form.first_name = ''
+    form.last_name = ''
     form.email = ''
-    form.rol = 'Operador/a'
+    form.phone_number = ''
+    form.role_id = 2
+    form.client_id = null
+    form.is_active = true
+}
+
+function handleClose() {
+    resetForm()
     emit('close')
 }
 
@@ -49,20 +79,47 @@ function handleOverlayClick(e) {
                     </div>
 
                     <div class="modal-body">
-                        <div class="modal-field">
-                            <label class="modal-label">Nombre Completo</label>
-                            <input v-model="form.name" type="text" class="modal-input" placeholder="Ej. Juan Pérez" />
+                        <div class="modal-grid">
+                            <div class="modal-field">
+                                <label class="modal-label">Nombre</label>
+                                <input v-model="form.first_name" type="text" class="modal-input"
+                                    placeholder="Ej. Juan" />
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">Apellidos</label>
+                                <input v-model="form.last_name" type="text" class="modal-input"
+                                    placeholder="Ej. Pérez García" />
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">Email</label>
+                                <input v-model="form.email" type="email" class="modal-input"
+                                    placeholder="juan@ejemplo.com" />
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">Teléfono</label>
+                                <input v-model="form.phone_number" type="text" class="modal-input"
+                                    placeholder="+34 600 000 000" />
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">Rol</label>
+                                <select v-model="form.role_id" class="modal-select">
+                                    <option v-for="r in roleOptions" :key="r.id" :value="r.id">{{ r.name }}</option>
+                                </select>
+                            </div>
+                            <div v-if="form.role_id === 3" class="modal-field">
+                                <label class="modal-label">Cliente Asociado</label>
+                                <select v-model="form.client_id" class="modal-select">
+                                    <option v-for="c in clientOptions" :key="c.id" :value="c.id">{{ c.name }}</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="modal-field">
-                            <label class="modal-label">Correo Electrónico</label>
-                            <input v-model="form.email" type="email" class="modal-input"
-                                placeholder="juan@ejemplo.com" />
-                        </div>
-                        <div class="modal-field">
-                            <label class="modal-label">Rol del Sistema</label>
-                            <select v-model="form.rol" class="modal-select">
-                                <option v-for="r in roles" :key="r" :value="r">{{ r }}</option>
-                            </select>
+                        <div class="modal-field modal-field--toggle">
+                            <label class="modal-label">Estado</label>
+                            <label class="modal-toggle">
+                                <input type="checkbox" v-model="form.is_active" class="modal-toggle-input" />
+                                <span class="modal-toggle-slider"></span>
+                                <span class="modal-toggle-label">{{ form.is_active ? 'Activo' : 'Inactivo' }}</span>
+                            </label>
                         </div>
                     </div>
 
@@ -92,7 +149,7 @@ function handleOverlayClick(e) {
     background: #ffffff;
     border-radius: 14px;
     width: 100%;
-    max-width: 460px;
+    max-width: 580px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
@@ -134,10 +191,20 @@ function handleOverlayClick(e) {
     gap: 16px;
 }
 
+.modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
 .modal-field {
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+.modal-field--toggle {
+    gap: 8px;
 }
 
 .modal-label {
@@ -169,6 +236,54 @@ function handleOverlayClick(e) {
 
 .modal-input::placeholder {
     color: var(--text-muted);
+}
+
+/* Toggle */
+.modal-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.modal-toggle-input {
+    display: none;
+}
+
+.modal-toggle-slider {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    background: #d1d5db;
+    border-radius: 11px;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+}
+
+.modal-toggle-slider::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+}
+
+.modal-toggle-input:checked + .modal-toggle-slider {
+    background: #047857;
+}
+
+.modal-toggle-input:checked + .modal-toggle-slider::after {
+    transform: translateX(18px);
+}
+
+.modal-toggle-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
 }
 
 .modal-footer {

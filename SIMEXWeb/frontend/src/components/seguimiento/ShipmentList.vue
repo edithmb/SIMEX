@@ -57,7 +57,7 @@ const emit = defineEmits(['select'])
           <span
             class="shipment-card-status"
             :style="{ background: s.statusColor, color: s.statusTextColor }"
-          >{{ s.status }}</span>
+          >{{ s.statusLabel }}</span>
         </div>
         <div class="shipment-card-progress">
           <div class="shipment-card-progress-bar">
