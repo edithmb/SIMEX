@@ -3,27 +3,22 @@ import { reactive } from 'vue'
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
+    empresas: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['close', 'submit'])
 
-const presupuestosAceptados = [
-    { ref: 'PR-2024-093', label: 'PR-2024-093 — Maquinaria Industrial Norte (€5,600)' },
-    { ref: 'PR-2024-090', label: 'PR-2024-090 — Importaciones García S.L. (€4,200)' },
-]
-
-const agentes = ['María García', 'Carlos López', 'Ana Martínez']
-
 const form = reactive({
-    presupuesto: '',
-    fechaInicio: '',
-    agente: 'María García',
+    name: '',
+    empresa: '',
+    email: '',
+    phone: '',
+    position: '',
+    rol: '',
 })
 
 function handleClose() {
-    form.presupuesto = ''
-    form.fechaInicio = ''
-    form.agente = 'María García'
+    Object.assign(form, { name: '', empresa: '', email: '', phone: '', position: '', rol: '' })
     emit('close')
 }
 
@@ -43,7 +38,7 @@ function handleOverlayClick(e) {
             <div v-if="visible" class="modal-overlay" @click="handleOverlayClick">
                 <div class="modal-box">
                     <div class="modal-header">
-                        <h3 class="modal-header-title">Crear Nueva Operación</h3>
+                        <h3 class="modal-header-title">Crear Usuario</h3>
                         <button class="modal-header-close" @click="handleClose" title="Cerrar">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -55,31 +50,49 @@ function handleOverlayClick(e) {
 
                     <div class="modal-body">
                         <div class="modal-field">
-                            <label class="modal-label">Presupuesto Asociado</label>
-                            <select v-model="form.presupuesto" class="modal-select">
-                                <option value="" disabled>Seleccionar presupuesto aceptado...</option>
-                                <option v-for="p in presupuestosAceptados" :key="p.ref" :value="p.ref">{{ p.label }}
-                                </option>
+                            <label class="modal-label">Nombre Completo</label>
+                            <input v-model="form.name" type="text" class="modal-input"
+                                placeholder="Nombre y apellidos" />
+                        </div>
+                        <div class="modal-field">
+                            <label class="modal-label">Empresa</label>
+                            <select v-model="form.empresa" class="modal-select">
+                                <option value="" disabled>Seleccionar empresa...</option>
+                                <option v-for="e in empresas" :key="e" :value="e">{{ e }}</option>
                             </select>
-                            <span class="modal-hint">Solo se muestran presupuestos con estado 'Aceptado'</span>
+                        </div>
+                        <div class="modal-field">
+                            <label class="modal-label">Rol</label>
+                            <select v-model="form.rol" class="modal-select">
+                                <option value="" disabled>Seleccionar rol...</option>
+                                <option value="operador_logistico">Operador Logístico</option>
+                                <option value="operador_comercial">Operador Comercial</option>
+                                <option value="cliente">Cliente</option>
+                                <option value="administrador">Administrador</option>
+                            </select>
+                        </div>
+                        <div class="modal-field">
+                            <label class="modal-label">Email / Correo Electrónico</label>
+                            <input v-model="form.email" type="email" class="modal-input"
+                                placeholder="correo@empresa.com" />
                         </div>
                         <div class="modal-grid">
                             <div class="modal-field">
-                                <label class="modal-label">Fecha Estimada Inicio</label>
-                                <input v-model="form.fechaInicio" type="date" class="modal-input" />
+                                <label class="modal-label">Teléfono</label>
+                                <input v-model="form.phone" type="text" class="modal-input"
+                                    placeholder="+34 600 000 000" />
                             </div>
                             <div class="modal-field">
-                                <label class="modal-label">Agente Asignado</label>
-                                <select v-model="form.agente" class="modal-select">
-                                    <option v-for="a in agentes" :key="a" :value="a">{{ a }}</option>
-                                </select>
+                                <label class="modal-label">Cargo</label>
+                                <input v-model="form.position" type="text" class="modal-input"
+                                    placeholder="Ej. Director Comercial" />
                             </div>
                         </div>
                     </div>
 
                     <div class="modal-footer">
                         <button class="modal-footer-cancel" @click="handleClose">Cancelar</button>
-                        <button class="modal-footer-submit" @click="handleSubmit">Generar Operación</button>
+                        <button class="modal-footer-submit" @click="handleSubmit">Crear Usuario</button>
                     </div>
                 </div>
             </div>
@@ -163,12 +176,6 @@ function handleOverlayClick(e) {
     color: var(--text-secondary);
 }
 
-.modal-hint {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-style: italic;
-}
-
 .modal-input,
 .modal-select {
     height: 40px;
@@ -188,6 +195,10 @@ function handleOverlayClick(e) {
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 3px rgba(26, 111, 181, 0.12);
     outline: none;
+}
+
+.modal-input::placeholder {
+    color: var(--text-muted);
 }
 
 .modal-footer {

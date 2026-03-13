@@ -1,7 +1,37 @@
 <script setup>
 const props = defineProps({
   shipment: { type: Object, required: true },
+  role: { type: String, default: 'admin' },
 })
+
+const emit = defineEmits(['update-status', 'upload-document'])
+
+function formatDate(dateStr) {
+  if (!dateStr) return 'Pendiente'
+  const d = new Date(dateStr)
+  const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
+}
+
+const statusOptions = [
+  { value: 'embalaje',           label: 'Embalaje',       color: '#e5e7eb', textColor: '#4b5563' },
+  { value: 'carga',              label: 'Carga',           color: '#dbeafe', textColor: '#1a6fb5' },
+  { value: 'transporte',         label: 'Transporte',      color: '#dbeafe', textColor: '#1a6fb5' },
+  { value: 'aduana_exp',         label: 'Aduana Exp.',     color: '#fef3c7', textColor: '#b45309' },
+  { value: 'manip_origen',       label: 'Manip. Origen',   color: '#dbeafe', textColor: '#1a6fb5' },
+  { value: 'flete',              label: 'Flete',           color: '#dbeafe', textColor: '#1a6fb5' },
+  { value: 'manip_destino',      label: 'Manip. Destino',  color: '#dbeafe', textColor: '#1a6fb5' },
+  { value: 'aduana_imp',         label: 'Aduana Imp.',     color: '#fef3c7', textColor: '#b45309' },
+  { value: 'transporte_destino', label: 'Transp. Destino', color: '#dbeafe', textColor: '#1a6fb5' },
+  { value: 'descarga',           label: 'Descarga',        color: '#d1fae5', textColor: '#047857' },
+]
+
+function handleFileSelect(event) {
+  const file = event.target.files[0]
+  if (!file) return
+  emit('upload-document', props.shipment.id, { name: file.name, ready: true })
+  event.target.value = ''
+}
 </script>
 
 <template>
@@ -13,7 +43,7 @@ const props = defineProps({
         <span
           class="detail-status"
           :style="{ background: shipment.statusColor, color: shipment.statusTextColor }"
-        >{{ shipment.status }}</span>
+        >{{ shipment.statusLabel }}</span>
       </div>
       <div class="detail-header-right">
         <span class="detail-transport-badge">
@@ -40,6 +70,24 @@ const props = defineProps({
         <span class="detail-incoterm" :style="{ background: shipment.incotermColor || '#1a6fb5' }">
           {{ shipment.incoterm }}
         </span>
+      </div>
+    </div>
+
+    <!-- Admin Status Control -->
+    <div v-if="role === 'admin'" class="detail-step-control">
+      <span class="detail-step-label">Estado:</span>
+      <div class="status-btn-row">
+        <button
+          v-for="opt in statusOptions"
+          :key="opt.value"
+          :class="['status-btn', { 'status-btn--active': shipment.status === opt.value }]"
+          :style="shipment.status === opt.value
+            ? { background: opt.color, color: opt.textColor, borderColor: opt.color }
+            : {}"
+          @click="$emit('update-status', shipment.id, opt.value)"
+        >
+          {{ opt.label }}
+        </button>
       </div>
     </div>
 
@@ -130,6 +178,37 @@ const props = defineProps({
           </div>
         </div>
 
+        <!-- Fechas del Envío -->
+        <div class="data-block">
+          <h3 class="detail-section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            Fechas del Envío
+          </h3>
+          <div class="data-grid">
+            <div class="data-item">
+              <span class="data-item-label">ETD (Salida Estimada)</span>
+              <span class="data-item-value">{{ formatDate(shipment.etd) }}</span>
+            </div>
+            <div class="data-item">
+              <span class="data-item-label">ETA (Llegada Estimada)</span>
+              <span class="data-item-value">{{ formatDate(shipment.eta) }}</span>
+            </div>
+            <div class="data-item">
+              <span class="data-item-label">ATD (Salida Real)</span>
+              <span class="data-item-value">{{ formatDate(shipment.atd) }}</span>
+            </div>
+            <div class="data-item">
+              <span class="data-item-label">ATA (Llegada Real)</span>
+              <span class="data-item-value">{{ formatDate(shipment.ata) }}</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Documentación -->
         <div class="data-block">
           <h3 class="detail-section-title">
@@ -142,18 +221,26 @@ const props = defineProps({
           <div class="docs-list">
             <div v-for="doc in shipment.documents" :key="doc.name" class="doc-item">
               <span class="doc-item-name">{{ doc.name }}</span>
-              <span :class="['doc-item-status', doc.ready ? 'doc-item-status--ready' : 'doc-item-status--pending']">
-                <!-- Check -->
-                <svg v-if="doc.ready" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-                <!-- Clock/pending -->
-                <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-              </span>
+              <div class="doc-item-actions">
+                <span :class="['doc-item-status', doc.ready ? 'doc-item-status--ready' : 'doc-item-status--pending']">
+                  <svg v-if="doc.ready" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                  <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </span>
+                <label class="doc-upload-btn" :title="'Subir ' + doc.name">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  <input type="file" style="display:none" @change="handleFileSelect($event)" />
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -225,6 +312,52 @@ const props = defineProps({
   font-size: 11px;
   font-weight: 700;
   color: #ffffff;
+}
+
+/* Step Control */
+.detail-step-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--page-bg);
+  border-radius: 8px;
+}
+
+.detail-step-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.status-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.status-btn {
+  padding: 5px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-family);
+}
+
+.status-btn:hover:not(.status-btn--active) {
+  border-color: #1a6fb5;
+  color: #1a6fb5;
+}
+
+.status-btn--active {
+  font-weight: 700;
+  border-width: 2px;
 }
 
 /* Client & Route */
@@ -468,5 +601,31 @@ const props = defineProps({
 .doc-item-status {
   display: flex;
   align-items: center;
+}
+
+.doc-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doc-upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--page-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.doc-upload-btn:hover {
+  border-color: #1a6fb5;
+  color: #1a6fb5;
+  background: #eff6ff;
 }
 </style>

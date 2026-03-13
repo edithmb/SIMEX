@@ -5,8 +5,8 @@ defineProps({
 
 const rolColors = {
     Administrador: { bg: '#dbeafe', color: '#1a6fb5' },
-    Operador: { bg: '#e5e7eb', color: '#4b5563' },
-    Cliente: { bg: '#e5e7eb', color: '#4b5563' },
+    Operador: { bg: '#e5e7eb', color: '#6b7280' },
+    Cliente: { bg: '#d1fae5', color: '#047857' },
 }
 
 const statusColors = {
@@ -16,16 +16,28 @@ const statusColors = {
 
 const avatarColors = ['#1a6fb5', '#047857', '#b45309', '#6d28d9', '#be185d']
 
-function getRolStyle(rol) {
-    return rolColors[rol] || { bg: '#e5e7eb', color: '#6b7280' }
+function getRolStyle(roleName) {
+    return rolColors[roleName] || { bg: '#e5e7eb', color: '#6b7280' }
 }
 
-function getStatusStyle(status) {
-    return statusColors[status] || { bg: '#e5e7eb', color: '#6b7280' }
+function getStatusStyle(isActive) {
+    return isActive ? statusColors['Activo'] : statusColors['Inactivo']
+}
+
+function getStatusLabel(isActive) {
+    return isActive ? 'Activo' : 'Inactivo'
 }
 
 function getAvatarColor(i) {
     return avatarColors[i % avatarColors.length]
+}
+
+function getInitials(u) {
+    return (u.first_name?.[0] || '') + (u.last_name?.[0] || '')
+}
+
+function getFullName(u) {
+    return u.first_name + ' ' + u.last_name
 }
 </script>
 
@@ -35,33 +47,39 @@ function getAvatarColor(i) {
             <thead>
                 <tr>
                     <th>Usuario</th>
+                    <th>Teléfono</th>
                     <th>Rol</th>
+                    <th>Cliente Asociado</th>
                     <th>Estado</th>
                     <th>Último Acceso</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(u, i) in usuarios" :key="u.email">
+                <tr v-for="(u, i) in usuarios" :key="u.id">
                     <td>
                         <div class="user-cell">
-                            <div class="user-avatar" :style="{ background: getAvatarColor(i) }">{{ u.initial }}</div>
+                            <div class="user-avatar" :style="{ background: getAvatarColor(i) }">{{ getInitials(u) }}</div>
                             <div class="user-info">
-                                <span class="user-name">{{ u.name }}</span>
+                                <span class="user-name">{{ getFullName(u) }}</span>
                                 <span class="user-email">{{ u.email }}</span>
                             </div>
                         </div>
                     </td>
+                    <td><span class="user-phone">{{ u.phone_number }}</span></td>
                     <td>
                         <span class="user-badge"
-                            :style="{ background: getRolStyle(u.rol).bg, color: getRolStyle(u.rol).color }">
-                            {{ u.rol }}
+                            :style="{ background: getRolStyle(u.roleName).bg, color: getRolStyle(u.roleName).color }">
+                            {{ u.roleName }}
                         </span>
                     </td>
                     <td>
+                        <span class="user-client">{{ u.clientName || '—' }}</span>
+                    </td>
+                    <td>
                         <span class="user-badge"
-                            :style="{ background: getStatusStyle(u.status).bg, color: getStatusStyle(u.status).color }">
-                            {{ u.status }}
+                            :style="{ background: getStatusStyle(u.is_active).bg, color: getStatusStyle(u.is_active).color }">
+                            {{ getStatusLabel(u.is_active) }}
                         </span>
                     </td>
                     <td><span class="user-access">{{ u.lastAccess }}</span></td>
@@ -77,7 +95,7 @@ function getAvatarColor(i) {
                     </td>
                 </tr>
                 <tr v-if="usuarios.length === 0">
-                    <td colspan="5" class="user-empty">No se encontraron usuarios.</td>
+                    <td colspan="7" class="user-empty">No se encontraron usuarios.</td>
                 </tr>
             </tbody>
         </table>
@@ -163,12 +181,24 @@ function getAvatarColor(i) {
     color: var(--text-muted);
 }
 
+.user-phone {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
 .user-badge {
     display: inline-block;
     padding: 3px 12px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
+    white-space: nowrap;
+}
+
+.user-client {
+    font-size: 13px;
+    color: var(--text-secondary);
     white-space: nowrap;
 }
 
