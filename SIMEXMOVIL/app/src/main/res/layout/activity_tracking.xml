@@ -1,6 +1,265 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F4F7FB">
 
+    <View
+        android:id="@+id/fondoCabecera"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:background="#90A93E"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/btnVolver"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_bajar"
+        app:tint="#FFFFFF"
+        android:rotation="90"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvTituloCabecera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Detalles de la orden"
+        android:textColor="#E0F0B0"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@id/tvOrderId"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tvOrderId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="ORD2355"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/btnVolver"
+        app:layout_constraintBottom_toBottomOf="@id/btnVolver"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:cardBackgroundColor="#3B5F8F"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
+        app:layout_constraintTop_toBottomOf="@id/tvOrderId"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tvBadgeEstadoGeneral"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:text="EN TRANSITO"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:drawableStartCompat="@drawable/ic_barco"
+            android:drawablePadding="6dp"
+            app:drawableTint="#FFFFFF" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/fondoCabecera"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="20dp"
+                        android:gravity="center">
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Origen" android:textSize="12sp" android:textColor="#90A93E" android:textStyle="bold"/>
+                            <TextView android:id="@+id/tvOrigenPrincipal" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Barcelona" android:textColor="#1A1A1A" android:textSize="18sp" android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="España" android:textSize="12sp" android:textColor="#7A7A7A"/>
+                        </LinearLayout>
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" ⟶ " android:textSize="24sp" android:textColor="#DDE2E8"/>
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Destino" android:textSize="12sp" android:textColor="#90A93E" android:textStyle="bold"/>
+                            <TextView android:id="@+id/tvDestinoPrincipal" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Shanghai" android:textColor="#1A1A1A" android:textSize="18sp" android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="China" android:textSize="12sp" android:textColor="#7A7A7A"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F0F3F8"
+                        android:layout_marginHorizontal="20dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="16dp"
+                        android:baselineAligned="false">
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Peso" android:textSize="12sp" android:textColor="#7A7A7A" app:drawableStartCompat="@drawable/ic_caja" android:drawablePadding="6dp" app:drawableTint="#90A93E"/>
+                            <TextView android:id="@+id/tvPesoInfo" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="2.340 kg" android:textColor="#1A1A1A" android:textStyle="bold" android:textSize="14sp" android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Volumen" android:textSize="12sp" android:textColor="#7A7A7A" app:drawableStartCompat="@drawable/ic_cubo" android:drawablePadding="6dp" app:drawableTint="#90A93E"/>
+                            <TextView android:id="@+id/tvVolumenInfo" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="12 m³" android:textColor="#1A1A1A" android:textStyle="bold" android:textSize="14sp" android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Llegada est." android:textSize="12sp" android:textColor="#7A7A7A" app:drawableStartCompat="@drawable/ic_reloj" android:drawablePadding="6dp" app:drawableTint="#90A93E"/>
+                            <TextView android:id="@+id/tvEtaInfo" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="25 Mar 2026" android:textColor="#1A1A1A" android:textStyle="bold" android:textSize="14sp" android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imgAgente"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="#7493B9"
+                    app:shapeAppearanceOverlay="@style/EstiloCirculo"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:id="@+id/tvNombreAgente"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    tools:text="Federico Peluche"
+                    android:textColor="#1A1A1A"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toEndOf="@id/imgAgente"
+                    app:layout_constraintTop_toTopOf="@id/imgAgente"
+                    app:layout_constraintBottom_toTopOf="@id/tvRolAgente"/>
+
+                <TextView
+                    android:id="@+id/tvRolAgente"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Agente comercial"
+                    android:textColor="#7A7A7A"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="@id/tvNombreAgente"
+                    app:layout_constraintTop_toBottomOf="@id/tvNombreAgente"
+                    app:layout_constraintBottom_toBottomOf="@id/imgAgente"/>
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/btnChatAgente"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="#90A93E"
+                    android:src="@drawable/ic_chat"
+                    android:padding="12dp"
+                    app:tint="#FFFFFF"
+                    app:shapeAppearanceOverlay="@style/EstiloCirculo"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#DDE2E8" android:layout_marginVertical="20dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_gris"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Descripción" android:textStyle="bold" android:textColor="#1A1A1A" android:layout_marginBottom="8dp"/>
+                <TextView android:id="@+id/tvDescripcion" android:layout_width="match_parent" android:layout_height="wrap_content" tools:text="Transport aeri. Recollida a Madrid, flete aeri Madrid-Chicago, despatx duaner a destinació i lliurament." android:textColor="#555555" android:textSize="14sp"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Historial de seguimiento"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#1A1A1A"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="16dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvLineaTiempo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                tools:itemCount="4"
+                tools:listitem="@layout/item_timeline" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDescargarPDF"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_marginTop="32dp"
+                android:text="Descargar PDF"
+                android:textColor="#3B5F8F"
+                app:backgroundTint="#FFFFFF"
+                app:strokeColor="#3B5F8F"
+                app:strokeWidth="2dp"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGestionarEntrega"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="32dp"
+                android:text="Gestionar entrega"
+                app:backgroundTint="#90A93E"
+                app:cornerRadius="12dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
