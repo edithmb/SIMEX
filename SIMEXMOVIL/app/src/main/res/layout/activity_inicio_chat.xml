@@ -33,7 +33,6 @@
         android:layout_marginHorizontal="40dp"
         android:layout_marginTop="24dp"
         android:background="@drawable/bg_caja_blanca"
-        android:drawableStart="@drawable/ic_search"
         android:drawablePadding="12dp"
         android:hint="Buscar chat"
         android:paddingHorizontal="16dp"

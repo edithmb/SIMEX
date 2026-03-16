@@ -3,10 +3,10 @@ package com.example.simex_movil
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 
-class FormActivity: AppCompatActivity() {
+class HistoryRequestActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_history_offers)
+        setContentView(R.layout.activity_history_request)
 
     }
 }

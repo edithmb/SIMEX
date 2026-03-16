@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F4F7FB">
+
+    <View
+        android:id="@+id/fondoCabecera"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:background="#90A93E"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/btnVolver"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_volver"
+        app:tint="#FFFFFF"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Detalle propuesta"
+        android:textColor="#E0F0B0"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@id/tvPropuestaId"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tvPropuestaId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="PRO-2024-008"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/btnVolver"
+        app:layout_constraintBottom_toBottomOf="@id/btnVolver"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/fondoCabecera"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#3B5F8F" app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="-40dp"> <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingVertical="32dp">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Importe total" android:textColor="#B0C4DE" android:textSize="14sp"/>
+                <TextView android:id="@+id/tvImporteTotal" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="3.200 EUR" android:textColor="#FFFFFF" android:textSize="36sp" android:textStyle="bold" android:layout_marginVertical="8dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="IVA no incluido" android:textColor="#B0C4DE" android:textSize="12sp"/>
+            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="20dp" android:gravity="center">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="● ORIGEN" android:textSize="10sp" android:textColor="#3B5F8F" android:textStyle="bold"/>
+                        <TextView android:id="@+id/tvOrigenPrincipal" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Madrid" android:textColor="#1A1A1A" android:textSize="16sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="España" android:textSize="12sp" android:textColor="#7A7A7A"/>
+                    </LinearLayout>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" ⟶ " android:textSize="24sp" android:textColor="#DDE2E8"/>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="DESTINO ●" android:textSize="10sp" android:textColor="#90A93E" android:textStyle="bold"/>
+                        <TextView android:id="@+id/tvDestinoPrincipal" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Chicago" android:textColor="#1A1A1A" android:textSize="16sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="EUA" android:textSize="12sp" android:textColor="#7A7A7A"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MERCANCÍA" android:textSize="12sp" android:textColor="#A0A0A0" android:layout_marginBottom="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Muebles de diseño - Exportación" android:textSize="14sp" android:textColor="#1A1A1A" android:layout_marginBottom="16dp"/>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F0F3F8" android:layout_marginBottom="16dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="DETALLES DEL SERVICIO" android:textSize="12sp" android:textColor="#A0A0A0" android:layout_marginBottom="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="Transporte aéreo. Recogida en Madrid, flete aéreo Madrid-Chicago, despacho aduanero en destino y entrega." android:textSize="14sp" android:textColor="#555555"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="16dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CREADA" android:textSize="10sp" android:textColor="#A0A0A0" app:drawableStartCompat="@drawable/ic_reloj" android:drawablePadding="4dp" app:drawableTint="#A0A0A0"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="15/02/2024" android:textColor="#1A1A1A" android:textStyle="bold" android:textSize="14sp"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="end">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="VENCIMIENTO" android:textSize="10sp" android:textColor="#F57C00" app:drawableEndCompat="@drawable/ic_reloj" android:drawablePadding="4dp" app:drawableTint="#F57C00"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="01/03/2024" android:textColor="#D84315" android:textStyle="bold" android:textSize="14sp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDescargarPropuesta"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:text="Descargar propuesta (PDF)"
+                android:textColor="#3B5F8F"
+                app:strokeColor="#3B5F8F"
+                app:cornerRadius="8dp"
+                app:icon="@drawable/ic_bajar"
+                app:iconTint="#3B5F8F"
+                android:layout_marginBottom="16dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="32dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnRechazar"
+                    android:layout_width="0dp"
+                    android:layout_height="55dp"
+                    android:layout_weight="1"
+                    android:text="Rechazar"
+                    android:textColor="@color/white"
+                    app:backgroundTint="#A8342C"
+                    app:cornerRadius="8dp"
+                    app:elevation="0dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAceptar"
+                    android:layout_width="0dp"
+                    android:layout_height="55dp"
+                    android:layout_weight="1.5" android:text="Aceptar propuesta"
+                    app:backgroundTint="#90A93E" app:cornerRadius="8dp"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
