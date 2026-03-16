@@ -2,19 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Airport;
+use App\Models\Carrier;
+use App\Models\City;
+use App\Models\ContainerType;
+use App\Models\Country;
+use App\Models\Port;
+use App\Models\ShippingLine;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class DatosMaestros extends Controller
 {
     private array $tableMap = [
-        'countries'      => \App\Models\Country::class,
-        'cities'         => \App\Models\City::class,
-        'ports'          => \App\Models\Port::class,
-        'airports'       => \App\Models\Airport::class,
-        'shipping_lines' => \App\Models\ShippingLine::class,
-        'carriers'       => \App\Models\Carrier::class,
-        'container_types'=> \App\Models\ContainerType::class,
+        'countries'      => Country::class,
+        'cities'         => City::class,
+        'ports'          => Port::class,
+        'airports'       => Airport::class,
+        'shipping_lines' => ShippingLine::class,
+        'carriers'       => Carrier::class,
+        'container_types'=> ContainerType::class,
     ];
 
     private array $validationRules = [
