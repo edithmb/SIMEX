@@ -8,15 +8,25 @@ const props = defineProps({
 const emit = defineEmits(['close', 'submit'])
 
 const form = reactive({
-    name: '',
-    cif: '',
-    city: '',
+    company_name: '',
+    vat_number: '',
+    address: '',
+    country: '',
+    postal_code: '',
+    contact_name: '',
+    email: '',
+    phone: '',
 })
 
 function handleClose() {
-    form.name = ''
-    form.cif = ''
-    form.city = ''
+    form.company_name = ''
+    form.vat_number = ''
+    form.address = ''
+    form.country = ''
+    form.postal_code = ''
+    form.contact_name = ''
+    form.email = ''
+    form.phone = ''
     emit('close')
 }
 
@@ -47,18 +57,58 @@ function handleOverlayClick(e) {
                     </div>
 
                     <div class="modal-body">
-                        <div class="modal-field">
-                            <label class="modal-label">Nombre de la empresa</label>
-                            <input v-model="form.name" type="text" class="modal-input"
-                                placeholder="Nombre de la empresa" />
-                        </div>
-                        <div class="modal-field">
-                            <label class="modal-label">CIF</label>
-                            <input v-model="form.cif" type="text" class="modal-input" placeholder="Ej. B12345678" />
-                        </div>
-                        <div class="modal-field">
-                            <label class="modal-label">Ciudad / Localidad</label>
-                            <input v-model="form.city" type="text" class="modal-input" placeholder="Ciudad" />
+                        <div class="modal-grid">
+                            <div class="modal-field">
+                                <label class="modal-label">Nombre de Empresa</label>
+                                <input v-model="form.company_name" type="text" class="modal-input"
+                                    placeholder="Nombre de la empresa" />
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">NIF/CIF</label>
+                                <input v-model="form.vat_number" type="text" class="modal-input"
+                                    placeholder="Ej. B12345678" />
+                            </div>
+                            <div class="modal-field modal-field--full">
+                                <label class="modal-label">Dirección</label>
+                                <input v-model="form.address" type="text" class="modal-input"
+                                    placeholder="Dirección completa" />
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">País</label>
+                                <select v-model="form.country" class="modal-input">
+                                    <option value="" disabled>Seleccionar país</option>
+                                    <option value="España">España</option>
+                                    <option value="Francia">Francia</option>
+                                    <option value="Alemania">Alemania</option>
+                                    <option value="Italia">Italia</option>
+                                    <option value="Portugal">Portugal</option>
+                                    <option value="Reino Unido">Reino Unido</option>
+                                    <option value="Países Bajos">Países Bajos</option>
+                                    <option value="China">China</option>
+                                    <option value="EEUU">EEUU</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">Código Postal</label>
+                                <input v-model="form.postal_code" type="text" class="modal-input"
+                                    placeholder="Ej. 28001" />
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">Persona de Contacto</label>
+                                <input v-model="form.contact_name" type="text" class="modal-input"
+                                    placeholder="Nombre completo" />
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">Email</label>
+                                <input v-model="form.email" type="email" class="modal-input"
+                                    placeholder="correo@empresa.com" />
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">Teléfono</label>
+                                <input v-model="form.phone" type="text" class="modal-input"
+                                    placeholder="+34 XXX XXX XXX" />
+                            </div>
                         </div>
                     </div>
 
@@ -88,7 +138,7 @@ function handleOverlayClick(e) {
     background: #ffffff;
     border-radius: 14px;
     width: 100%;
-    max-width: 480px;
+    max-width: 580px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
@@ -125,8 +175,11 @@ function handleOverlayClick(e) {
 
 .modal-body {
     padding: 20px 28px;
-    display: flex;
-    flex-direction: column;
+}
+
+.modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 16px;
 }
 
@@ -134,6 +187,10 @@ function handleOverlayClick(e) {
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+.modal-field--full {
+    grid-column: span 2;
 }
 
 .modal-label {

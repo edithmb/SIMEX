@@ -1,7 +1,10 @@
 <script setup>
-defineProps({
+const props = defineProps({
     presupuestos: { type: Array, required: true },
+    role: { type: String, default: 'admin' },
 })
+
+const emit = defineEmits(['aprobar', 'rechazar'])
 
 const incotermColors = {
     CIF: { bg: '#dbeafe', color: '#1a6fb5' },
@@ -10,14 +13,16 @@ const incotermColors = {
     FOB: { bg: '#ede9fe', color: '#6d28d9' },
     DAP: { bg: '#fce7f3', color: '#be185d' },
     CIP: { bg: '#e0e7ff', color: '#4338ca' },
+    CFR: { bg: '#f0fdf4', color: '#15803d' },
+    CPT: { bg: '#fdf4ff', color: '#a21caf' },
+    DPU: { bg: '#fff7ed', color: '#c2410c' },
 }
 
 const statusColors = {
-    Caducado: { bg: '#fef3c7', color: '#b45309' },
-    Enviado: { bg: '#dbeafe', color: '#1a6fb5' },
-    Rechazado: { bg: '#fee2e2', color: '#dc2626' },
-    Aceptado: { bg: '#d1fae5', color: '#047857' },
     Borrador: { bg: '#e5e7eb', color: '#6b7280' },
+    Enviado: { bg: '#dbeafe', color: '#1a6fb5' },
+    Aceptado: { bg: '#d1fae5', color: '#047857' },
+    Rechazado: { bg: '#fee2e2', color: '#dc2626' },
 }
 
 function getIncotermStyle(incoterm) {
@@ -26,6 +31,10 @@ function getIncotermStyle(incoterm) {
 
 function getStatusStyle(status) {
     return statusColors[status] || { bg: '#e5e7eb', color: '#6b7280' }
+}
+
+function formatPrice(price) {
+    return '€' + price.toLocaleString('es-ES')
 }
 </script>
 
@@ -37,65 +46,51 @@ function getStatusStyle(status) {
                     <th>Referencia</th>
                     <th>Solicitud</th>
                     <th>Cliente</th>
-                    <th>Ruta</th>
                     <th>Incoterm</th>
-                    <th>Transp.</th>
-                    <th>Valor</th>
-                    <th>Estado</th>
+                    <th>Puerto Origen</th>
+                    <th>Puerto Destino</th>
+                    <th>Contenedor</th>
+                    <th>Precio</th>
                     <th>Validez</th>
+                    <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="p in presupuestos" :key="p.ref">
-                    <td><span class="pres-ref">{{ p.ref }}</span></td>
-                    <td><span class="pres-sol">{{ p.solicitud }}</span></td>
-                    <td><span class="pres-client">{{ p.client }}</span></td>
-                    <td><span class="pres-route">{{ p.routeFrom }} → {{ p.routeTo }}</span></td>
+                <tr v-for="p in presupuestos" :key="p.id">
+                    <td><span class="pres-ref">{{ p.reference }}</span></td>
+                    <td><span class="pres-sol">SOL-2024-{{ String(p.client_request_id).padStart(3, '0') }}</span></td>
+                    <td><span class="pres-client">{{ p.clientName }}</span></td>
                     <td>
                         <span class="pres-incoterm"
                             :style="{ background: getIncotermStyle(p.incoterm).bg, color: getIncotermStyle(p.incoterm).color }">
                             {{ p.incoterm }}
                         </span>
                     </td>
-                    <td>
-                        <span class="pres-transport">
-                            <svg v-if="p.transport === 'ship'" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1 .6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" />
-                                <path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 7.76" />
-                                <path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6" />
-                                <path d="M12 10V2" />
-                            </svg>
-                            <svg v-else-if="p.transport === 'plane'" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path
-                                    d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
-                            </svg>
-                            <svg v-else-if="p.transport === 'truck'" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <rect x="1" y="3" width="15" height="13" rx="1" />
-                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-                                <circle cx="5.5" cy="18.5" r="2.5" />
-                                <circle cx="18.5" cy="18.5" r="2.5" />
-                            </svg>
-                        </span>
-                    </td>
-                    <td><span class="pres-value">{{ p.value }}</span></td>
+                    <td><span class="pres-port">{{ p.origin_port }}</span></td>
+                    <td><span class="pres-port">{{ p.destination_port }}</span></td>
+                    <td><span class="pres-container">{{ p.container_type }}</span></td>
+                    <td><span class="pres-value">{{ formatPrice(p.price) }}</span></td>
+                    <td><span class="pres-validity">{{ p.valid_until }}</span></td>
                     <td>
                         <span class="pres-status"
                             :style="{ background: getStatusStyle(p.status).bg, color: getStatusStyle(p.status).color }">
                             {{ p.status }}
                         </span>
                     </td>
-                    <td><span class="pres-validity">{{ p.validity }}</span></td>
-                    <td><!-- placeholder for future actions --></td>
+                    <td>
+                        <div v-if="role === 'cliente' && p.status === 'Enviado'" class="pres-actions">
+                            <button class="pres-action-btn pres-action-btn--approve" @click="emit('aprobar', p)">
+                                Aprobar
+                            </button>
+                            <button class="pres-action-btn pres-action-btn--reject" @click="emit('rechazar', p)">
+                                Rechazar
+                            </button>
+                        </div>
+                    </td>
                 </tr>
                 <tr v-if="presupuestos.length === 0">
-                    <td colspan="10" class="pres-empty">No se encontraron presupuestos con los filtros aplicados.</td>
+                    <td colspan="11" class="pres-empty">No se encontraron presupuestos con los filtros aplicados.</td>
                 </tr>
             </tbody>
         </table>
@@ -164,12 +159,6 @@ function getStatusStyle(status) {
     color: var(--text-primary);
 }
 
-.pres-route {
-    color: var(--text-secondary);
-    font-size: 13px;
-    white-space: nowrap;
-}
-
 .pres-incoterm {
     display: inline-block;
     padding: 3px 10px;
@@ -179,11 +168,16 @@ function getStatusStyle(status) {
     white-space: nowrap;
 }
 
-.pres-transport {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.pres-port {
     color: var(--text-secondary);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.pres-container {
+    color: var(--text-secondary);
+    font-size: 13px;
+    white-space: nowrap;
 }
 
 .pres-value {
@@ -212,5 +206,40 @@ function getStatusStyle(status) {
     padding: 40px 14px !important;
     color: var(--text-muted);
     font-size: 14px;
+}
+
+.pres-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.pres-action-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.pres-action-btn--approve {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.pres-action-btn--approve:hover {
+    background: #047857;
+    color: #ffffff;
+}
+
+.pres-action-btn--reject {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.pres-action-btn--reject:hover {
+    background: #dc2626;
+    color: #ffffff;
 }
 </style>

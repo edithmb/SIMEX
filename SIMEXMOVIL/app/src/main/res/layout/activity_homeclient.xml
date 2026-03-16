@@ -97,7 +97,6 @@ android:background="@color/white">
             android:hint="Buscar"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:drawableEnd="@drawable/ic_buscar"
             android:drawableTint="@color/green"
             android:layout_marginBottom="16dp" />
 
