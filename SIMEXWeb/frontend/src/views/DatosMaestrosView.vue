@@ -3,19 +3,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import MaestroNav from '@/components/datos-maestros/MaestroNav.vue'
 import MaestroTable from '@/components/datos-maestros/MaestroTable.vue'
 import MaestroFormModal from '@/components/datos-maestros/MaestroFormModal.vue'
-
-// ─── API ──────────────────────────────────────────────────────────────────────
-
-const API = '/api/datos-maestros'
-
-async function apiFetch(method, path, body) {
-  const opts = { method, headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } }
-  if (body) opts.body = JSON.stringify(body)
-  const res = await fetch(API + path, opts)
-  if (res.status === 204) return null
-  if (!res.ok) throw new Error(`Error ${res.status}`)
-  return res.json()
-}
+import { apiFetch } from '@/api'
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 
@@ -32,9 +20,9 @@ const tablaRefMap = {
   ciudades:       { ref: ciudades,       tabla: 'cities' },
   puertos:        { ref: puertos,        tabla: 'ports' },
   aeropuertos:    { ref: aeropuertos,    tabla: 'airports' },
-  navieras:       { ref: navieras,       tabla: 'shipping_lines' },
+  navieras:       { ref: navieras,       tabla: 'shipping-lines' },
   transportistas: { ref: transportistas, tabla: 'carriers' },
-  contenedores:   { ref: contenedores,   tabla: 'container_types' },
+  contenedores:   { ref: contenedores,   tabla: 'container-types' },
 }
 
 async function fetchTabla(key) {
