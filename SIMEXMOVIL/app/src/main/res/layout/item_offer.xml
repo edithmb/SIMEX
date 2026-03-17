@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/imgIconoTransporte"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="#F4F7FB"
+            android:padding="10dp"
+            tools:src="@drawable/ic_barco"
+            app:tint="#3B5F8F"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvPropuestaId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            tools:text="PRO-2024-015"
+            android:textColor="#1A1A1A"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/imgIconoTransporte"
+            app:layout_constraintTop_toTopOf="@id/imgIconoTransporte" />
+
+        <TextView
+            android:id="@+id/tvRuta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Barcelona → Sydney"
+            android:textColor="#7A7A7A"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@id/tvPropuestaId"
+            app:layout_constraintTop_toBottomOf="@id/tvPropuestaId" />
+
+        <TextView
+            android:id="@+id/tvBadgeEstado"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_etiqueta_verde"
+            android:backgroundTint="#FFF3E0" android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            tools:text="● Pendiente"
+            android:textColor="#F57C00"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvPropuestaId"
+            app:layout_constraintBottom_toBottomOf="@id/tvPropuestaId"/>
+
+        <TextView
+            android:id="@+id/tvProducto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Productos químicos industriales - 3.500 kg"
+            android:textColor="#555555"
+            android:textSize="13sp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/imgIconoTransporte"/>
+
+        <TextView
+            android:id="@+id/tvPrecio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="€ 8.750 EUR"
+            android:textColor="#3B5F8F"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvProducto"/>
+
+        <TextView
+            android:id="@+id/tvVencimiento"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Venc.: 15/03/2024"
+            android:textColor="#A0A0A0"
+            android:textSize="11sp"
+            app:drawableStartCompat="@drawable/ic_calendar"
+            android:drawablePadding="4dp"
+            app:drawableTint="#A0A0A0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvPrecio"
+            app:layout_constraintBottom_toBottomOf="@id/tvPrecio"/>
+
+        <LinearLayout
+            android:id="@+id/layoutAvisoPendiente"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/green"
+            android:padding="8dp"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tvPrecio">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text= "Pendiente de tu respuesta"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

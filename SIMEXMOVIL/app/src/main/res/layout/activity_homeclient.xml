@@ -136,7 +136,7 @@ android:background="@color/white">
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:nestedScrollingEnabled="false"
-            />
+            tools:listitem="@layout/item_tracking" tools:itemCount="3" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
 

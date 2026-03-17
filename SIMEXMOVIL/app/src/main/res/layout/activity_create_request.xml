@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F4F7FB">
+
+    <View
+        android:id="@+id/fondoCabecera"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="#90A93E"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/btnVolver"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_volver"
+        app:tint="#FFFFFF"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvTituloPantalla"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nueva Solicitud"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/btnVolver"
+        app:layout_constraintBottom_toBottomOf="@id/btnVolver"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/fondoCabecera"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Datos de facturación y contacto"
+                android:textColor="#1A1A1A"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nombre de la compañía"
+                        android:textSize="12sp"
+                        android:textColor="#7A7A7A"
+                        android:layout_marginBottom="4dp"/>
+                    <EditText
+                        android:id="@+id/inputCompania"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_caja_texto"
+                        android:hint="Ej. Peluche Corporations"
+                        android:paddingHorizontal="16dp"
+                        android:inputType="textPersonName"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="CIF / Tax ID"
+                        android:textSize="12sp"
+                        android:textColor="#7A7A7A"
+                        android:layout_marginBottom="4dp"/>
+                    <EditText
+                        android:id="@+id/inputCif"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_caja_texto"
+                        android:hint="Ej. B12345678"
+                        android:paddingHorizontal="16dp"
+                        android:inputType="text"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Email de contacto"
+                        android:textSize="12sp"
+                        android:textColor="#7A7A7A"
+                        android:layout_marginBottom="4dp"/>
+                    <EditText
+                        android:id="@+id/inputEmailContacto"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_caja_texto"
+                        android:hint="contacto@empresa.com"
+                        android:paddingHorizontal="16dp"
+                        android:inputType="textEmailAddress"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ruta y Operación"
+                android:textColor="#1A1A1A"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp"/>
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleTipoOperacion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:checkedButton="@id/btnImportacion"
+                android:layout_marginBottom="12dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnImportacion"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="55dp"
+                    android:text="Importación"
+                    app:strokeColor="#90A93E"
+                    android:textColor="#1A1A1A"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnExportacion"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="55dp"
+                    android:text="Exportación"
+                    app:strokeColor="#90A93E"
+                    android:textColor="#1A1A1A"/>
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Origen" android:textSize="12sp"
+                        android:textColor="#7A7A7A" android:layout_marginBottom="4dp"/>
+                    <EditText
+                        android:id="@+id/inputOrigen"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_caja_texto"
+                        android:hint="Ej. Shenzhen, China"
+                        android:paddingHorizontal="16dp"
+                        android:inputType="textPostalAddress"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Destino"
+                        android:textSize="12sp"
+                        android:textColor="#7A7A7A"
+                        android:layout_marginBottom="4dp"/>
+                    <EditText
+                        android:id="@+id/inputDestino"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_caja_texto"
+                        android:hint="Ej. Barcelona, España"
+                        android:paddingHorizontal="16dp"
+                        android:inputType="textPostalAddress"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Código Postal (Destino)"
+                        android:textSize="12sp"
+                        android:textColor="#7A7A7A"
+                        android:layout_marginBottom="4dp"/>
+                    <EditText
+                        android:id="@+id/inputCodigoPostal"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_caja_texto"
+                        android:hint="Ej. 08012"
+                        android:paddingHorizontal="16dp"
+                        android:inputType="textPostalAddress"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Detalles de la carga"
+                android:textColor="#1A1A1A"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="¿Qué vas a enviar?"
+                        android:textSize="12sp"
+                        android:textColor="#7A7A7A"
+                        android:layout_marginBottom="4dp"/>
+                    <EditText
+                        android:id="@+id/inputDescripcion"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_caja_texto"
+                        android:hint="Ej. Componentes electrónicos"
+                        android:paddingHorizontal="16dp"
+                        android:inputType="text"
+                        android:layout_marginBottom="16dp"/>
+
+                    <TextView android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tipo de contenedor"
+                        android:textSize="12sp"
+                        android:textColor="#7A7A7A"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        app:boxStrokeColor="#90A93E"
+                        app:boxCornerRadiusTopStart="8dp"
+                        app:boxCornerRadiusTopEnd="8dp"
+                        app:boxCornerRadiusBottomStart="8dp"
+                        app:boxCornerRadiusBottomEnd="8dp"
+                        android:layout_marginBottom="16dp">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/dropdownContenedor"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:paddingHorizontal="16dp"
+                            android:inputType="none"
+                            android:hint="Selecciona una opción"
+                            android:textColor="#1A1A1A" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical"
+                            android:layout_marginEnd="8dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Peso (Kg)"
+                                android:textSize="12sp"
+                                android:textColor="#7A7A7A"
+                                android:layout_marginBottom="4dp"/>
+                            <EditText
+                                android:id="@+id/inputPeso"
+                                android:layout_width="match_parent"
+                                android:layout_height="50dp"
+                                android:background="@drawable/bg_caja_texto"
+                                android:hint="Ej. 1500"
+                                android:paddingHorizontal="16dp"
+                                android:inputType="numberDecimal"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="8dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Volumen (m³)"
+                                android:textSize="12sp"
+                                android:textColor="#7A7A7A"
+                                android:layout_marginBottom="4dp"/>
+                            <EditText
+                                android:id="@+id/inputVolumen"
+                                android:layout_width="match_parent"
+                                android:layout_height="50dp"
+                                android:background="@drawable/bg_caja_texto"
+                                android:hint="Ej. 12.5"
+                                android:paddingHorizontal="16dp"
+                                android:inputType="numberDecimal"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Información Adicional"
+                android:textColor="#1A1A1A"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="32dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Fecha disponible para recogida"
+                        android:textSize="12sp"
+                        android:textColor="#7A7A7A"
+                        android:layout_marginBottom="4dp"/>
+                    <EditText
+                        android:id="@+id/inputFecha"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_caja_texto"
+                        android:hint="DD/MM/AAAA"
+                        android:paddingHorizontal="16dp"
+                        android:focusable="false"
+                        android:clickable="true"
+                        app:drawableEndCompat="@drawable/ic_calendar"
+                        app:drawableTint="#90A93E"
+                        android:layout_marginBottom="16dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Comentarios o peticiones especiales"
+                        android:textSize="12sp"
+                        android:textColor="#7A7A7A"
+                        android:layout_marginBottom="4dp"/>
+                    <EditText
+                        android:id="@+id/inputComentarios"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:background="@drawable/bg_caja_texto"
+                        android:hint="Ej. La mercancía requiere control de temperatura..."
+                        android:padding="16dp"
+                        android:gravity="top|start"
+                        android:inputType="textMultiLine"
+                        android:lines="4"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSolicitarCotizacion"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginBottom="24dp"
+                android:text="Solicitar Cotización"
+                android:textSize="16sp"
+                app:backgroundTint="#3B5F8F"
+                app:cornerRadius="12dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

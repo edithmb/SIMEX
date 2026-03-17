@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F7FA"> <ScrollView
+    android:background="#F4F7FA">
+    <ScrollView
     android:layout_width="match_parent"
     android:layout_height="0dp"
     android:scrollbars="none"
@@ -50,7 +51,7 @@
                 android:id="@+id/txv_documentation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Gestionar ofertas"
+                android:text="Historial"
                 android:textSize="14sp"
                 android:textColor="#333333"
                 android:paddingVertical="12dp"
@@ -129,7 +130,8 @@
             android:background="@drawable/bg_box_settings"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
-            android:layout_marginBottom="40dp"> <LinearLayout
+            android:layout_marginBottom="40dp">
+            <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
