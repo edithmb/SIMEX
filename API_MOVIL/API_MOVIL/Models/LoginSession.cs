@@ -17,7 +17,7 @@ public partial class LoginSession
 
     public DateTime? LoggedInAt { get; set; }
 
-    public DateTime LoggedOutAt { get; set; }
+    public DateTime? LoggedOutAt { get; set; }
 
     public DateTime TokenExpiresAt { get; set; }
 
