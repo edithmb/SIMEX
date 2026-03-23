@@ -29,11 +29,17 @@ public partial class Simex06Context : DbContext
 
     public virtual DbSet<ContainerType> ContainerTypes { get; set; }
 
+    public virtual DbSet<Conversation> Conversations { get; set; }
+
+    public virtual DbSet<ConversationParticipant> ConversationParticipants { get; set; }
+
     public virtual DbSet<Country> Countries { get; set; }
 
-    public virtual DbSet<Document> Documents { get; set; }
+    public virtual DbSet<DocumentType> DocumentTypes { get; set; }
 
     public virtual DbSet<Incoterm> Incoterms { get; set; }
+
+    public virtual DbSet<IncotermDocumentTemplate> IncotermDocumentTemplates { get; set; }
 
     public virtual DbSet<IncotermType> IncotermTypes { get; set; }
 
@@ -42,6 +48,16 @@ public partial class Simex06Context : DbContext
     public virtual DbSet<LoginSession> LoginSessions { get; set; }
 
     public virtual DbSet<LogisticsOperation> LogisticsOperations { get; set; }
+
+    public virtual DbSet<LogisticsOperationDocument> LogisticsOperationDocuments { get; set; }
+
+    public virtual DbSet<Message> Messages { get; set; }
+
+    public virtual DbSet<Migration> Migrations { get; set; }
+
+    public virtual DbSet<PersonalDocument> PersonalDocuments { get; set; }
+
+    public virtual DbSet<PersonalDocumentsType> PersonalDocumentsTypes { get; set; }
 
     public virtual DbSet<Port> Ports { get; set; }
 
@@ -55,7 +71,7 @@ public partial class Simex06Context : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=51.83.192.177;Database=simex06;User Id=simex06;Password=diversion2.0;Trusted_Connection=False;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=vps-5d4cfa08.vps.ovh.net;Database=simex06;User Id=simex06;Password=diversion2.0;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -73,7 +89,7 @@ public partial class Simex06Context : DbContext
                 .IsFixedLength()
                 .HasColumnName("code");
             entity.Property(e => e.Name)
-                .HasMaxLength(50)
+                .HasMaxLength(120)
                 .IsUnicode(false)
                 .HasColumnName("name");
 
@@ -334,6 +350,47 @@ public partial class Simex06Context : DbContext
                 .HasColumnName("type_name");
         });
 
+        modelBuilder.Entity<Conversation>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__conversa__3213E83F69F83BFA");
+
+            entity.ToTable("conversations");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Title)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("title");
+        });
+
+        modelBuilder.Entity<ConversationParticipant>(entity =>
+        {
+            entity.HasKey(e => new { e.ConversationId, e.UserId }).HasName("PK__conversa__DA859DEA342E7F1B");
+
+            entity.ToTable("conversation_participants");
+
+            entity.Property(e => e.ConversationId).HasColumnName("conversation_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.JoinedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("joined_at");
+
+            entity.HasOne(d => d.Conversation).WithMany(p => p.ConversationParticipants)
+                .HasForeignKey(d => d.ConversationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_participants_conversations");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ConversationParticipants)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_participants_users");
+        });
+
         modelBuilder.Entity<Country>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__countrie__3213E83F51590F8D");
@@ -347,47 +404,30 @@ public partial class Simex06Context : DbContext
                 .HasColumnName("name");
         });
 
-        modelBuilder.Entity<Document>(entity =>
+        modelBuilder.Entity<DocumentType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__document__3213E83F8F787577");
+            entity.HasKey(e => e.Id).HasName("PK__document__3213E83F70A14BFC");
 
-            entity.ToTable("documents");
+            entity.ToTable("document_types");
+
+            entity.HasIndex(e => e.Code, "UQ__document__357D4CF9163A2C4A").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("created_at");
-            entity.Property(e => e.DocumentTypeId).HasColumnName("document_type_id");
-            entity.Property(e => e.EncryptionKey)
-                .HasMaxLength(500)
+            entity.Property(e => e.Code)
+                .HasMaxLength(50)
                 .IsUnicode(false)
-                .HasColumnName("encryption_key");
-            entity.Property(e => e.EntityId).HasColumnName("entity_id");
-            entity.Property(e => e.EntityType)
-                .HasMaxLength(30)
-                .IsUnicode(false)
-                .HasColumnName("entity_type");
-            entity.Property(e => e.FileName)
+                .HasColumnName("code");
+            entity.Property(e => e.Description)
                 .HasMaxLength(255)
                 .IsUnicode(false)
-                .HasColumnName("file_name");
-            entity.Property(e => e.FilePath)
-                .HasMaxLength(500)
-                .IsUnicode(false)
-                .HasColumnName("file_path");
-            entity.Property(e => e.FileSizeBytes).HasColumnName("file_size_bytes");
-            entity.Property(e => e.IsEncrypted).HasColumnName("is_encrypted");
-            entity.Property(e => e.MimeType)
+                .HasColumnName("description");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.Name)
                 .HasMaxLength(100)
                 .IsUnicode(false)
-                .HasColumnName("mime_type");
-            entity.Property(e => e.UploadedBy).HasColumnName("uploaded_by");
-
-            entity.HasOne(d => d.UploadedByNavigation).WithMany(p => p.Documents)
-                .HasForeignKey(d => d.UploadedBy)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_documents_users");
+                .HasColumnName("name");
         });
 
         modelBuilder.Entity<Incoterm>(entity =>
@@ -399,6 +439,10 @@ public partial class Simex06Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.IncotermTypeId).HasColumnName("incoterm_type_id");
             entity.Property(e => e.OrderNum).HasColumnName("order_num");
+            entity.Property(e => e.Responsability)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("responsability");
             entity.Property(e => e.TrackingStepId).HasColumnName("tracking_step_id");
 
             entity.HasOne(d => d.IncotermType).WithMany(p => p.Incoterms)
@@ -410,6 +454,30 @@ public partial class Simex06Context : DbContext
                 .HasForeignKey(d => d.TrackingStepId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_incoterms_tracking_steps");
+        });
+
+        modelBuilder.Entity<IncotermDocumentTemplate>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__incoterm__3213E83FA4B0CC5B");
+
+            entity.ToTable("incoterm_document_templates");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.DocumentTypeId).HasColumnName("document_type_id");
+            entity.Property(e => e.IncotermId).HasColumnName("incoterm_id");
+            entity.Property(e => e.IsMandatory)
+                .HasDefaultValue(true)
+                .HasColumnName("is_mandatory");
+
+            entity.HasOne(d => d.DocumentType).WithMany(p => p.IncotermDocumentTemplates)
+                .HasForeignKey(d => d.DocumentTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Template_DocType");
+
+            entity.HasOne(d => d.Incoterm).WithMany(p => p.IncotermDocumentTemplates)
+                .HasForeignKey(d => d.IncotermId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Template_IncotermType");
         });
 
         modelBuilder.Entity<IncotermType>(entity =>
@@ -547,6 +615,155 @@ public partial class Simex06Context : DbContext
                 .HasConstraintName("FK_logistics_operations_offers");
         });
 
+        modelBuilder.Entity<LogisticsOperationDocument>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__logistic__3213E83FE23D8AF2");
+
+            entity.ToTable("logistics_operation_documents");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CustomName)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("custom_name");
+            entity.Property(e => e.DocumentTypeId).HasColumnName("document_type_id");
+            entity.Property(e => e.FileName)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("file_name");
+            entity.Property(e => e.FileUrl)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("file_url");
+            entity.Property(e => e.IsAdHoc)
+                .HasDefaultValue(false)
+                .HasColumnName("is_ad_hoc");
+            entity.Property(e => e.LogisticsOperationId).HasColumnName("logistics_operation_id");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasDefaultValue("PENDING")
+                .HasColumnName("status");
+            entity.Property(e => e.UploadedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("uploaded_at");
+
+            entity.HasOne(d => d.DocumentType).WithMany(p => p.LogisticsOperationDocuments)
+                .HasForeignKey(d => d.DocumentTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_OpDocs_DocType");
+
+            entity.HasOne(d => d.LogisticsOperation).WithMany(p => p.LogisticsOperationDocuments)
+                .HasForeignKey(d => d.LogisticsOperationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_OpDocs_LogisticsOp");
+        });
+
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__messages__3213E83F888D8B69");
+
+            entity.ToTable("messages");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Content)
+                .IsUnicode(false)
+                .HasColumnName("content");
+            entity.Property(e => e.ConversationId).HasColumnName("conversation_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.SenderId).HasColumnName("sender_id");
+
+            entity.HasOne(d => d.Conversation).WithMany(p => p.Messages)
+                .HasForeignKey(d => d.ConversationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_messages_conversations");
+
+            entity.HasOne(d => d.Sender).WithMany(p => p.Messages)
+                .HasForeignKey(d => d.SenderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_messages_users");
+        });
+
+        modelBuilder.Entity<Migration>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__migratio__3213E83F9FDD663F");
+
+            entity.ToTable("migrations");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Batch).HasColumnName("batch");
+            entity.Property(e => e.Migration1)
+                .HasMaxLength(255)
+                .HasColumnName("migration");
+        });
+
+        modelBuilder.Entity<PersonalDocument>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__document__3213E83F8F787577");
+
+            entity.ToTable("personal_documents");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.EncryptionKey)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("encryption_key");
+            entity.Property(e => e.EntityId).HasColumnName("entity_id");
+            entity.Property(e => e.EntityType)
+                .HasMaxLength(30)
+                .IsUnicode(false)
+                .HasColumnName("entity_type");
+            entity.Property(e => e.FileName)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("file_name");
+            entity.Property(e => e.FilePath)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("file_path");
+            entity.Property(e => e.FileSizeBytes).HasColumnName("file_size_bytes");
+            entity.Property(e => e.IsEncrypted).HasColumnName("is_encrypted");
+            entity.Property(e => e.MimeType)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("mime_type");
+            entity.Property(e => e.PersonalDocumentTypeId).HasColumnName("personal_document_type_id");
+            entity.Property(e => e.UploadedBy).HasColumnName("uploaded_by");
+
+            entity.HasOne(d => d.PersonalDocumentType).WithMany(p => p.PersonalDocuments)
+                .HasForeignKey(d => d.PersonalDocumentTypeId)
+                .HasConstraintName("FK_personal_documents_types");
+
+            entity.HasOne(d => d.UploadedByNavigation).WithMany(p => p.PersonalDocuments)
+                .HasForeignKey(d => d.UploadedBy)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_personal_documents_users");
+        });
+
+        modelBuilder.Entity<PersonalDocumentsType>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__personal__3213E83F7BA1D372");
+
+            entity.ToTable("personal_documents_types");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("name");
+        });
+
         modelBuilder.Entity<Port>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__ports__3213E83F22214E09");
@@ -615,6 +832,10 @@ public partial class Simex06Context : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("name");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .IsFixedLength()
+                .HasColumnName("status");
         });
 
         modelBuilder.Entity<User>(entity =>
