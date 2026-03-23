@@ -17,5 +17,14 @@ namespace API_MOVIL.Controllers
         {
             _context = context;
         }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Client>>> GetClients()
+        {
+            return await _context.Clients.ToListAsync();
+
+        }
+
+
     }
 }
