@@ -59,5 +59,5 @@ public partial class User
 
     public virtual ICollection<PersonalDocument> PersonalDocuments { get; set; } = new List<PersonalDocument>();
 
-    public virtual Role Role { get; set; } = null!;
+    public virtual Role? Role { get; set; } = null!;
 }
