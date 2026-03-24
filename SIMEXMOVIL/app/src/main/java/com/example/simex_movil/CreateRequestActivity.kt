@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 class CreateRequestActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_history_offers)
+        setContentView(R.layout.activity_history_request)
 
     }
 }

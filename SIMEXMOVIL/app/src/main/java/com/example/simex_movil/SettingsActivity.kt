@@ -2,7 +2,6 @@ package com.example.simex_movil
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -25,7 +24,7 @@ class SettingsActivity: AppCompatActivity() {
 
 
         documents.setOnClickListener {
-            val intent = Intent(this, HistoryOffersActivity::class.java)
+            val intent = Intent(this, HistoryRequestActivity::class.java)
             startActivity(intent)
         }
 

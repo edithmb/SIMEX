@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, watch, computed } from 'vue'
+import { reactive, watch } from 'vue'
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
@@ -8,47 +8,70 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'submit'])
 
-const transportLabels = {
-    ship: '🚢 Marítimo',
-    plane: '✈️ Aéreo',
-    truck: '🚚 Terrestre',
-}
-
 const form = reactive({
-    transport: 'ship',
-    containerType: '',
-    carrier: '',
-    incoterm: 'CIF',
-    portOrigin: '',
-    portDestination: '',
+    reference: '',
+    incoterm: 'FOB',
+    origin_port: '',
+    destination_port: '',
+    container_type: '',
     price: '',
-    validity: '',
-    observations: '',
+    valid_until: '',
+    comments: '',
 })
 
-// Pre-fill form when solicitud changes
+// Reset form when solicitud changes
 watch(
     () => props.solicitud,
     (sol) => {
         if (sol) {
-            form.transport = sol.transport || 'ship'
-            form.containerType = ''
-            form.carrier = ''
-            form.incoterm = 'CIF'
-            form.portOrigin = sol.routeFrom || ''
-            form.portDestination = sol.routeTo || ''
+            form.reference = ''
+            form.incoterm = 'FOB'
+            form.origin_port = ''
+            form.destination_port = ''
+            form.container_type = ''
             form.price = ''
-            form.validity = ''
-            form.observations = ''
+            form.valid_until = ''
+            form.comments = ''
         }
     },
     { immediate: true },
 )
 
-const transportOptions = [
-    { value: 'ship', label: '🚢 Marítimo' },
-    { value: 'plane', label: '✈️ Aéreo' },
-    { value: 'truck', label: '🚚 Terrestre' },
+const incotermOptions = [
+    { value: 'FOB', label: 'FOB (Free On Board)' },
+    { value: 'CIF', label: 'CIF (Cost, Insurance & Freight)' },
+    { value: 'EXW', label: 'EXW (Ex Works)' },
+    { value: 'DDP', label: 'DDP (Delivered Duty Paid)' },
+    { value: 'FCA', label: 'FCA (Free Carrier)' },
+    { value: 'CFR', label: 'CFR (Cost & Freight)' },
+    { value: 'CPT', label: 'CPT (Carriage Paid To)' },
+    { value: 'CIP', label: 'CIP (Carriage & Insurance Paid To)' },
+    { value: 'DAP', label: 'DAP (Delivered At Place)' },
+    { value: 'DPU', label: 'DPU (Delivered at Place Unloaded)' },
+]
+
+const portOptions = [
+    { value: '', label: 'Seleccionar...' },
+    { value: 'Barcelona', label: 'Barcelona' },
+    { value: 'Valencia', label: 'Valencia' },
+    { value: 'Bilbao', label: 'Bilbao' },
+    { value: 'Algeciras', label: 'Algeciras' },
+    { value: 'Shanghai', label: 'Shanghai' },
+    { value: 'Shenzhen', label: 'Shenzhen' },
+    { value: 'Ningbo', label: 'Ningbo' },
+    { value: 'Rotterdam', label: 'Rotterdam' },
+    { value: 'Hamburgo', label: 'Hamburgo' },
+    { value: 'Amberes', label: 'Amberes' },
+    { value: 'Miami', label: 'Miami' },
+    { value: 'Nueva York', label: 'Nueva York' },
+    { value: 'Los Ángeles', label: 'Los Ángeles' },
+    { value: 'Singapur', label: 'Singapur' },
+    { value: 'Busan', label: 'Busan' },
+    { value: 'Santos', label: 'Santos' },
+    { value: 'El Pireo', label: 'El Pireo' },
+    { value: 'Génova', label: 'Génova' },
+    { value: 'Jebel Ali', label: 'Jebel Ali' },
+    { value: 'Le Havre', label: 'Le Havre' },
 ]
 
 const containerOptions = [
@@ -58,17 +81,6 @@ const containerOptions = [
     { value: '40hc', label: "40' High Cube" },
     { value: '20rf', label: "20' Reefer" },
     { value: '40rf', label: "40' Reefer" },
-    { value: 'flatrack', label: 'Flat Rack' },
-    { value: 'opentop', label: 'Open Top' },
-]
-
-const incotermOptions = [
-    { value: 'CIF', label: 'CIF (Cost, Insurance & Freight)' },
-    { value: 'FOB', label: 'FOB (Free On Board)' },
-    { value: 'DDP', label: 'DDP (Delivered Duty Paid)' },
-    { value: 'DAP', label: 'DAP (Delivered At Place)' },
-    { value: 'EXW', label: 'EXW (Ex Works)' },
-    { value: 'FCA', label: 'FCA (Free Carrier)' },
 ]
 
 function handleClose() {
@@ -108,49 +120,45 @@ function handleOverlayClick(e) {
                         <span class="modal-linked-label">Solicitud Vinculada</span>
                         <div class="modal-linked-grid">
                             <div class="modal-linked-item">
-                                <span class="modal-linked-key">Referencia:</span>
-                                <span class="modal-linked-ref">{{ solicitud.ref }}</span>
+                                <span class="modal-linked-key">ID:</span>
+                                <span class="modal-linked-ref">{{ solicitud.id }}</span>
                             </div>
                             <div class="modal-linked-item">
                                 <span class="modal-linked-key">Cliente:</span>
-                                <span class="modal-linked-val">{{ solicitud.client }}</span>
+                                <span class="modal-linked-val">{{ solicitud.clientName }}</span>
                             </div>
                             <div class="modal-linked-item">
-                                <span class="modal-linked-key">Mercancía:</span>
-                                <span class="modal-linked-val">{{ solicitud.goods }}</span>
+                                <span class="modal-linked-key">Volumen (m³):</span>
+                                <span class="modal-linked-val">{{ solicitud.volume_m3 }}</span>
                             </div>
                             <div class="modal-linked-item">
-                                <span class="modal-linked-key">Fecha Deseada:</span>
-                                <span class="modal-linked-val">{{ solicitud.date }}</span>
+                                <span class="modal-linked-key">Peso Bruto (kg):</span>
+                                <span class="modal-linked-val">{{ solicitud.gross_weight_kg?.toLocaleString() }}</span>
+                            </div>
+                            <div class="modal-linked-item">
+                                <span class="modal-linked-key">Origen:</span>
+                                <span class="modal-linked-val">{{ solicitud.originName }}</span>
+                            </div>
+                            <div class="modal-linked-item">
+                                <span class="modal-linked-key">Destino:</span>
+                                <span class="modal-linked-val">{{ solicitud.destinationName }}</span>
+                            </div>
+                            <div class="modal-linked-item modal-linked-item--full">
+                                <span class="modal-linked-key">Comentarios:</span>
+                                <span class="modal-linked-val">{{ solicitud.comments }}</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Form Body -->
                     <div class="modal-body">
-                        <!-- Especificaciones de Transporte -->
-                        <h4 class="modal-section-title">Especificaciones de Transporte</h4>
+                        <!-- Detalles de la Oferta -->
+                        <h4 class="modal-section-title">Detalles de la Oferta</h4>
                         <div class="modal-grid">
                             <div class="modal-field">
-                                <label class="modal-label">Medio de Transporte</label>
-                                <select v-model="form.transport" class="modal-select">
-                                    <option v-for="opt in transportOptions" :key="opt.value" :value="opt.value">
-                                        {{ opt.label }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="modal-field">
-                                <label class="modal-label">Tipo de Contenedor</label>
-                                <select v-model="form.containerType" class="modal-select">
-                                    <option v-for="opt in containerOptions" :key="opt.value" :value="opt.value">
-                                        {{ opt.label }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="modal-field">
-                                <label class="modal-label">Empresa de Transporte / Naviera</label>
-                                <input v-model="form.carrier" type="text" class="modal-input"
-                                    placeholder="Ej. Maersk, MSC, CMA CGM..." />
+                                <label class="modal-label">Referencia</label>
+                                <input v-model="form.reference" type="text" class="modal-input"
+                                    placeholder="PR-2024-XXX" />
                             </div>
                             <div class="modal-field">
                                 <label class="modal-label">Incoterm</label>
@@ -161,14 +169,28 @@ function handleOverlayClick(e) {
                                 </select>
                             </div>
                             <div class="modal-field">
-                                <label class="modal-label">Puerto / Terminal Origen</label>
-                                <input v-model="form.portOrigin" type="text" class="modal-input"
-                                    placeholder="Puerto de origen" />
+                                <label class="modal-label">Puerto Origen</label>
+                                <select v-model="form.origin_port" class="modal-select">
+                                    <option v-for="opt in portOptions" :key="opt.value" :value="opt.value">
+                                        {{ opt.label }}
+                                    </option>
+                                </select>
                             </div>
                             <div class="modal-field">
-                                <label class="modal-label">Puerto / Terminal Destino</label>
-                                <input v-model="form.portDestination" type="text" class="modal-input"
-                                    placeholder="Puerto de destino" />
+                                <label class="modal-label">Puerto Destino</label>
+                                <select v-model="form.destination_port" class="modal-select">
+                                    <option v-for="opt in portOptions" :key="opt.value" :value="opt.value">
+                                        {{ opt.label }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">Tipo de Contenedor</label>
+                                <select v-model="form.container_type" class="modal-select">
+                                    <option v-for="opt in containerOptions" :key="opt.value" :value="opt.value">
+                                        {{ opt.label }}
+                                    </option>
+                                </select>
                             </div>
                         </div>
 
@@ -176,19 +198,19 @@ function handleOverlayClick(e) {
                         <h4 class="modal-section-title">Condiciones Económicas</h4>
                         <div class="modal-grid">
                             <div class="modal-field">
-                                <label class="modal-label">Precio (€)</label>
+                                <label class="modal-label">Precio (EUR)</label>
                                 <input v-model="form.price" type="text" class="modal-input" placeholder="Ej. 12.450" />
                             </div>
                             <div class="modal-field">
-                                <label class="modal-label">Validez del Presupuesto</label>
-                                <input v-model="form.validity" type="date" class="modal-input" />
+                                <label class="modal-label">Válido Hasta</label>
+                                <input v-model="form.valid_until" type="date" class="modal-input" />
                             </div>
                         </div>
 
                         <!-- Observaciones -->
                         <div class="modal-field modal-field--full">
-                            <label class="modal-label">Observaciones</label>
-                            <textarea v-model="form.observations" class="modal-textarea"
+                            <label class="modal-label">Comentarios</label>
+                            <textarea v-model="form.comments" class="modal-textarea"
                                 placeholder="Condiciones especiales, notas internas..." rows="3"></textarea>
                         </div>
                     </div>
@@ -289,6 +311,10 @@ function handleOverlayClick(e) {
     display: flex;
     align-items: baseline;
     gap: 6px;
+}
+
+.modal-linked-item--full {
+    grid-column: 1 / -1;
 }
 
 .modal-linked-key {

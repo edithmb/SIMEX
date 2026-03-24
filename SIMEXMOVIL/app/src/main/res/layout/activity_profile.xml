@@ -13,7 +13,7 @@
         android:layout_marginTop="70dp"
         android:text="Perfil"
         android:textColor="#8AB242"
-        android:textSize="40dp"
+        android:textSize="40sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -36,6 +36,7 @@
         android:layout_height="32dp"
         android:background="@drawable/bg_white_circle"
         android:backgroundTint="#8AB242"
+        android:src="@drawable/ic_lapiz"
         android:padding="6dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/imgPerfil"
@@ -61,7 +62,7 @@
         android:layout_marginEnd="60dp"
         android:layout_marginTop="16dp"
         android:text="Editar Perfil"
-        android:backgroundTint="#5C82B1"
+        app:backgroundTint="#5C82B1"
         app:cornerRadius="10dp"
         app:layout_constraintTop_toBottomOf="@id/nombreEmpresa"
         app:layout_constraintStart_toStartOf="parent"
@@ -180,16 +181,13 @@
         </LinearLayout>
     </ScrollView>
 
-    <FrameLayout
+    <include
         android:id="@+id/bottom_navigation"
+        layout="@layout/layout_menu_reutilizable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <include layout="@layout/layout_menu_reutilizable" />
-
-    </FrameLayout>
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

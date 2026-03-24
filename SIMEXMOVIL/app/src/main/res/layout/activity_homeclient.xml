@@ -97,7 +97,6 @@ android:background="@color/white">
             android:hint="Buscar"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:drawableEnd="@drawable/ic_buscar"
             android:drawableTint="@color/green"
             android:layout_marginBottom="16dp" />
 
@@ -137,7 +136,7 @@ android:background="@color/white">
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:nestedScrollingEnabled="false"
-            />
+            tools:listitem="@layout/item_tracking" tools:itemCount="3" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
 
