@@ -12,11 +12,30 @@ const emit = defineEmits(['close', 'save'])
 
 const form = ref({})
 
+function getRelationKey(col) {
+  if (!col?.key) return null
+  if (col.key.endsWith('_id')) return col.key.slice(0, -3)
+  return col.key
+}
+
+function getInitialValue(col) {
+  if (!props.row) return ''
+
+  const directValue = props.row[col.key]
+  if (directValue != null) return directValue
+
+  if (col.type !== 'select') return ''
+
+  const relationKey = getRelationKey(col)
+  const relationObj = relationKey ? props.row[relationKey] : null
+  return relationObj?.id ?? ''
+}
+
 watch(() => props.visible, (val) => {
   if (!val) return
   const initial = {}
   props.columns.forEach(col => {
-    initial[col.key] = props.row ? props.row[col.key] : ''
+    initial[col.key] = getInitialValue(col)
   })
   form.value = initial
 })

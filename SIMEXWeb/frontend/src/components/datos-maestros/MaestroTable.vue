@@ -3,17 +3,45 @@ import { ref, computed } from 'vue'
 
 const props = defineProps({
   maestro: { type: Object, required: true },
+  relatedData: { type: Object, default: () => ({}) },
 })
 defineEmits(['add', 'edit', 'delete'])
 
 const search = ref('')
+
+function getRelationKey(col) {
+  if (!col?.key) return null
+  if (col.key.endsWith('_id')) return col.key.slice(0, -3)
+  return col.key
+}
+
+function resolveSelectLabel(row, col) {
+  const relationKey = getRelationKey(col)
+  const displayField = col.displayField || 'name'
+  const relationObj = relationKey ? row?.[relationKey] : null
+
+  if (relationObj && relationObj[displayField] != null) {
+    return relationObj[displayField]
+  }
+
+  const relatedList = props.relatedData?.[col.relatedKey] || []
+  const fkValue = row?.[col.key]
+  if (fkValue == null || !Array.isArray(relatedList)) return ''
+  const match = relatedList.find(item => item.id === fkValue)
+  return match?.[displayField] ?? ''
+}
+
+function getCellValue(row, col) {
+  if (col.type === 'select') return resolveSelectLabel(row, col)
+  return row?.[col.key] ?? ''
+}
 
 const filtered = computed(() => {
   const q = search.value.toLowerCase()
   if (!q) return props.maestro.data
   return props.maestro.data.filter(row =>
     props.maestro.columns.some(col =>
-      String(row[col.key] ?? '').toLowerCase().includes(q)
+      String(getCellValue(row, col)).toLowerCase().includes(q)
     )
   )
 })
@@ -63,7 +91,7 @@ const filtered = computed(() => {
           </tr>
           <tr v-for="row in filtered" :key="row.id" class="data-row">
             <td class="td-id">{{ row.id }}</td>
-            <td v-for="col in maestro.columns" :key="col.key">{{ row[col.key] }}</td>
+            <td v-for="col in maestro.columns" :key="col.key">{{ getCellValue(row, col) }}</td>
             <td class="td-actions">
               <button class="action-btn action-btn--edit" @click="$emit('edit', row)" title="Editar">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

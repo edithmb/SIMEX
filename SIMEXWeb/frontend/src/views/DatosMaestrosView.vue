@@ -1,12 +1,12 @@
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import MaestroNav from '@/components/datos-maestros/MaestroNav.vue'
 import MaestroTable from '@/components/datos-maestros/MaestroTable.vue'
 import MaestroFormModal from '@/components/datos-maestros/MaestroFormModal.vue'
 
-const LARAVEL = import.meta.env.VITE_LARAVEL_API
+const LARAVEL = import.meta.env.VITE_LARAVEL_API || 'http://127.0.0.1:8000/api'
 const auth = useAuthStore()
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
@@ -29,12 +29,48 @@ const tablaRefMap = {
   contenedores:   { ref: contenedores,   tabla: 'container-types' },
 }
 
-const headers = { Authorization: `Bearer ${auth.token}` }
+const loading = ref(false)
+const errorMessage = ref('')
+
+function getAuthHeaders() {
+  return { Authorization: `Bearer ${auth.token}` }
+}
+
+function normalizeApiRows(payload) {
+  if (Array.isArray(payload)) return payload
+  if (Array.isArray(payload?.data)) return payload.data
+  return []
+}
 
 async function fetchTabla(key) {
+  if (!auth.token) return
   const { ref: dataRef, tabla } = tablaRefMap[key]
-  const res = await axios.get(LARAVEL + '/' + tabla, { headers })
-  dataRef.value = res.data
+  const res = await axios.get(LARAVEL + '/' + tabla, { headers: getAuthHeaders() })
+  dataRef.value = normalizeApiRows(res.data)
+}
+
+async function cargarDatosIniciales() {
+  if (!LARAVEL) {
+    errorMessage.value = 'Falta configurar la URL de API (VITE_LARAVEL_API).'
+    return
+  }
+
+  if (!auth.token) {
+    errorMessage.value = 'No hay sesion activa. Inicia sesion nuevamente.'
+    return
+  }
+
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    await Promise.all([fetchTabla('paises'), fetchTabla('ciudades')])
+    await fetchTabla(activeKey.value)
+  } catch (err) {
+    const message = err.response?.data?.message || err.message || 'No se pudieron cargar los datos maestros.'
+    errorMessage.value = message
+  } finally {
+    loading.value = false
+  }
 }
 
 // ─── MAESTRO CONFIG ──────────────────────────────────────────────────────────
@@ -134,7 +170,23 @@ const navGroups = [
 const activeKey = ref('paises')
 const activeMaestro = computed(() => maestroConfig[activeKey.value])
 
-watch(activeKey, (key) => fetchTabla(key))
+watch(activeKey, async (key) => {
+  if (!auth.token) return
+  try {
+    loading.value = true
+    errorMessage.value = ''
+    await fetchTabla(key)
+  } catch (err) {
+    const message = err.response?.data?.message || err.message || 'No se pudo cargar la tabla seleccionada.'
+    errorMessage.value = message
+  } finally {
+    loading.value = false
+  }
+})
+
+watch(() => auth.token, (token) => {
+  if (token) cargarDatosIniciales()
+}, { immediate: true })
 
 // ─── MODAL STATE ──────────────────────────────────────────────────────────────
 
@@ -159,10 +211,11 @@ function closeModal() {
 
 async function handleSave(formData) {
   const { tabla } = tablaRefMap[activeKey.value]
+  errorMessage.value = ''
   if (editingRow.value) {
-    await axios.put(LARAVEL + '/' + tabla + '/' + editingRow.value.id, formData, { headers })
+    await axios.put(LARAVEL + '/' + tabla + '/' + editingRow.value.id, formData, { headers: getAuthHeaders() })
   } else {
-    await axios.post(LARAVEL + '/' + tabla, formData, { headers })
+    await axios.post(LARAVEL + '/' + tabla, formData, { headers: getAuthHeaders() })
   }
   await fetchTabla(activeKey.value)
   closeModal()
@@ -170,7 +223,8 @@ async function handleSave(formData) {
 
 async function handleDelete(row) {
   const { tabla } = tablaRefMap[activeKey.value]
-  await axios.delete(LARAVEL + '/' + tabla + '/' + row.id, { headers })
+  errorMessage.value = ''
+  await axios.delete(LARAVEL + '/' + tabla + '/' + row.id, { headers: getAuthHeaders() })
   await fetchTabla(activeKey.value)
 }
 
@@ -181,9 +235,8 @@ const relatedData = computed(() => ({
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 
-onMounted(async () => {
-  await Promise.all([fetchTabla('paises'), fetchTabla('ciudades')])
-  await fetchTabla(activeKey.value)
+onMounted(() => {
+  if (auth.token) cargarDatosIniciales()
 })
 </script>
 
@@ -197,6 +250,9 @@ onMounted(async () => {
       </div>
     </div>
 
+    <p v-if="loading" class="maestros-status">Cargando datos maestros...</p>
+    <p v-else-if="errorMessage" class="maestros-error">{{ errorMessage }}</p>
+
     <!-- Content -->
     <div class="maestros-content">
       <MaestroNav
@@ -206,6 +262,7 @@ onMounted(async () => {
       />
       <MaestroTable
         :maestro="activeMaestro"
+        :related-data="relatedData"
         @add="openAdd"
         @edit="openEdit"
         @delete="handleDelete"
@@ -225,6 +282,18 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.maestros-status {
+  margin: 6px 0 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.maestros-error {
+  margin: 6px 0 12px;
+  font-size: 13px;
+  color: #dc2626;
+}
+
 .maestros-content {
   display: flex;
   gap: 20px;
