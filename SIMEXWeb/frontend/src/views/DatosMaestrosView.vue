@@ -3,7 +3,8 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import MaestroNav from '@/components/datos-maestros/MaestroNav.vue'
 import MaestroTable from '@/components/datos-maestros/MaestroTable.vue'
 import MaestroFormModal from '@/components/datos-maestros/MaestroFormModal.vue'
-import { apiFetch } from '@/api'
+import * as datosMaestrosService from '@/services/datosMaestrosService'
+import api from '@/services/api'
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 
@@ -27,7 +28,8 @@ const tablaRefMap = {
 
 async function fetchTabla(key) {
   const { ref: dataRef, tabla } = tablaRefMap[key]
-  dataRef.value = await apiFetch('GET', `/${tabla}`)
+  const res = await datosMaestrosService.getAll(tabla)
+  dataRef.value = res.data
 }
 
 // ─── MAESTRO CONFIG ──────────────────────────────────────────────────────────
@@ -153,9 +155,9 @@ function closeModal() {
 async function handleSave(formData) {
   const { tabla } = tablaRefMap[activeKey.value]
   if (editingRow.value) {
-    await apiFetch('PUT', `/${tabla}/${editingRow.value.id}`, formData)
+    await datosMaestrosService.update(tabla, editingRow.value.id, formData)
   } else {
-    await apiFetch('POST', `/${tabla}`, formData)
+    await datosMaestrosService.create(tabla, formData)
   }
   await fetchTabla(activeKey.value)
   closeModal()
@@ -163,7 +165,7 @@ async function handleSave(formData) {
 
 async function handleDelete(row) {
   const { tabla } = tablaRefMap[activeKey.value]
-  await apiFetch('DELETE', `/${tabla}/${row.id}`)
+  await datosMaestrosService.remove(tabla, row.id)
   await fetchTabla(activeKey.value)
 }
 

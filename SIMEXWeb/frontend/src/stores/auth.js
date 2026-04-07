@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useRoleStore } from '@/stores/role'
+import * as authService from '@/services/authService'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('jwt_token') ?? null)
@@ -18,28 +19,23 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login(email, password) {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
-
-    if (!res.ok) {
-      const data = await res.json()
-      throw new Error(data.message ?? 'Credenciales incorrectas')
+    let res
+    try {
+      res = await authService.login(email, password)
+    } catch (err) {
+      const message = err.response?.data?.message ?? 'Credenciales incorrectas'
+      throw new Error(message)
     }
 
-    const data = await res.json()
-    setToken(data.token)
+    setToken(res.data.token)
 
-    const meRes = await fetch('/api/me', {
-      headers: { 'Authorization': `Bearer ${data.token}`, 'Accept': 'application/json' },
-    })
-    if (meRes.ok) {
-      const userData = await meRes.json()
-      const roleName = userData.role?.name ?? 'cliente'
+    try {
+      const meRes = await authService.me()
+      const roleName = meRes.data.role?.name ?? 'cliente'
       const roleStore = useRoleStore()
       roleStore.setRole(roleName)
+    } catch {
+      // si /me falla, seguimos autenticados igualmente
     }
   }
 

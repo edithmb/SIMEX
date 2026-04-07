@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoleStore } from '@/stores/role'
-import { apiFetch } from '@/api'
+import * as solicitudesService from '@/services/solicitudesService'
 import SolicitudesStats from '@/components/solicitudes/SolicitudesStats.vue'
 import SolicitudesFilters from '@/components/solicitudes/SolicitudesFilters.vue'
 import SolicitudesTable from '@/components/solicitudes/SolicitudesTable.vue'
@@ -35,9 +35,10 @@ function mapSolicitud(item) {
 async function fetchSolicitudes() {
   loading.value = true
   try {
-    const endpoint = roleStore.isAdmin ? '/client-requests-admin' : '/client-requests-client'
-    const data = await apiFetch('GET', endpoint)
-    solicitudes.value = data.map(mapSolicitud)
+    const res = roleStore.isAdmin
+      ? await solicitudesService.getAdmin()
+      : await solicitudesService.getClient()
+    solicitudes.value = res.data.map(mapSolicitud)
   } finally {
     loading.value = false
   }
@@ -46,23 +47,20 @@ async function fetchSolicitudes() {
 // 2. Función para cargar localizaciones y clientes
 async function cargarDatos() {
   try {
-    // Las localizaciones las necesitan tanto admins como clientes
-    const peticionLocalizaciones = apiFetch('GET', '/locations')
-    
-    // Optimizamos: los clientes de la BD solo los necesitamos si el usuario es Admin
-    let peticionClientes = Promise.resolve([]) 
+    const peticionLocalizaciones = solicitudesService.getLocations()
+
+    let peticionClientes = Promise.resolve({ data: [] })
     if (roleStore.isAdmin) {
-      peticionClientes = apiFetch('GET', '/clients')
+      peticionClientes = solicitudesService.getClients()
     }
 
-    // Ejecutamos ambas peticiones en paralelo para mayor velocidad
     const [resLocalizaciones, resClientes] = await Promise.all([
       peticionLocalizaciones,
-      peticionClientes
+      peticionClientes,
     ])
-    
-    localizacionesList.value = resLocalizaciones
-    clientesList.value = resClientes
+
+    localizacionesList.value = resLocalizaciones.data
+    clientesList.value = resClientes.data
   } catch (error) {
     console.error('Error al cargar datos para los desplegables:', error)
   }
@@ -131,11 +129,13 @@ function closeSolicitudModal() {
 
 async function handleSolicitudSubmit(data) {
   try {
-    const endpoint = roleStore.isAdmin ? '/client-requests-admin' : '/client-requests-client'
-    await apiFetch('POST', endpoint, data)
+    if (roleStore.isAdmin) {
+      await solicitudesService.createAdmin(data)
+    } else {
+      await solicitudesService.createClient(data)
+    }
     closeSolicitudModal()
-    // Volvemos a pedir las solicitudes para que la tabla muestre la nueva al instante
-    await fetchSolicitudes() 
+    await fetchSolicitudes()
   } catch (error) {
     console.error('Error al enviar la solicitud:', error)
   }
