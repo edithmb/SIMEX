@@ -1,7 +1,9 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useRoleStore } from '@/stores/role'
-import * as authService from '@/services/authService'
+import axios from 'axios'
+
+const LARAVEL = import.meta.env.VITE_LARAVEL_API
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('jwt_token') ?? null)
@@ -21,7 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(email, password) {
     let res
     try {
-      res = await authService.login(email, password)
+      res = await axios.post(LARAVEL + '/login', { email, password })
     } catch (err) {
       const message = err.response?.data?.message ?? 'Credenciales incorrectas'
       throw new Error(message)
@@ -30,7 +32,9 @@ export const useAuthStore = defineStore('auth', () => {
     setToken(res.data.token)
 
     try {
-      const meRes = await authService.me()
+      const meRes = await axios.get(LARAVEL + '/me', {
+        headers: { Authorization: `Bearer ${token.value}` },
+      })
       const roleName = meRes.data.role?.name ?? 'cliente'
       const roleStore = useRoleStore()
       roleStore.setRole(roleName)

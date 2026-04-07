@@ -1,10 +1,13 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
+import axios from 'axios'
+import { useAuthStore } from '@/stores/auth'
 import MaestroNav from '@/components/datos-maestros/MaestroNav.vue'
 import MaestroTable from '@/components/datos-maestros/MaestroTable.vue'
 import MaestroFormModal from '@/components/datos-maestros/MaestroFormModal.vue'
-import * as datosMaestrosService from '@/services/datosMaestrosService'
-import api from '@/services/api'
+
+const LARAVEL = import.meta.env.VITE_LARAVEL_API
+const auth = useAuthStore()
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 
@@ -26,9 +29,11 @@ const tablaRefMap = {
   contenedores:   { ref: contenedores,   tabla: 'container-types' },
 }
 
+const headers = { Authorization: `Bearer ${auth.token}` }
+
 async function fetchTabla(key) {
   const { ref: dataRef, tabla } = tablaRefMap[key]
-  const res = await datosMaestrosService.getAll(tabla)
+  const res = await axios.get(LARAVEL + '/' + tabla, { headers })
   dataRef.value = res.data
 }
 
@@ -155,9 +160,9 @@ function closeModal() {
 async function handleSave(formData) {
   const { tabla } = tablaRefMap[activeKey.value]
   if (editingRow.value) {
-    await datosMaestrosService.update(tabla, editingRow.value.id, formData)
+    await axios.put(LARAVEL + '/' + tabla + '/' + editingRow.value.id, formData, { headers })
   } else {
-    await datosMaestrosService.create(tabla, formData)
+    await axios.post(LARAVEL + '/' + tabla, formData, { headers })
   }
   await fetchTabla(activeKey.value)
   closeModal()
@@ -165,7 +170,7 @@ async function handleSave(formData) {
 
 async function handleDelete(row) {
   const { tabla } = tablaRefMap[activeKey.value]
-  await datosMaestrosService.remove(tabla, row.id)
+  await axios.delete(LARAVEL + '/' + tabla + '/' + row.id, { headers })
   await fetchTabla(activeKey.value)
 }
 

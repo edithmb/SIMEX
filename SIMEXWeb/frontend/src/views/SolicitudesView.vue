@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 import { useRoleStore } from '@/stores/role'
-import * as solicitudesService from '@/services/solicitudesService'
+import { useAuthStore } from '@/stores/auth'
 import SolicitudesStats from '@/components/solicitudes/SolicitudesStats.vue'
 import SolicitudesFilters from '@/components/solicitudes/SolicitudesFilters.vue'
 import SolicitudesTable from '@/components/solicitudes/SolicitudesTable.vue'
@@ -9,6 +10,10 @@ import CrearPresupuestoModal from '@/components/solicitudes/CrearPresupuestoModa
 import CrearSolicitudModal from '@/components/solicitudes/CrearSolicitudModal.vue'
 
 const roleStore = useRoleStore()
+const auth = useAuthStore()
+
+const LARAVEL = import.meta.env.VITE_LARAVEL_API
+const headers = { Authorization: `Bearer ${auth.token}` }
 
 const solicitudes = ref([])
 const loading = ref(false)
@@ -35,9 +40,8 @@ function mapSolicitud(item) {
 async function fetchSolicitudes() {
   loading.value = true
   try {
-    const res = roleStore.isAdmin
-      ? await solicitudesService.getAdmin()
-      : await solicitudesService.getClient()
+    const endpoint = roleStore.isAdmin ? '/client-requests-admin' : '/client-requests-client'
+    const res = await axios.get(LARAVEL + endpoint, { headers })
     solicitudes.value = res.data.map(mapSolicitud)
   } finally {
     loading.value = false
@@ -47,11 +51,11 @@ async function fetchSolicitudes() {
 // 2. Función para cargar localizaciones y clientes
 async function cargarDatos() {
   try {
-    const peticionLocalizaciones = solicitudesService.getLocations()
+    const peticionLocalizaciones = axios.get(LARAVEL + '/locations', { headers })
 
     let peticionClientes = Promise.resolve({ data: [] })
     if (roleStore.isAdmin) {
-      peticionClientes = solicitudesService.getClients()
+      peticionClientes = axios.get(LARAVEL + '/clients', { headers })
     }
 
     const [resLocalizaciones, resClientes] = await Promise.all([
@@ -129,11 +133,8 @@ function closeSolicitudModal() {
 
 async function handleSolicitudSubmit(data) {
   try {
-    if (roleStore.isAdmin) {
-      await solicitudesService.createAdmin(data)
-    } else {
-      await solicitudesService.createClient(data)
-    }
+    const endpoint = roleStore.isAdmin ? '/client-requests-admin' : '/client-requests-client'
+    await axios.post(LARAVEL + endpoint, data, { headers })
     closeSolicitudModal()
     await fetchSolicitudes()
   } catch (error) {

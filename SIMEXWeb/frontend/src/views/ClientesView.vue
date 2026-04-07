@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import * as clientesService from '@/services/clientesService'
+import axios from 'axios'
+import { useAuthStore } from '@/stores/auth'
 import ClientesStats from '@/components/clientes/ClientesStats.vue'
 import ClientesFilters from '@/components/clientes/ClientesFilters.vue'
 import ClientesList from '@/components/clientes/ClientesList.vue'
@@ -53,10 +54,15 @@ function closeDropdownOutside(e) {
     }
 }
 
+const LARAVEL = import.meta.env.VITE_LARAVEL_API
+const auth = useAuthStore()
+
 onMounted(async () => {
     document.addEventListener('click', closeDropdownOutside)
     try {
-        const res = await clientesService.getAll()
+        const res = await axios.get(LARAVEL + '/clients', {
+            headers: { Authorization: `Bearer ${auth.token}` },
+        })
         clientes.value = res.data
     } catch (error) {
         console.error('Error al cargar clientes:', error)
