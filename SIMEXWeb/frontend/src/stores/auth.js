@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { useRoleStore } from '@/stores/role'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('jwt_token') ?? null)
@@ -13,6 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
   function clearToken() {
     token.value = null
     localStorage.removeItem('jwt_token')
+    localStorage.removeItem('user_role')
   }
 
   async function login(email, password) {
@@ -29,6 +31,16 @@ export const useAuthStore = defineStore('auth', () => {
 
     const data = await res.json()
     setToken(data.token)
+
+    const meRes = await fetch('/api/me', {
+      headers: { 'Authorization': `Bearer ${data.token}`, 'Accept': 'application/json' },
+    })
+    if (meRes.ok) {
+      const userData = await meRes.json()
+      const roleName = userData.role?.name ?? 'cliente'
+      const roleStore = useRoleStore()
+      roleStore.setRole(roleName)
+    }
   }
 
   function logout() {
