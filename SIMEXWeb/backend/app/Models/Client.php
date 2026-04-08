@@ -11,6 +11,9 @@ class Client extends Model
 {
     use SoftDeletes;
 
+    protected $primaryKey = 'id';
+    public $timestamps = false;
+
     protected $fillable = [
         'company_name',
         'vat_number',
