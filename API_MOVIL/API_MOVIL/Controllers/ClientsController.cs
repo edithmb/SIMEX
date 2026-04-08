@@ -22,7 +22,7 @@ namespace API_MOVIL.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Client>>> GetClients()
         {
-            return await _context.Clients.ToListAsync();
+            return await _context.Clients.Where(c => c.DeletedAt == null).ToListAsync(); // que no muestre los eliminados
 
         }
 
@@ -30,9 +30,9 @@ namespace API_MOVIL.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Client>> GetClient(int id)
         {
-            var client = await _context.Clients.FindAsync(id);
+            var client = await _context.Clients.Where(c => c.DeletedAt == null).FirstOrDefaultAsync(c => c.Id == id);
 
-            if (client == null) return NotFound("Cliente no encontrado");
+            if (client == null) return NotFound("Customer not found or has been deleted");
 
             return client;
         }
@@ -51,7 +51,7 @@ namespace API_MOVIL.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<Client>> PutClient(int id, Client client)
         {
-            if (id != client.Id) return BadRequest("Id no coincide");
+            if (id != client.Id) return BadRequest("Id does not match");
 
             _context.Entry(client).State = EntityState.Modified;
 
@@ -65,7 +65,7 @@ namespace API_MOVIL.Controllers
                 else throw;
             }
 
-            return Ok("Cliente actualizado correctamnete");
+            return Ok("Client updated successfully");
 
         }
 
@@ -79,12 +79,18 @@ namespace API_MOVIL.Controllers
         public async Task<ActionResult<Client>> DeleteClient(int id)
         {
             var client = await _context.Clients.FindAsync(id);
-            if (client == null) return NotFound("Cliente no encontrado");
+            if (client == null) return NotFound("Client not found");
 
-            _context.Clients.Remove(client);
+            // rellenar espacios de datos de "eliminacion"
+            client.DeletedAt = DateTime.UtcNow;
+            client.DeletedBy = 1;
+
+            // avisar al orm que se han actualizado cositas
+            _context.Entry(client).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
-            return Ok("Cliente eliminado correctamnete");
+            return Ok("Client successfully sent to the trash");
+           
         }
 
 
