@@ -1,7 +1,7 @@
 name: Build and Push to Docker Hub
 
 on:
-  pull_request:
+  push:
     branches:
       - main # O "master", asegúrate de que sea el nombre de tu rama principal
 
