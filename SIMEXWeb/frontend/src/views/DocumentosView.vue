@@ -61,9 +61,7 @@ const filteredOperationDocs = computed(() => {
             const filteredDocs =
                 activeDocFilter.value === 'Todos'
                     ? op.documents
-                    : op.documents.filter(
-                          (d) => d.status === activeDocFilter.value.toLowerCase(),
-                      )
+                    : op.documents.filter((d) => d.status === activeDocFilter.value.toLowerCase())
             return { ...op, filteredDocs }
         })
         .filter((op) => op.filteredDocs.length > 0)
@@ -80,11 +78,13 @@ function mockUpload(doc) {
         <!-- Header -->
         <div :class="['documentos-header', { 'documentos-header--with-btn': roleStore.isAdmin }]">
             <div class="documentos-header-text">
-                <h2 class="documentos-header-title">{{ roleStore.isAdmin ? 'Gestión Documental' : 'Mis Documentos' }}</h2>
+                <h2 class="documentos-header-title">
+                    {{ roleStore.isAdmin ? 'Gestión Documental' : 'Mis Documentos' }}
+                </h2>
             </div>
             <button v-if="roleStore.isAdmin" class="documentos-header-btn" @click="showModal = true">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="17 8 12 3 7 8" />
                     <line x1="12" y1="3" x2="12" y2="15" />
@@ -95,9 +95,10 @@ function mockUpload(doc) {
 
         <!-- Filter buttons -->
         <div class="doc-client-filters">
-            <button v-for="f in clientFilters" :key="f"
-                :class="['doc-client-filter-btn', { 'doc-client-filter-btn--active': activeDocFilter === f }]"
-                @click="activeDocFilter = f">
+            <button v-for="f in clientFilters" :key="f" :class="[
+                'doc-client-filter-btn',
+                { 'doc-client-filter-btn--active': activeDocFilter === f },
+            ]" @click="activeDocFilter = f">
                 {{ f }}
             </button>
         </div>
@@ -123,8 +124,7 @@ function mockUpload(doc) {
                             class="doc-status-badge doc-status-badge--subido">Subido</span>
                         <span v-else-if="doc.status === 'urgente'"
                             class="doc-status-badge doc-status-badge--urgente">Urgente</span>
-                        <span v-else
-                            class="doc-status-badge doc-status-badge--pendiente">Pendiente</span>
+                        <span v-else class="doc-status-badge doc-status-badge--pendiente">Pendiente</span>
                         <button v-if="doc.status !== 'subido'" class="doc-upload-btn" @click="mockUpload(doc)">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
