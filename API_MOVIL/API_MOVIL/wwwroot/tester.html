@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulador Móvil - Sockets DNI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            background-color: #f4f4f9;
+        }
+
+        .consola {
+            background: black;
+            color: lime;
+            padding: 15px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>📱 Simulador de App - Subida de DNI</h2>
+
+    <input type="file" id="archivoDni" accept="image/*,application/pdf" />
+    <br><br>
+    <button id="btnSubir">🚀 Subir y Encriptar por Socket</button>
+
+    <hr>
+    <h3>Consola del Servidor en Tiempo Real:</h3>
+    <div class="consola" id="consolaMensajes">
+        <p style="color: gray;">Esperando conexión...</p>
+    </div>
+
+    <script>
+        // 1. ABRIR EL TÚNEL (Conectar al Hub)
+        const conexion = new signalR.HubConnectionBuilder()
+            .withUrl("/Hubs/DocumentsPersonHub") // La ruta que pusimos en Program.cs
+            .build();
+
+        const consola = document.getElementById("consolaMensajes");
+
+        // 2. ESCUCHAR AL SERVIDOR (Funciones que tu Hub llama desde C#)
+        conexion.on("Receivemessage", function (mensaje) {
+            consola.innerHTML += `<p>🔵 INFO: ${mensaje}</p>`;
+        });
+
+        conexion.on("UploadCompleted", function (mensaje, idBD) {
+            consola.innerHTML += `<p style="color: #0f0;">✅ ÉXITO: ${mensaje} (ID guardado: ${idBD})</p>`;
+        });
+
+        conexion.on("UploadedError", function (error) {
+            consola.innerHTML += `<p style="color: red;">❌ ERROR: ${error}</p>`;
+        });
+
+        // Arrancar la conexión al cargar la página
+        conexion.start()
+            .then(() => consola.innerHTML += `<p style="color: yellow;">⚡ CONECTADO AL TÚNEL SIGNALR ⚡</p>`)
+            .catch(err => consola.innerHTML += `<p style="color: red;">Error de conexión: ${err}</p>`);
+
+        // 3. ENVIAR EL ARCHIVO AL HACER CLIC
+        document.getElementById("btnSubir").addEventListener("click", function () {
+            const inputArchivo = document.getElementById("archivoDni");
+
+            if (inputArchivo.files.length === 0) {
+                alert("Selecciona un DNI primero."); return;
+            }
+
+            const archivo = inputArchivo.files[0];
+            const lector = new FileReader();
+
+            // Cuando el navegador termine de leer el archivo...
+            lector.onload = function (evento) {
+                // El archivo se lee en Base64 (texto). Le quitamos la cabecera para quedarnos solo con los datos crudos.
+                const base64Completo = evento.target.result;
+                const base64Limpio = base64Completo.split(',')[1];
+
+                consola.innerHTML += `<p>📤 Enviando archivo por el túnel...</p>`;
+
+                // LLAMAMOS AL MÉTODO DE C# "SubirDni"
+                // (Le pasamos ID 1 y tipo "Chofer" como prueba)
+                conexion.invoke("UploadDni", 1, "Chofer", archivo.name, base64Limpio)
+                    .catch(err => consola.innerHTML += `<p style="color: red;">Error al enviar: ${err}</p>`);
+            };
+
+            lector.readAsDataURL(archivo); // Iniciar lectura
+        });
+    </script>
+</body>
+</html>

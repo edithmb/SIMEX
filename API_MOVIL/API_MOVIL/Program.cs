@@ -16,6 +16,11 @@ builder.Services.AddSingleton<EncryptionService>(); // archivo deencriptación
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR(options =>
+{
+    // Ensanchamos el túnel para aceptar archivos de hasta 10 Megabytes
+    options.MaximumReceiveMessageSize = 10 * 1024 * 1024;
+});
 
 // lectura de llave
 var secretKey = builder.Configuration["JwtConfig:Secret"];
@@ -49,6 +54,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication(); // lee token
 app.UseAuthorization(); // lee permisos
 
+app.UseStaticFiles(); // para ver webs
 app.MapControllers();
-
+app.MapHub<API_MOVIL.Hubs.DocumentsPersonHub>("/Hubs/DocumentsPersonHub"); // ruta de web
 app.Run();
