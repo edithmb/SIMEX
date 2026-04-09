@@ -3,6 +3,10 @@
 # Etapa 1: Construcción (Build)
 FROM node:lts-alpine as build-stage
 WORKDIR /app
+ARG VITE_LARAVEL_API=http://localhost:8000/api
+ARG VITE_NET_API=http://localhost:5000/api/
+ENV VITE_LARAVEL_API=${VITE_LARAVEL_API}
+ENV VITE_NET_API=${VITE_NET_API}
 COPY package*.json ./
 RUN npm install
 COPY . .
