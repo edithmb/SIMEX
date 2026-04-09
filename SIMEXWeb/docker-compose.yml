@@ -23,7 +23,8 @@ services:
     image: ddelacortep/simex-daw:backend
     container_name: simex-backend
     restart: always
-    # Si usas base de datos, añade las variables de entorno aquí
+    env_file:
+      - ./backend/.env
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
