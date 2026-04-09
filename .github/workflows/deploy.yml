@@ -22,7 +22,7 @@ jobs:
       - name: Build & Push Backend
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
+          context: ./SIMEXWeb/backend
           push: true
           tags: |
             ddelacortep/simex-daw:backend
@@ -32,7 +32,7 @@ jobs:
       - name: Build & Push Frontend
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
+          context: ./SIMEXWeb/frontend
           push: true
           tags: |
             ddelacortep/simex-daw:frontend
