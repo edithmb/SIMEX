@@ -18,6 +18,7 @@ class ClientRequest extends Model
         'origin_id',
         'destination_id',
         'created_by',
+        'estado'
     ];
 
     protected function casts(): array

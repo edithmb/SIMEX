@@ -11,9 +11,7 @@ export default defineConfig({
     vueDevTools(),
   ],
   server: {
-    proxy: {
-      '/api': 'http://localhost:8000',
-    },
+    port: 5173,
   },
   resolve: {
     alias: {

@@ -1,136 +1,162 @@
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import axios from 'axios'
+import { useAuthStore } from '@/stores/auth'
 import MaestroNav from '@/components/datos-maestros/MaestroNav.vue'
 import MaestroTable from '@/components/datos-maestros/MaestroTable.vue'
 import MaestroFormModal from '@/components/datos-maestros/MaestroFormModal.vue'
-import { apiFetch } from '@/api'
 
-// ─── DATA ─────────────────────────────────────────────────────────────────────
+const auth = useAuthStore()
 
-const paises        = ref([])
-const ciudades      = ref([])
-const puertos       = ref([])
-const aeropuertos   = ref([])
-const navieras      = ref([])
-const transportistas= ref([])
-const contenedores  = ref([])
+const LARAVEL = import.meta.env.VITE_LARAVEL_API
+const headers = { Authorization: `Bearer ${auth.token}` }
 
-const tablaRefMap = {
-  paises:         { ref: paises,         tabla: 'countries' },
-  ciudades:       { ref: ciudades,       tabla: 'cities' },
-  puertos:        { ref: puertos,        tabla: 'ports' },
-  aeropuertos:    { ref: aeropuertos,    tabla: 'airports' },
-  navieras:       { ref: navieras,       tabla: 'shipping-lines' },
-  transportistas: { ref: transportistas, tabla: 'carriers' },
-  contenedores:   { ref: contenedores,   tabla: 'container-types' },
-}
+// ── Estado general ──
+const loading = ref(false)
+const errorMessage = ref('')
 
-async function fetchTabla(key) {
-  const { ref: dataRef, tabla } = tablaRefMap[key]
-  dataRef.value = await apiFetch('GET', `/${tabla}`)
-}
+// ── Datos de cada maestro ──
+const countriesList = ref([])
+const portsList = ref([])
+const airportsList = ref([])
+const shippingLinesList = ref([])
+const carriersList = ref([])
+const containerTypesList = ref([])
+const incotermsList = ref([])
 
-// ─── MAESTRO CONFIG ──────────────────────────────────────────────────────────
-
-const maestroConfig = {
-  paises: {
-    label: 'Países',
-    columns: [
-      { key: 'name', label: 'Nombre', type: 'text' },
-    ],
-    get data() { return paises.value },
-  },
-  ciudades: {
-    label: 'Ciudades',
-    columns: [
-      { key: 'name', label: 'Nombre', type: 'text' },
-      { key: 'country_id', label: 'País', type: 'select', relatedKey: 'paises', displayField: 'name' },
-    ],
-    get data() { return ciudades.value },
-  },
-  puertos: {
-    label: 'Puertos',
-    columns: [
-      { key: 'name', label: 'Nombre', type: 'text' },
-      { key: 'city_id', label: 'Ciudad', type: 'select', relatedKey: 'ciudades', displayField: 'name' },
-    ],
-    get data() { return puertos.value },
-  },
-  aeropuertos: {
-    label: 'Aeropuertos',
-    columns: [
-      { key: 'code', label: 'Código IATA', type: 'text' },
-      { key: 'name', label: 'Nombre', type: 'text' },
-      { key: 'city_id', label: 'Ciudad', type: 'select', relatedKey: 'ciudades', displayField: 'name' },
-    ],
-    get data() { return aeropuertos.value },
-  },
-  navieras: {
-    label: 'Navieras',
-    columns: [
-      { key: 'name', label: 'Nombre', type: 'text' },
-      { key: 'city_id', label: 'Ciudad', type: 'select', relatedKey: 'ciudades', displayField: 'name' },
-    ],
-    get data() { return navieras.value },
-  },
-  transportistas: {
-    label: 'Transportistas',
-    columns: [
-      { key: 'name', label: 'Nombre', type: 'text' },
-      { key: 'city_id', label: 'Ciudad', type: 'select', relatedKey: 'ciudades', displayField: 'name' },
-    ],
-    get data() { return transportistas.value },
-  },
-  contenedores: {
-    label: 'Tipos de Contenedor',
-    columns: [
-      { key: 'type_name', label: 'Tipo', type: 'text' },
-    ],
-    get data() { return contenedores.value },
-  },
-}
-
-// ─── NAV GROUPS ──────────────────────────────────────────────────────────────
-
+// ── Configuración de la navegación lateral ──
 const navGroups = [
   {
     label: 'Geografía',
     items: [
-      { key: 'paises', label: 'Países' },
-      { key: 'ciudades', label: 'Ciudades' },
-    ],
-  },
-  {
-    label: 'Infraestructura',
-    items: [
-      { key: 'puertos', label: 'Puertos' },
-      { key: 'aeropuertos', label: 'Aeropuertos' },
+      { key: 'countries', label: 'Países' },
+      { key: 'ports', label: 'Puertos' },
+      { key: 'airports', label: 'Aeropuertos' },
     ],
   },
   {
     label: 'Transporte',
     items: [
-      { key: 'navieras', label: 'Navieras' },
-      { key: 'transportistas', label: 'Transportistas' },
+      { key: 'shipping-lines', label: 'Líneas de Transporte' },
+      { key: 'carriers', label: 'Modos de Transporte' },
+      { key: 'container-types', label: 'Tipos de Contenedor' },
     ],
   },
   {
-    label: 'Operativo',
+    label: 'Comercial',
     items: [
-      { key: 'contenedores', label: 'Tipos de Contenedor' },
+      { key: 'incoterms', label: 'Incoterms' },
     ],
   },
 ]
 
-// ─── ACTIVE TABLE ─────────────────────────────────────────────────────────────
+// ── Configuración de columnas por maestro ──
+const maestrosConfig = {
+  countries: {
+    label: 'Países',
+    endpoint: '/countries',
+    columns: [
+      { key: 'name', label: 'Nombre' },
+    ],
+    dataRef: countriesList,
+  },
+  ports: {
+    label: 'Puertos',
+    endpoint: '/ports',
+    columns: [
+      { key: 'name', label: 'Nombre' },
+    ],
+    dataRef: portsList,
+  },
+  airports: {
+    label: 'Aeropuertos',
+    endpoint: '/airports',
+    columns: [
+      { key: 'name', label: 'Nombre' },
+    ],
+    dataRef: airportsList,
+  },
+  'shipping-lines': {
+    label: 'Líneas de Transporte',
+    endpoint: '/shipping-lines',
+    columns: [
+      { key: 'name', label: 'Nombre' },
+    ],
+    dataRef: shippingLinesList,
+  },
+  carriers: {
+    label: 'Modos de Transporte',
+    endpoint: '/carriers',
+    columns: [
+      { key: 'name', label: 'Nombre' },
+    ],
+    dataRef: carriersList,
+  },
+  'container-types': {
+    label: 'Tipos de Contenedor',
+    endpoint: '/container-types',
+    columns: [
+      { key: 'name', label: 'Nombre' },
+    ],
+    dataRef: containerTypesList,
+  },
+  incoterms: {
+    label: 'Incoterms',
+    endpoint: '/incoterms',
+    columns: [
+      { key: 'code', label: 'Código' },
+      { key: 'name', label: 'Nombre' },
+    ],
+    dataRef: incotermsList,
+  },
+}
 
-const activeKey = ref('paises')
-const activeMaestro = computed(() => maestroConfig[activeKey.value])
+// ── Maestro activo ──
+const activeKey = ref('countries')
 
-watch(activeKey, (key) => fetchTabla(key))
+const activeMaestro = computed(() => {
+  const config = maestrosConfig[activeKey.value]
+  return {
+    label: config.label,
+    columns: config.columns,
+    data: config.dataRef.value,
+  }
+})
 
-// ─── MODAL STATE ──────────────────────────────────────────────────────────────
+const relatedData = ref({})
 
+// ── Fetch maestro genérico ──
+async function fetchMaestro(key) {
+  if (!auth.token) {
+    errorMessage.value = 'No autenticado. Por favor inicia sesión.'
+    return
+  }
+
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    const config = maestrosConfig[key]
+    const res = await axios.get(LARAVEL + config.endpoint, { headers })
+    config.dataRef.value = res.data
+  } catch (error) {
+    errorMessage.value = `Error al cargar ${maestrosConfig[key].label}.`
+    console.error(`Error al cargar ${key}:`, error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// ── Carga inicial ──
+onMounted(() => {
+  fetchMaestro(activeKey.value)
+})
+
+// ── Cargar maestro cuando cambia la pestaña ──
+watch(activeKey, (newKey) => {
+  fetchMaestro(newKey)
+})
+
+// ── Modal ──
 const modalVisible = ref(false)
 const editingRow = ref(null)
 
@@ -146,38 +172,33 @@ function openEdit(row) {
 
 function closeModal() {
   modalVisible.value = false
+  editingRow.value = null
 }
 
-// ─── CRUD HANDLERS ────────────────────────────────────────────────────────────
-
-async function handleSave(formData) {
-  const { tabla } = tablaRefMap[activeKey.value]
-  if (editingRow.value) {
-    await apiFetch('PUT', `/${tabla}/${editingRow.value.id}`, formData)
-  } else {
-    await apiFetch('POST', `/${tabla}`, formData)
+async function handleSave(data) {
+  const config = maestrosConfig[activeKey.value]
+  try {
+    if (editingRow.value) {
+      await axios.put(LARAVEL + config.endpoint + '/' + editingRow.value.id, data, { headers })
+    } else {
+      await axios.post(LARAVEL + config.endpoint, data, { headers })
+    }
+    closeModal()
+    await fetchMaestro(activeKey.value)
+  } catch (error) {
+    console.error('Error al guardar:', error)
   }
-  await fetchTabla(activeKey.value)
-  closeModal()
 }
 
 async function handleDelete(row) {
-  const { tabla } = tablaRefMap[activeKey.value]
-  await apiFetch('DELETE', `/${tabla}/${row.id}`)
-  await fetchTabla(activeKey.value)
+  const config = maestrosConfig[activeKey.value]
+  try {
+    await axios.delete(LARAVEL + config.endpoint + '/' + row.id, { headers })
+    await fetchMaestro(activeKey.value)
+  } catch (error) {
+    console.error('Error al eliminar:', error)
+  }
 }
-
-const relatedData = computed(() => ({
-  paises: paises.value,
-  ciudades: ciudades.value,
-}))
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-
-onMounted(async () => {
-  await Promise.all([fetchTabla('paises'), fetchTabla('ciudades')])
-  await fetchTabla(activeKey.value)
-})
 </script>
 
 <template>
@@ -190,6 +211,9 @@ onMounted(async () => {
       </div>
     </div>
 
+    <p v-if="loading" class="maestros-status">Cargando datos maestros...</p>
+    <p v-else-if="errorMessage" class="maestros-error">{{ errorMessage }}</p>
+
     <!-- Content -->
     <div class="maestros-content">
       <MaestroNav
@@ -199,6 +223,7 @@ onMounted(async () => {
       />
       <MaestroTable
         :maestro="activeMaestro"
+        :related-data="relatedData"
         @add="openAdd"
         @edit="openEdit"
         @delete="handleDelete"
@@ -218,6 +243,18 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.maestros-status {
+  margin: 6px 0 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.maestros-error {
+  margin: 6px 0 12px;
+  font-size: 13px;
+  color: #dc2626;
+}
+
 .maestros-content {
   display: flex;
   gap: 20px;

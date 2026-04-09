@@ -1,6 +1,8 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 import { useRoleStore } from '@/stores/role'
+import { useAuthStore } from '@/stores/auth'
 import SolicitudesStats from '@/components/solicitudes/SolicitudesStats.vue'
 import SolicitudesFilters from '@/components/solicitudes/SolicitudesFilters.vue'
 import SolicitudesTable from '@/components/solicitudes/SolicitudesTable.vue'
@@ -8,20 +10,77 @@ import CrearPresupuestoModal from '@/components/solicitudes/CrearPresupuestoModa
 import CrearSolicitudModal from '@/components/solicitudes/CrearSolicitudModal.vue'
 
 const roleStore = useRoleStore()
+const auth = useAuthStore()
 
-const solicitudes = reactive([
-  { id: 1, client_id: 1, clientName: 'Textiles Mediterráneo S.A.', volume_m3: 45, gross_weight_kg: 12450, originName: 'Almacén Shanghai, Pudong District, China', destinationName: 'Nave Industrial, Pol. Ind. Fuente del Jarro, Valencia', comments: '2 contenedores 40HC con ropa de temporada', created_at: '15/03/2024', hasOffer: false },
-  { id: 2, client_id: 2, clientName: 'Importaciones García S.L.', volume_m3: 6.5, gross_weight_kg: 1850, originName: 'Almacén Miami, NW 25th St, Florida, EEUU', destinationName: 'Centro Logístico, Coslada, Madrid', comments: '5 pallets de electrónica', created_at: '20/02/2024', hasOffer: true },
-  { id: 3, client_id: 3, clientName: 'Alimentación Ibérica S.L.', volume_m3: 32, gross_weight_kg: 8200, originName: 'Fábrica Rotterdam, Europoort, Países Bajos', destinationName: 'Almacén Frigorífico, Zona Franca, Barcelona', comments: 'Camión frigorífico completo', created_at: '25/02/2024', hasOffer: false },
-  { id: 4, client_id: 4, clientName: 'Electrónica Levante S.A.', volume_m3: 12, gross_weight_kg: 3200, originName: 'Fábrica Shenzhen, Guangdong, China', destinationName: 'Almacén Bilbao, Pol. Ind. Arriaga', comments: '1 contenedor 20DV con componentes electrónicos', created_at: '10/03/2024', hasOffer: true },
-  { id: 5, client_id: 5, clientName: 'Maquinaria Industrial Norte', volume_m3: 55, gross_weight_kg: 18500, originName: 'Fábrica Frankfurt, Hessen, Alemania', destinationName: 'Polígono Industrial, Zaragoza', comments: 'Maquinaria pesada oversized', created_at: '18/03/2024', hasOffer: false },
-])
+const LARAVEL = import.meta.env.VITE_LARAVEL_API
+const headers = { Authorization: `Bearer ${auth.token}` }
+
+const solicitudes = ref([])
+const loading = ref(false)
+
+// 1. Creamos las listas reactivas para los desplegables del modal
+const clientesList = ref([])
+const localizacionesList = ref([])
+
+function mapSolicitud(item) {
+  return {
+    id: item.id,
+    client_id: item.client_id,
+    clientName: item.client?.company_name ?? '—',
+    volume_m3: item.volume_m3,
+    gross_weight_kg: item.gross_weight_kg,
+    originName: item.origin?.name ?? '—',
+    destinationName: item.destination?.name ?? '—',
+    comments: item.comments,
+    created_at: item.created_at ? new Date(item.created_at).toLocaleDateString('es-ES') : '—',
+    hasOffer: (item.commercial_offers?.length ?? 0) > 0,
+  }
+}
+
+async function fetchSolicitudes() {
+  loading.value = true
+  try {
+    const endpoint = roleStore.isAdmin ? '/client-requests-admin' : '/client-requests-client'
+    const res = await axios.get(LARAVEL + endpoint, { headers })
+    solicitudes.value = res.data.map(mapSolicitud)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 2. Función para cargar localizaciones y clientes
+async function cargarDatos() {
+  try {
+    const peticionLocalizaciones = axios.get(LARAVEL + '/locations', { headers })
+
+    let peticionClientes = Promise.resolve({ data: [] })
+    if (roleStore.isAdmin) {
+      peticionClientes = axios.get(LARAVEL + '/clients', { headers })
+    }
+
+    const [resLocalizaciones, resClientes] = await Promise.all([
+      peticionLocalizaciones,
+      peticionClientes,
+    ])
+
+    localizacionesList.value = resLocalizaciones.data
+    clientesList.value = resClientes.data
+  } catch (error) {
+    console.error('Error al cargar datos para los desplegables:', error)
+  }
+}
+
+// 3. Ejecutamos las llamadas a la API cuando el componente se monta
+onMounted(() => {
+  fetchSolicitudes()
+  cargarDatos()
+})
 
 const activeFilter = ref('Todos')
 const searchQuery = ref('')
 
 const filteredSolicitudes = computed(() => {
-  let result = solicitudes
+  let result = solicitudes.value
 
   if (activeFilter.value !== 'Todos') {
     result = result.filter((s) => {
@@ -61,7 +120,7 @@ function handlePresupuestoSubmit(data) {
   closePresupuestoModal()
 }
 
-// Modal state — client: solicitud modal
+// Modal state — client/admin: solicitud modal
 const showSolicitudModal = ref(false)
 
 function openSolicitudModal() {
@@ -72,9 +131,15 @@ function closeSolicitudModal() {
   showSolicitudModal.value = false
 }
 
-function handleSolicitudSubmit(data) {
-  console.log('Solicitud creada:', data)
-  closeSolicitudModal()
+async function handleSolicitudSubmit(data) {
+  try {
+    const endpoint = roleStore.isAdmin ? '/client-requests-admin' : '/client-requests-client'
+    await axios.post(LARAVEL + endpoint, data, { headers })
+    closeSolicitudModal()
+    await fetchSolicitudes()
+  } catch (error) {
+    console.error('Error al enviar la solicitud:', error)
+  }
 }
 </script>
 
@@ -97,7 +162,7 @@ function handleSolicitudSubmit(data) {
     </div>
 
     <!-- Stats Row -->
-    <SolicitudesStats />
+    <SolicitudesStats :solicitudes="solicitudes" />
 
     <!-- Filters -->
     <SolicitudesFilters :active-filter="activeFilter" :search-query="searchQuery"
@@ -111,9 +176,10 @@ function handleSolicitudSubmit(data) {
     <CrearPresupuestoModal :visible="showPresupuestoModal" :solicitud="selectedSolicitud"
       @close="closePresupuestoModal" @submit="handlePresupuestoSubmit" />
 
-    <!-- Modal: Crear Solicitud (client) -->
-    <CrearSolicitudModal :visible="showSolicitudModal" @close="closeSolicitudModal"
-      @submit="handleSolicitudSubmit" />
+    <!-- Modal: Crear Solicitud (client/admin) -->
+    <CrearSolicitudModal :visible="showSolicitudModal" :role="roleStore.currentRole"
+      :clientes="clientesList" :localizaciones="localizacionesList"
+      @close="closeSolicitudModal" @submit="handleSolicitudSubmit" />
   </div>
 </template>
 

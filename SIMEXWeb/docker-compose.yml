@@ -1,0 +1,29 @@
+services:
+  # El "portero" que recibe las visitas
+  nginx-proxy:
+    image: nginx:stable-alpine
+    container_name: simex-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: always
+
+  # Tu aplicación de Vue
+  frontend:
+    image: ddelacortep/simex-daw:frontend
+    container_name: simex-frontend
+    restart: always
+
+  # Tu aplicación de Laravel
+  backend:
+    image: ddelacortep/simex-daw:backend
+    container_name: simex-backend
+    restart: always
+    # Si usas base de datos, añade las variables de entorno aquí
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
