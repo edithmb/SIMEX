@@ -24,7 +24,7 @@ services:
     container_name: simex-backend
     restart: always
     env_file:
-      - ./backend/.env
+      - backend/.env
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
