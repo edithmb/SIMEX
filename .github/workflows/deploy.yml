@@ -1,7 +1,7 @@
 name: Build and Push to Docker Hub
 
 on:
-  pull_request:
+  push:
     branches:
       - main # O "master", asegúrate de que sea el nombre de tu rama principal
 
@@ -23,6 +23,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./SIMEXWeb/backend
+          file: ./SIMEXWeb/backend/DOCKERFILE
           push: true
           tags: |
             ddelacortep/simex-daw:backend
@@ -32,7 +33,8 @@ jobs:
       - name: Build & Push Frontend
         uses: docker/build-push-action@v5
         with:
-          context: /SIMEXWeb/frontend
+          context: ./SIMEXWeb/frontend
+          file: ./SIMEXWeb/frontend/DOCKERFILE
           push: true
           tags: |
             ddelacortep/simex-daw:frontend
