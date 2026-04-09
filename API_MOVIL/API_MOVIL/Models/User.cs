@@ -51,9 +51,13 @@ public partial class User
 
     public virtual ICollection<CommercialOffer> CommercialOfferUpdatedByNavigations { get; set; } = new List<CommercialOffer>();
 
-    public virtual ICollection<Document> Documents { get; set; } = new List<Document>();
+    public virtual ICollection<ConversationParticipant> ConversationParticipants { get; set; } = new List<ConversationParticipant>();
 
     public virtual ICollection<LoginSession> LoginSessions { get; set; } = new List<LoginSession>();
 
-    public virtual Role Role { get; set; } = null!;
+    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
+
+    public virtual ICollection<PersonalDocument> PersonalDocuments { get; set; } = new List<PersonalDocument>();
+
+    public virtual Role? Role { get; set; } = null!;
 }

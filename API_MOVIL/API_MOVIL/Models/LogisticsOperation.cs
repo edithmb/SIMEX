@@ -34,4 +34,6 @@ public partial class LogisticsOperation
     public virtual Client Client { get; set; } = null!;
 
     public virtual CommercialOffer CommercialOffer { get; set; } = null!;
+
+    public virtual ICollection<LogisticsOperationDocument> LogisticsOperationDocuments { get; set; } = new List<LogisticsOperationDocument>();
 }

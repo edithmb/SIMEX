@@ -51,7 +51,7 @@ function handleSave() {
               <option
                 v-for="opt in (relatedData[col.relatedKey] || [])"
                 :key="opt.id"
-                :value="opt[col.displayField || 'name']"
+                :value="opt.id"
               >
                 {{ opt[col.displayField || 'name'] }}
               </option>
