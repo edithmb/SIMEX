@@ -1,5 +1,6 @@
 .agents
 .agent
 .claude
+.worktrees
 skills-lock.json
 .env
