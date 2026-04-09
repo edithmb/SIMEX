@@ -1,0 +1,39 @@
+services:
+  backend:
+    image: ${DOCKERHUB_USERNAME:-myuser}/simex-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      APP_NAME: "SIMEX"
+      APP_ENV: production
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: "false"
+      APP_URL: ${APP_URL:-http://localhost:8000/api}
+      DB_CONNECTION: sqlsrv
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-1433}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TTL: ${JWT_TTL:-1440}
+      CACHE_STORE: file
+      SESSION_DRIVER: file
+      LOG_CHANNEL: stderr
+    restart: unless-stopped
+
+  frontend:
+    image: ${DOCKERHUB_USERNAME:-myuser}/simex-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_LARAVEL_API: ${VITE_LARAVEL_API:-http://localhost:8000/api}
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
