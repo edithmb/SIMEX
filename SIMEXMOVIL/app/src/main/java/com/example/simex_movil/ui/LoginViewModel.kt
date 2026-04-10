@@ -38,7 +38,7 @@ class LoginViewModel : ViewModel(){
                     _loginState.value = LoginState.Error("Credenciales incorrectas")
                 }
             } catch (e: Exception) {
-                _loginState.value = LoginState.Error("Error de conexión: Verifica tu red")
+                _loginState.value = LoginState.Error("fallo tecnico: ${e.message}")
             }
         }
     }
