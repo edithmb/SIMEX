@@ -41,8 +41,6 @@ class LoginViewModel : ViewModel(){
                 _loginState.value = LoginState.Error("Error de conexión: Verifica tu red")
             }
         }
-
-
     }
 
 }
