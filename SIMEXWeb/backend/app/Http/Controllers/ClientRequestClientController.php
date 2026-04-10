@@ -20,14 +20,20 @@ class ClientRequestClientController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $validated = $request->validate([
+            'origin_id'       => 'required|integer|exists:locations,id',
+            'destination_id'  => 'required|integer|exists:locations,id',
+            'volume_m3'       => 'required|numeric|min:0',
+            'gross_weight_kg' => 'required|numeric|min:0',
+            'comments'        => 'nullable|string',
+        ]);
+
         $clientRequest = ClientRequest::create([
+            ...$validated,
+            'comments'   => $validated['comments'] ?? '',
+            'client_id'  => auth()->user()->client_id,
             'created_by' => auth()->id(),
-            'volume_m3' => $request->input('volume_m3'),
-            'gross_weight_kg' => $request->input('gross_weight_kg'),
-            'comments' => $request->input('comments'),
-            'origin_id' => $request->input('origin_id'),
-            'destination_id' => $request->input('destination_id'),
-            'estado' => 'enviado',
+            'estado'     => 'enviado',
         ]);
 
         return response()->json($clientRequest, 201);

@@ -36,10 +36,20 @@ class CommercialOffer extends Model
     {
         return [
             'price' => 'decimal:2',
-            'valid_until' => 'date',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * SQL Server devuelve fechas como "Feb 22 2028 12:00:00:AM"
+     * donde Carbon no puede parsear ":AM"/":PM". Normalizamos aquí.
+     */
+    protected function asDateTime($value)
+    {
+        if (is_string($value) && preg_match('/:\s*(AM|PM)\s*$/i', $value)) {
+            $value = preg_replace('/:\s*(AM|PM)\s*$/i', ' $1', $value);
+        }
+
+        return parent::asDateTime($value);
     }
 
     public function scopeDraft(Builder $query): Builder

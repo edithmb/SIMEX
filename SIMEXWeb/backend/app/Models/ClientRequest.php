@@ -29,8 +29,20 @@ class ClientRequest extends Model
         return [
             'volume_m3' => 'decimal:2',
             'gross_weight_kg' => 'decimal:2',
-            'created_at' => 'datetime',
         ];
+    }
+
+    /**
+     * SQL Server devuelve fechas como "Feb 22 2028 12:00:00:AM"
+     * donde Carbon no puede parsear ":AM"/":PM". Normalizamos aquí.
+     */
+    protected function asDateTime($value)
+    {
+        if (is_string($value) && preg_match('/:\s*(AM|PM)\s*$/i', $value)) {
+            $value = preg_replace('/:\s*(AM|PM)\s*$/i', ' $1', $value);
+        }
+
+        return parent::asDateTime($value);
     }
 
     public function client(): BelongsTo
