@@ -26,7 +26,7 @@ namespace API_MOVIL.Hubs
 
                 var result = _encryptation.Encrypt(originalFile);
 
-                string secureFolder = Path.Combine(_env.WebRootPath ?? _env.ContentRootPath, "wwwroot", "encrypted_dnis"); // preparamos nueva carpeta
+                string secureFolder = Path.Combine(_env.ContentRootPath, "wwwroot", "encrypted_dnis"); // preparamos nueva carpeta
                 if (!Directory.Exists(secureFolder)) Directory.CreateDirectory(secureFolder);
 
                 // nombre con extension .aes

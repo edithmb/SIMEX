@@ -7,21 +7,21 @@ public partial class Client
 {
     public int Id { get; set; }
 
-    public string CompanyName { get; set; } = null!;
+    public string CompanyName { get; set; }
 
-    public string? VatNumber { get; set; }
+    public string VatNumber { get; set; }
 
-    public string Address { get; set; } = null!;
+    public string Address { get; set; }
 
-    public string Country { get; set; } = null!;
+    public string Country { get; set; }
 
-    public string PostalCode { get; set; } = null!;
+    public string PostalCode { get; set; }
 
-    public string ContactName { get; set; } = null!;
+    public string ContactName { get; set; }
 
-    public string? Email { get; set; }
+    public string Email { get; set; }
 
-    public string Phone { get; set; } = null!;
+    public string Phone { get; set; }
 
     public int? OdooInt { get; set; }
 
@@ -41,15 +41,15 @@ public partial class Client
 
     public virtual ICollection<CommercialOffer> CommercialOffers { get; set; } = new List<CommercialOffer>();
 
-    public virtual User CreatedByNavigation { get; set; } = null!;
+    public virtual User CreatedByNavigation { get; set; }
 
-    public virtual User? DeletedByNavigation { get; set; }
+    public virtual User DeletedByNavigation { get; set; }
 
     public virtual ICollection<Location> Locations { get; set; } = new List<Location>();
 
     public virtual ICollection<LogisticsOperation> LogisticsOperations { get; set; } = new List<LogisticsOperation>();
 
-    public virtual User? UpdatedByNavigation { get; set; }
+    public virtual User UpdatedByNavigation { get; set; }
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

@@ -7,11 +7,11 @@ public partial class Port
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public string Name { get; set; }
 
     public int CityId { get; set; }
 
-    public virtual City City { get; set; } = null!;
+    public virtual City City { get; set; }
 
     public virtual ICollection<CommercialOffer> CommercialOfferDestinationPorts { get; set; } = new List<CommercialOffer>();
 

@@ -11,11 +11,11 @@ public partial class Message
 
     public int SenderId { get; set; }
 
-    public string Content { get; set; } = null!;
+    public string Content { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
-    public virtual Conversation Conversation { get; set; } = null!;
+    public virtual Conversation Conversation { get; set; }
 
-    public virtual User Sender { get; set; } = null!;
+    public virtual User Sender { get; set; }
 }

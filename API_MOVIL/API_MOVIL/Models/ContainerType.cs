@@ -7,7 +7,7 @@ public partial class ContainerType
 {
     public int Id { get; set; }
 
-    public string TypeName { get; set; } = null!;
+    public string TypeName { get; set; }
 
     public virtual ICollection<CommercialOffer> CommercialOffers { get; set; } = new List<CommercialOffer>();
 }

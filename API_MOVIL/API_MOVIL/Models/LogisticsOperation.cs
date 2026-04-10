@@ -7,13 +7,13 @@ public partial class LogisticsOperation
 {
     public int Id { get; set; }
 
-    public string Reference { get; set; } = null!;
+    public string Reference { get; set; }
 
     public int CommercialOfferId { get; set; }
 
     public int ClientId { get; set; }
 
-    public string Status { get; set; } = null!;
+    public string Status { get; set; }
 
     public DateOnly? Etd { get; set; }
 
@@ -31,9 +31,9 @@ public partial class LogisticsOperation
 
     public DateTime? CompletedAt { get; set; }
 
-    public virtual Client Client { get; set; } = null!;
+    public virtual Client Client { get; set; }
 
-    public virtual CommercialOffer CommercialOffer { get; set; } = null!;
+    public virtual CommercialOffer CommercialOffer { get; set; }
 
     public virtual ICollection<LogisticsOperationDocument> LogisticsOperationDocuments { get; set; } = new List<LogisticsOperationDocument>();
 }

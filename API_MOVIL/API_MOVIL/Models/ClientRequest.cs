@@ -13,7 +13,7 @@ public partial class ClientRequest
 
     public decimal GrossWeightKg { get; set; }
 
-    public string Comments { get; set; } = null!;
+    public string Comments { get; set; }
 
     public int OriginId { get; set; }
 
@@ -23,13 +23,15 @@ public partial class ClientRequest
 
     public int CreatedBy { get; set; }
 
-    public virtual Client Client { get; set; } = null!;
+    public string Estado { get; set; }
+
+    public virtual Client Client { get; set; }
 
     public virtual ICollection<CommercialOffer> CommercialOffers { get; set; } = new List<CommercialOffer>();
 
-    public virtual User CreatedByNavigation { get; set; } = null!;
+    public virtual User CreatedByNavigation { get; set; }
 
-    public virtual Location Destination { get; set; } = null!;
+    public virtual Location Destination { get; set; }
 
-    public virtual Location Origin { get; set; } = null!;
+    public virtual Location Origin { get; set; }
 }
