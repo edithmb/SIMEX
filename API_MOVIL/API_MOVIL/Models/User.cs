@@ -11,15 +11,15 @@ public partial class User
 
     public int? ClientId { get; set; }
 
-    public string FirstName { get; set; } = null!;
+    public string FirstName { get; set; }
 
-    public string LastName { get; set; } = null!;
+    public string LastName { get; set; }
 
-    public string Email { get; set; } = null!;
+    public string Email { get; set; }
 
-    public string PasswordHash { get; set; } = null!;
+    public string PasswordHash { get; set; }
 
-    public string PhoneNumber { get; set; } = null!;
+    public string PhoneNumber { get; set; }
 
     public bool IsActive { get; set; }
 
@@ -37,7 +37,7 @@ public partial class User
 
     public int? DeletedBy { get; set; }
 
-    public virtual Client? Client { get; set; }
+    public virtual Client Client { get; set; }
 
     public virtual ICollection<Client> ClientCreatedByNavigations { get; set; } = new List<Client>();
 
@@ -59,5 +59,5 @@ public partial class User
 
     public virtual ICollection<PersonalDocument> PersonalDocuments { get; set; } = new List<PersonalDocument>();
 
-    public virtual Role? Role { get; set; } = null!;
+    public virtual Role Role { get; set; }
 }

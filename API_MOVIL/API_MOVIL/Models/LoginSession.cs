@@ -9,11 +9,11 @@ public partial class LoginSession
 
     public int UserId { get; set; }
 
-    public string IpAddress { get; set; } = null!;
+    public string IpAddress { get; set; }
 
-    public string UserAgent { get; set; } = null!;
+    public string UserAgent { get; set; }
 
-    public string DeviceType { get; set; } = null!;
+    public string DeviceType { get; set; }
 
     public DateTime? LoggedInAt { get; set; }
 
@@ -21,5 +21,5 @@ public partial class LoginSession
 
     public DateTime TokenExpiresAt { get; set; }
 
-    public virtual User User { get; set; } = null!;
+    public virtual User User { get; set; }
 }

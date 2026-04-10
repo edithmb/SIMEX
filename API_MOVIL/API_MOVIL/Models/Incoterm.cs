@@ -13,13 +13,13 @@ public partial class Incoterm
 
     public int? OrderNum { get; set; }
 
-    public string? Responsability { get; set; }
+    public string Responsability { get; set; }
 
     public virtual ICollection<CommercialOffer> CommercialOffers { get; set; } = new List<CommercialOffer>();
 
     public virtual ICollection<IncotermDocumentTemplate> IncotermDocumentTemplates { get; set; } = new List<IncotermDocumentTemplate>();
 
-    public virtual IncotermType IncotermType { get; set; } = null!;
+    public virtual IncotermType IncotermType { get; set; }
 
-    public virtual TrackingStep TrackingStep { get; set; } = null!;
+    public virtual TrackingStep TrackingStep { get; set; }
 }
