@@ -31,7 +31,11 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/locations', [LocationController::class, 'index']);
     Route::get('/clients', [ClientController::class, 'index']);
     Route::get('/incoterms', [IncotermController::class, 'index']);
+    Route::get('/commercial-offers', [ComercialOfferController::class, 'index']);
+    Route::get('/commercial-offers/mine', [ComercialOfferController::class, 'mine']);
     Route::post('/commercial-offers', [ComercialOfferController::class, 'store']);
+    Route::put('/commercial-offers/{id}/approve', [ComercialOfferController::class, 'approve']);
+    Route::put('/commercial-offers/{id}/reject', [ComercialOfferController::class, 'reject']);
     Route::apiResource('client-requests-client', ClientRequestClientController::class)->except('show');
     Route::apiResource('client-requests-admin', ClientRequestAdminController::class)->except('show');
 });

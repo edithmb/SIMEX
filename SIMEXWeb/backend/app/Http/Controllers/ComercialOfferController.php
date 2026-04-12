@@ -33,86 +33,66 @@ class ComercialOfferController extends Controller
         return response()->json($offer, 201);
     }
 
-    public function index()
+    public function index(): JsonResponse
     {
-        $offers = CommercialOffer::select([
-                'id', 
-                'reference', 
-                'client_request_id',
-                'client_id',
-                'incoterm_id',
-                'container_type_id',
-                'valid_until',
-                'price', 
-                'status',
-                'rejection_reason',
-                'comments',
-                'created_at'
-            ])
-            ->with([
-                'clientRequest' => function($query) {
-                    $query->select([
-                        'id', 
-                        'volume_m3', 
-                        'gross_weight_kg', 
-                        'origin_id',
-                        'destination_id',
-                        'estado'
-                    ]);
-                },
-
-                'clientRequest.origin:id,name',      
-                'clientRequest.destination:id,name',
-                
-                'client:id,company_name',
-                'incoterm:id,incoterm_type_id',
-                'incoterm.incotermType:id,code,name',
-                'containerType:id,type_name'
-            ])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
+        $offers = $this->buildOffersQuery()->paginate(10);
         return response()->json($offers);
     }
-    public function getByClient($clientId)
+
+    public function mine(): JsonResponse
     {
-        $offers = CommercialOffer::select([
-                'id', 
-                'reference', 
+        $clientId = auth()->user()->client_id;
+        $offers = $this->buildOffersQuery()->where('client_id', $clientId)->paginate(10);
+        return response()->json($offers);
+    }
+
+    public function approve($id): JsonResponse
+    {
+        $offer = CommercialOffer::findOrFail($id);
+        $offer->update(['status' => 'accepted', 'updated_by' => auth()->id()]);
+        return response()->json($offer);
+    }
+
+    public function reject(Request $request, $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string',
+        ]);
+        $offer = CommercialOffer::findOrFail($id);
+        $offer->update([
+            'status'           => 'rejected',
+            'rejection_reason' => $validated['rejection_reason'],
+            'updated_by'       => auth()->id(),
+        ]);
+        return response()->json($offer);
+    }
+
+    private function buildOffersQuery()
+    {
+        return CommercialOffer::select([
+                'id',
+                'reference',
                 'client_request_id',
                 'client_id',
                 'incoterm_id',
+                'origin_port_id',
+                'destination_port_id',
                 'container_type_id',
                 'valid_until',
-                'price', 
+                'price',
                 'status',
                 'rejection_reason',
                 'comments',
-                'created_at'
+                'created_at',
             ])
-            ->where('client_id', $clientId) 
             ->with([
-                'clientRequest' => function($query) {
-                    $query->select([
-                        'id', 
-                        'volume_m3', 
-                        'gross_weight_kg', 
-                        'origin_id',
-                        'destination_id',
-                        'estado'
-                    ]);
-                },
-                'clientRequest.origin:id,name',      
-                'clientRequest.destination:id,name',
                 'client:id,company_name',
-
                 'incoterm:id,incoterm_type_id',
                 'incoterm.incotermType:id,code,name',
-                'containerType:id,type_name'
+                'originPort:id,name',
+                'destinationPort:id,name',
+                'containerType:id,type_name',
             ])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        return response()->json($offers);
+            ->orderBy('created_at', 'desc');
     }
 }
