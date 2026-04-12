@@ -21,6 +21,10 @@ const loading = ref(false)
 // 1. Creamos las listas reactivas para los desplegables del modal
 const clientesList = ref([])
 const localizacionesList = ref([])
+const incotermsList = ref([])
+const puertosOrigenList = ref([])
+const puertosDestinoList = ref([])
+const tiposContenedorList = ref([])
 
 function mapSolicitud(item) {
   return {
@@ -48,23 +52,35 @@ async function fetchSolicitudes() {
   }
 }
 
-// 2. Función para cargar localizaciones y clientes
+// 2. Función para cargar localizaciones, clientes y datos de presupuesto
 async function cargarDatos() {
   try {
     const peticionLocalizaciones = axios.get(LARAVEL + '/locations', { headers })
+    const peticionIncoterms = axios.get(LARAVEL + '/api/incoterms/', { headers })
+    const peticionPuertosOrigen = axios.get(LARAVEL + '/api/puertos/origen/', { headers })
+    const peticionPuertosDestino = axios.get(LARAVEL + '/api/puertos/destino/', { headers })
+    const peticionTiposContenedor = axios.get(LARAVEL + '/api/tipos-contenedor/', { headers })
 
     let peticionClientes = Promise.resolve({ data: [] })
     if (roleStore.isAdmin) {
       peticionClientes = axios.get(LARAVEL + '/clients', { headers })
     }
 
-    const [resLocalizaciones, resClientes] = await Promise.all([
+    const [resLocalizaciones, resClientes, resIncoterms, resPuertosOrigen, resPuertosDestino, resTiposContenedor] = await Promise.all([
       peticionLocalizaciones,
       peticionClientes,
+      peticionIncoterms,
+      peticionPuertosOrigen,
+      peticionPuertosDestino,
+      peticionTiposContenedor,
     ])
 
     localizacionesList.value = resLocalizaciones.data
     clientesList.value = resClientes.data
+    incotermsList.value = resIncoterms.data
+    puertosOrigenList.value = resPuertosOrigen.data
+    puertosDestinoList.value = resPuertosDestino.data
+    tiposContenedorList.value = resTiposContenedor.data
   } catch (error) {
     console.error('Error al cargar datos para los desplegables:', error)
   }
@@ -174,6 +190,8 @@ async function handleSolicitudSubmit(data) {
 
     <!-- Modal: Crear Presupuesto (admin) -->
     <CrearPresupuestoModal :visible="showPresupuestoModal" :solicitud="selectedSolicitud"
+      :incoterms="incotermsList" :puertos-origen="puertosOrigenList" :puertos-destino="puertosDestinoList"
+      :tipos-contenedor="tiposContenedorList"
       @close="closePresupuestoModal" @submit="handlePresupuestoSubmit" />
 
     <!-- Modal: Crear Solicitud (client/admin) -->

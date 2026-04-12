@@ -4,6 +4,10 @@ import { reactive, watch } from 'vue'
 const props = defineProps({
     visible: { type: Boolean, default: false },
     solicitud: { type: Object, default: null },
+    incoterms: { type: Array, default: () => [] },
+    puertosOrigen: { type: Array, default: () => [] },
+    puertosDestino: { type: Array, default: () => [] },
+    tiposContenedor: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['close', 'submit'])
@@ -36,52 +40,6 @@ watch(
     },
     { immediate: true },
 )
-
-const incotermOptions = [
-    { value: 'FOB', label: 'FOB (Free On Board)' },
-    { value: 'CIF', label: 'CIF (Cost, Insurance & Freight)' },
-    { value: 'EXW', label: 'EXW (Ex Works)' },
-    { value: 'DDP', label: 'DDP (Delivered Duty Paid)' },
-    { value: 'FCA', label: 'FCA (Free Carrier)' },
-    { value: 'CFR', label: 'CFR (Cost & Freight)' },
-    { value: 'CPT', label: 'CPT (Carriage Paid To)' },
-    { value: 'CIP', label: 'CIP (Carriage & Insurance Paid To)' },
-    { value: 'DAP', label: 'DAP (Delivered At Place)' },
-    { value: 'DPU', label: 'DPU (Delivered at Place Unloaded)' },
-]
-
-const portOptions = [
-    { value: '', label: 'Seleccionar...' },
-    { value: 'Barcelona', label: 'Barcelona' },
-    { value: 'Valencia', label: 'Valencia' },
-    { value: 'Bilbao', label: 'Bilbao' },
-    { value: 'Algeciras', label: 'Algeciras' },
-    { value: 'Shanghai', label: 'Shanghai' },
-    { value: 'Shenzhen', label: 'Shenzhen' },
-    { value: 'Ningbo', label: 'Ningbo' },
-    { value: 'Rotterdam', label: 'Rotterdam' },
-    { value: 'Hamburgo', label: 'Hamburgo' },
-    { value: 'Amberes', label: 'Amberes' },
-    { value: 'Miami', label: 'Miami' },
-    { value: 'Nueva York', label: 'Nueva York' },
-    { value: 'Los Ángeles', label: 'Los Ángeles' },
-    { value: 'Singapur', label: 'Singapur' },
-    { value: 'Busan', label: 'Busan' },
-    { value: 'Santos', label: 'Santos' },
-    { value: 'El Pireo', label: 'El Pireo' },
-    { value: 'Génova', label: 'Génova' },
-    { value: 'Jebel Ali', label: 'Jebel Ali' },
-    { value: 'Le Havre', label: 'Le Havre' },
-]
-
-const containerOptions = [
-    { value: '', label: 'Seleccionar...' },
-    { value: '20st', label: "20' Standard" },
-    { value: '40st', label: "40' Standard" },
-    { value: '40hc', label: "40' High Cube" },
-    { value: '20rf', label: "20' Reefer" },
-    { value: '40rf', label: "40' Reefer" },
-]
 
 function handleClose() {
     emit('close')
@@ -163,32 +121,32 @@ function handleOverlayClick(e) {
                             <div class="modal-field">
                                 <label class="modal-label">Incoterm</label>
                                 <select v-model="form.incoterm" class="modal-select">
-                                    <option v-for="opt in incotermOptions" :key="opt.value" :value="opt.value">
-                                        {{ opt.label }}
+                                    <option v-for="opt in incoterms" :key="opt.id || opt.code" :value="opt.code || opt.id">
+                                        {{ opt.name || opt.code }}
                                     </option>
                                 </select>
                             </div>
                             <div class="modal-field">
                                 <label class="modal-label">Puerto Origen</label>
                                 <select v-model="form.origin_port" class="modal-select">
-                                    <option v-for="opt in portOptions" :key="opt.value" :value="opt.value">
-                                        {{ opt.label }}
+                                    <option v-for="opt in puertosOrigen" :key="opt.id" :value="opt.id">
+                                        {{ opt.name }}
                                     </option>
                                 </select>
                             </div>
                             <div class="modal-field">
                                 <label class="modal-label">Puerto Destino</label>
                                 <select v-model="form.destination_port" class="modal-select">
-                                    <option v-for="opt in portOptions" :key="opt.value" :value="opt.value">
-                                        {{ opt.label }}
+                                    <option v-for="opt in puertosDestino" :key="opt.id" :value="opt.id">
+                                        {{ opt.name }}
                                     </option>
                                 </select>
                             </div>
                             <div class="modal-field">
                                 <label class="modal-label">Tipo de Contenedor</label>
                                 <select v-model="form.container_type" class="modal-select">
-                                    <option v-for="opt in containerOptions" :key="opt.value" :value="opt.value">
-                                        {{ opt.label }}
+                                    <option v-for="opt in tiposContenedor" :key="opt.id" :value="opt.id">
+                                        {{ opt.name || opt.type }}
                                     </option>
                                 </select>
                             </div>
