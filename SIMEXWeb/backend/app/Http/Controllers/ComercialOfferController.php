@@ -23,8 +23,13 @@ class ComercialOfferController extends Controller
             'comments'            => 'nullable|string',
         ]);
 
+        $reference = $validated['reference']
+            ?: 'PR-' . date('Y') . '-' . str_pad(CommercialOffer::count() + 1, 3, '0', STR_PAD_LEFT);
+
         $offer = CommercialOffer::create([
             ...$validated,
+            'reference'  => $reference,
+            'comments'   => $validated['comments'] ?? '',
             'client_id'  => ClientRequest::find($validated['client_request_id'])->client_id,
             'status'     => 'draft',
             'created_by' => auth()->id(),
