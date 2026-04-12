@@ -1,12 +1,11 @@
 <script setup>
-import { reactive, watch } from 'vue'
+import { reactive } from 'vue'
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
     solicitud: { type: Object, default: null },
     incoterms: { type: Array, default: () => [] },
-    puertosOrigen: { type: Array, default: () => [] },
-    puertosDestino: { type: Array, default: () => [] },
+    puertos: { type: Array, default: () => [] },
     tiposContenedor: { type: Array, default: () => [] },
 })
 
@@ -14,39 +13,45 @@ const emit = defineEmits(['close', 'submit'])
 
 const form = reactive({
     reference: '',
-    incoterm: 'FOB',
-    origin_port: '',
-    destination_port: '',
-    container_type: '',
+    incoterm_id: '',
+    origin_port_id: '',
+    destination_port_id: '',
+    container_type_id: '',
     price: '',
     valid_until: '',
     comments: '',
 })
 
-// Reset form when solicitud changes
-watch(
-    () => props.solicitud,
-    (sol) => {
-        if (sol) {
-            form.reference = ''
-            form.incoterm = 'FOB'
-            form.origin_port = ''
-            form.destination_port = ''
-            form.container_type = ''
-            form.price = ''
-            form.valid_until = ''
-            form.comments = ''
-        }
-    },
-    { immediate: true },
-)
+function resetForm() {
+    form.reference = ''
+    form.incoterm_id = ''
+    form.origin_port_id = ''
+    form.destination_port_id = ''
+    form.container_type_id = ''
+    form.price = ''
+    form.valid_until = ''
+    form.comments = ''
+}
 
 function handleClose() {
+    resetForm()
     emit('close')
 }
 
 function handleSubmit() {
-    emit('submit', { ...form })
+    const payload = {
+        client_request_id:   props.solicitud.id,
+        incoterm_id:         Number(form.incoterm_id),
+        origin_port_id:      Number(form.origin_port_id),
+        destination_port_id: Number(form.destination_port_id),
+        container_type_id:   Number(form.container_type_id),
+        price:               Number(form.price),
+        valid_until:         form.valid_until,
+        reference:           form.reference,
+        comments:            form.comments,
+    }
+    emit('submit', payload)
+    resetForm()
 }
 
 function handleOverlayClick(e) {
@@ -59,7 +64,7 @@ function handleOverlayClick(e) {
 <template>
     <Teleport to="body">
         <Transition name="modal">
-            <div v-if="visible && solicitud" class="modal-overlay" @click="handleOverlayClick">
+            <div v-if="visible" class="modal-overlay" @click="handleOverlayClick">
                 <div class="modal-box">
                     <!-- Header -->
                     <div class="modal-header">
@@ -120,33 +125,37 @@ function handleOverlayClick(e) {
                             </div>
                             <div class="modal-field">
                                 <label class="modal-label">Incoterm</label>
-                                <select v-model="form.incoterm" class="modal-select">
-                                    <option v-for="opt in incoterms" :key="opt.id || opt.code" :value="opt.code || opt.id">
-                                        {{ opt.name || opt.code }}
+                                <select v-model="form.incoterm_id" class="modal-select">
+                                    <option value="">Seleccionar...</option>
+                                    <option v-for="inc in incoterms" :key="inc.id" :value="inc.id">
+                                        {{ inc.incoterm_type?.code }} — {{ inc.incoterm_type?.name }}
                                     </option>
                                 </select>
                             </div>
                             <div class="modal-field">
                                 <label class="modal-label">Puerto Origen</label>
-                                <select v-model="form.origin_port" class="modal-select">
-                                    <option v-for="opt in puertosOrigen" :key="opt.id" :value="opt.id">
-                                        {{ opt.name }}
+                                <select v-model="form.origin_port_id" class="modal-select">
+                                    <option value="">Seleccionar...</option>
+                                    <option v-for="p in puertos" :key="p.id" :value="p.id">
+                                        {{ p.name }}
                                     </option>
                                 </select>
                             </div>
                             <div class="modal-field">
                                 <label class="modal-label">Puerto Destino</label>
-                                <select v-model="form.destination_port" class="modal-select">
-                                    <option v-for="opt in puertosDestino" :key="opt.id" :value="opt.id">
-                                        {{ opt.name }}
+                                <select v-model="form.destination_port_id" class="modal-select">
+                                    <option value="">Seleccionar...</option>
+                                    <option v-for="p in puertos" :key="p.id" :value="p.id">
+                                        {{ p.name }}
                                     </option>
                                 </select>
                             </div>
                             <div class="modal-field">
                                 <label class="modal-label">Tipo de Contenedor</label>
-                                <select v-model="form.container_type" class="modal-select">
-                                    <option v-for="opt in tiposContenedor" :key="opt.id" :value="opt.id">
-                                        {{ opt.name || opt.type }}
+                                <select v-model="form.container_type_id" class="modal-select">
+                                    <option value="">Seleccionar...</option>
+                                    <option v-for="c in tiposContenedor" :key="c.id" :value="c.id">
+                                        {{ c.type_name }}
                                     </option>
                                 </select>
                             </div>

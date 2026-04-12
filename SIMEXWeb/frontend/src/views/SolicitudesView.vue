@@ -22,8 +22,7 @@ const loading = ref(false)
 const clientesList = ref([])
 const localizacionesList = ref([])
 const incotermsList = ref([])
-const puertosOrigenList = ref([])
-const puertosDestinoList = ref([])
+const puertosList = ref([])
 const tiposContenedorList = ref([])
 
 function mapSolicitud(item) {
@@ -56,30 +55,27 @@ async function fetchSolicitudes() {
 async function cargarDatos() {
   try {
     const peticionLocalizaciones = axios.get(LARAVEL + '/locations', { headers })
-    const peticionIncoterms = axios.get(LARAVEL + '/api/incoterms/', { headers })
-    const peticionPuertosOrigen = axios.get(LARAVEL + '/api/puertos/origen/', { headers })
-    const peticionPuertosDestino = axios.get(LARAVEL + '/api/puertos/destino/', { headers })
-    const peticionTiposContenedor = axios.get(LARAVEL + '/api/tipos-contenedor/', { headers })
+    const peticionIncoterms = axios.get(LARAVEL + '/incoterms', { headers })
+    const peticionPuertos = axios.get(LARAVEL + '/ports', { headers })
+    const peticionTiposContenedor = axios.get(LARAVEL + '/container-types', { headers })
 
     let peticionClientes = Promise.resolve({ data: [] })
     if (roleStore.isAdmin) {
       peticionClientes = axios.get(LARAVEL + '/clients', { headers })
     }
 
-    const [resLocalizaciones, resClientes, resIncoterms, resPuertosOrigen, resPuertosDestino, resTiposContenedor] = await Promise.all([
+    const [resLocalizaciones, resClientes, resIncoterms, resPuertos, resTiposContenedor] = await Promise.all([
       peticionLocalizaciones,
       peticionClientes,
       peticionIncoterms,
-      peticionPuertosOrigen,
-      peticionPuertosDestino,
+      peticionPuertos,
       peticionTiposContenedor,
     ])
 
     localizacionesList.value = resLocalizaciones.data
     clientesList.value = resClientes.data
     incotermsList.value = resIncoterms.data
-    puertosOrigenList.value = resPuertosOrigen.data
-    puertosDestinoList.value = resPuertosDestino.data
+    puertosList.value = resPuertos.data
     tiposContenedorList.value = resTiposContenedor.data
   } catch (error) {
     console.error('Error al cargar datos para los desplegables:', error)
@@ -131,9 +127,14 @@ function closePresupuestoModal() {
   selectedSolicitud.value = null
 }
 
-function handlePresupuestoSubmit(data) {
-  console.log('Presupuesto generado:', data)
-  closePresupuestoModal()
+async function handlePresupuestoSubmit(data) {
+  try {
+    await axios.post(LARAVEL + '/commercial-offers', data, { headers })
+    closePresupuestoModal()
+    await fetchSolicitudes()
+  } catch (error) {
+    console.error('Error al crear presupuesto:', error)
+  }
 }
 
 // Modal state — client/admin: solicitud modal
@@ -190,8 +191,7 @@ async function handleSolicitudSubmit(data) {
 
     <!-- Modal: Crear Presupuesto (admin) -->
     <CrearPresupuestoModal :visible="showPresupuestoModal" :solicitud="selectedSolicitud"
-      :incoterms="incotermsList" :puertos-origen="puertosOrigenList" :puertos-destino="puertosDestinoList"
-      :tipos-contenedor="tiposContenedorList"
+      :incoterms="incotermsList" :puertos="puertosList" :tipos-contenedor="tiposContenedorList"
       @close="closePresupuestoModal" @submit="handlePresupuestoSubmit" />
 
     <!-- Modal: Crear Solicitud (client/admin) -->
