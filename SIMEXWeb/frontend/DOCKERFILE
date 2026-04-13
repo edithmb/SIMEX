@@ -1,0 +1,20 @@
+# frontend/Dockerfile
+
+# Etapa 1: Construcción (Build)
+FROM node:lts-alpine as build-stage
+WORKDIR /app
+ARG VITE_LARAVEL_API=http://localhost:8000/api
+ARG VITE_NET_API=http://localhost:5000/api/
+ENV VITE_LARAVEL_API=${VITE_LARAVEL_API}
+ENV VITE_NET_API=${VITE_NET_API}
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# Etapa 2: Producción (Servir con Nginx)
+FROM nginx:stable-alpine as production-stage
+# Copia los archivos compilados de Vue a la carpeta pública de Nginx
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

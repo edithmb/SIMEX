@@ -13,7 +13,7 @@ public partial class IncotermDocumentTemplate
 
     public bool? IsMandatory { get; set; }
 
-    public virtual DocumentType DocumentType { get; set; } = null!;
+    public virtual DocumentType DocumentType { get; set; }
 
-    public virtual Incoterm Incoterm { get; set; } = null!;
+    public virtual Incoterm Incoterm { get; set; }
 }

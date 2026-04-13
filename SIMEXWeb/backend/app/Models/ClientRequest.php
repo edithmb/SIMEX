@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ClientRequest extends Model
 {
+    use HasFactory;
+
     const UPDATED_AT = null;
 
     protected $fillable = [
@@ -18,6 +21,7 @@ class ClientRequest extends Model
         'origin_id',
         'destination_id',
         'created_by',
+        'estado'
     ];
 
     protected function casts(): array
@@ -25,8 +29,20 @@ class ClientRequest extends Model
         return [
             'volume_m3' => 'decimal:2',
             'gross_weight_kg' => 'decimal:2',
-            'created_at' => 'datetime',
         ];
+    }
+
+    /**
+     * SQL Server devuelve fechas como "Feb 22 2028 12:00:00:AM"
+     * donde Carbon no puede parsear ":AM"/":PM". Normalizamos aquí.
+     */
+    protected function asDateTime($value)
+    {
+        if (is_string($value) && preg_match('/:\s*(AM|PM)\s*$/i', $value)) {
+            $value = preg_replace('/:\s*(AM|PM)\s*$/i', ' $1', $value);
+        }
+
+        return parent::asDateTime($value);
     }
 
     public function client(): BelongsTo

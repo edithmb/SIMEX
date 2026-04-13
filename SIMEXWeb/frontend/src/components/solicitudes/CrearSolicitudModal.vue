@@ -1,38 +1,35 @@
 <script setup>
-import { reactive } from 'vue'
+import { reactive } from 'vue' // Quitamos 'ref' y 'onMounted' porque ya no los usaremos aquí
 
+// --- CAMBIO 1: Recibir los datos desde el padre ---
 const props = defineProps({
     visible: { type: Boolean, default: false },
+    role: { type: String, default: 'cliente' },
+    clientes: { type: Array, default: () => [] },       // Recibimos la lista de clientes
+    localizaciones: { type: Array, default: () => [] }, // Recibimos la lista de localizaciones
 })
 
 const emit = defineEmits(['close', 'submit'])
 
 const form = reactive({
-    origin: '',
-    destination: '',
+    origin_id: '',
+    destination_id: '',
     volume_m3: '',
     gross_weight_kg: '',
     comments: '',
+    client_id: '',
 })
 
-const locationOptions = [
-    { value: '', label: 'Seleccionar...' },
-    { value: 'Almacén Principal - Calle Industrial 15, Valencia', label: 'Almacén Principal - Calle Industrial 15, Valencia' },
-    { value: 'Nave Logística - Pol. Ind. Norte, Coslada, Madrid', label: 'Nave Logística - Pol. Ind. Norte, Coslada, Madrid' },
-    { value: 'Almacén Frigorífico - Zona Franca, Barcelona', label: 'Almacén Frigorífico - Zona Franca, Barcelona' },
-    { value: 'Fábrica Shanghai - Pudong District, China', label: 'Fábrica Shanghai - Pudong District, China' },
-    { value: 'Almacén Rotterdam - Europoort, Países Bajos', label: 'Almacén Rotterdam - Europoort, Países Bajos' },
-    { value: 'Centro Distribución Miami - NW 25th St, Florida, EEUU', label: 'Centro Distribución Miami - NW 25th St, Florida, EEUU' },
-    { value: 'Fábrica Shenzhen - Guangdong, China', label: 'Fábrica Shenzhen - Guangdong, China' },
-    { value: 'Almacén Frankfurt - Hessen, Alemania', label: 'Almacén Frankfurt - Hessen, Alemania' },
-]
+// --- CAMBIO 2: Eliminamos los 'ref' locales y el 'onMounted' ---
+// (Ya no hacemos el fetch aquí, porque el padre nos manda los datos en los props de arriba)
 
 function resetForm() {
-    form.origin = ''
-    form.destination = ''
+    form.origin_id = ''
+    form.destination_id = ''
     form.volume_m3 = ''
     form.gross_weight_kg = ''
     form.comments = ''
+    form.client_id = ''
 }
 
 function handleClose() {
@@ -41,7 +38,20 @@ function handleClose() {
 }
 
 function handleSubmit() {
-    emit('submit', { ...form })
+    // Tu lógica aquí está perfecta. 
+    // Castear a Number() asegura que tu backend reciba enteros, no strings.
+    const payload = {
+        origin_id: Number(form.origin_id),
+        destination_id: Number(form.destination_id),
+        volume_m3: Number(form.volume_m3),
+        gross_weight_kg: Number(form.gross_weight_kg),
+        comments: form.comments,
+    }
+    if (props.role === 'admin') {
+        payload.client_id = Number(form.client_id)
+    }
+    
+    emit('submit', payload)
     resetForm()
 }
 
@@ -57,7 +67,6 @@ function handleOverlayClick(e) {
         <Transition name="modal">
             <div v-if="visible" class="modal-overlay" @click="handleOverlayClick">
                 <div class="modal-box">
-                    <!-- Header -->
                     <div class="modal-header">
                         <h3 class="modal-header-title">Nueva Solicitud de Transporte</h3>
                         <button class="modal-header-close" @click="handleClose" title="Cerrar">
@@ -69,29 +78,37 @@ function handleOverlayClick(e) {
                         </button>
                     </div>
 
-                    <!-- Form Body -->
                     <div class="modal-body">
-                        <!-- Origen -->
+                        <div v-if="role === 'admin'" class="modal-field">
+                            <label class="modal-label">Cliente</label>
+                            <select v-model="form.client_id" class="modal-select">
+                                <option value="">Seleccionar...</option>
+                                <option v-for="c in clientes" :key="c.id" :value="c.id">
+                                    {{ c.company_name }}
+                                </option>
+                            </select>
+                        </div>
+
                         <div class="modal-field">
                             <label class="modal-label">Origen</label>
-                            <select v-model="form.origin" class="modal-select">
-                                <option v-for="opt in locationOptions" :key="opt.value" :value="opt.value">
-                                    {{ opt.label }}
+                            <select v-model="form.origin_id" class="modal-select">
+                                <option value="">Seleccionar...</option>
+                                <option v-for="loc in localizaciones" :key="loc.id" :value="loc.id">
+                                    {{ loc.name }}
                                 </option>
                             </select>
                         </div>
 
-                        <!-- Destino -->
                         <div class="modal-field">
                             <label class="modal-label">Destino</label>
-                            <select v-model="form.destination" class="modal-select">
-                                <option v-for="opt in locationOptions" :key="opt.value" :value="opt.value">
-                                    {{ opt.label }}
+                            <select v-model="form.destination_id" class="modal-select">
+                                <option value="">Seleccionar...</option>
+                                <option v-for="loc in localizaciones" :key="loc.id" :value="loc.id">
+                                    {{ loc.name }}
                                 </option>
                             </select>
                         </div>
 
-                        <!-- Volumen / Peso (2-column) -->
                         <div class="modal-grid">
                             <div class="modal-field">
                                 <label class="modal-label">Volumen (m³)</label>
@@ -105,7 +122,6 @@ function handleOverlayClick(e) {
                             </div>
                         </div>
 
-                        <!-- Comentarios -->
                         <div class="modal-field modal-field--full">
                             <label class="modal-label">Comentarios</label>
                             <textarea v-model="form.comments" class="modal-textarea"
@@ -113,7 +129,6 @@ function handleOverlayClick(e) {
                         </div>
                     </div>
 
-                    <!-- Footer -->
                     <div class="modal-footer">
                         <button class="modal-footer-cancel" @click="handleClose">Cancelar</button>
                         <button class="modal-footer-submit" @click="handleSubmit">Enviar Solicitud</button>

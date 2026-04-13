@@ -7,7 +7,7 @@ public partial class CommercialOffer
 {
     public int Id { get; set; }
 
-    public string Reference { get; set; } = null!;
+    public string Reference { get; set; }
 
     public int ClientRequestId { get; set; }
 
@@ -25,11 +25,11 @@ public partial class CommercialOffer
 
     public DateOnly ValidUntil { get; set; }
 
-    public string Status { get; set; } = null!;
+    public string Status { get; set; }
 
-    public string? RejectionReason { get; set; }
+    public string RejectionReason { get; set; }
 
-    public string? Comments { get; set; }
+    public string Comments { get; set; }
 
     public int? OdooId { get; set; }
 
@@ -41,21 +41,21 @@ public partial class CommercialOffer
 
     public int? UpdatedBy { get; set; }
 
-    public virtual Client Client { get; set; } = null!;
+    public virtual Client Client { get; set; }
 
-    public virtual ClientRequest ClientRequest { get; set; } = null!;
+    public virtual ClientRequest ClientRequest { get; set; }
 
-    public virtual ContainerType? ContainerType { get; set; }
+    public virtual ContainerType ContainerType { get; set; }
 
-    public virtual User CreatedByNavigation { get; set; } = null!;
+    public virtual User CreatedByNavigation { get; set; }
 
-    public virtual Port DestinationPort { get; set; } = null!;
+    public virtual Port DestinationPort { get; set; }
 
-    public virtual Incoterm Incoterm { get; set; } = null!;
+    public virtual Incoterm Incoterm { get; set; }
 
-    public virtual LogisticsOperation? LogisticsOperation { get; set; }
+    public virtual LogisticsOperation LogisticsOperation { get; set; }
 
-    public virtual Port OriginPort { get; set; } = null!;
+    public virtual Port OriginPort { get; set; }
 
-    public virtual User? UpdatedByNavigation { get; set; }
+    public virtual User UpdatedByNavigation { get; set; }
 }

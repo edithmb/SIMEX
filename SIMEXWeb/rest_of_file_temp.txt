@@ -1,0 +1,72 @@
+
+<template>
+  <div class="maestros">
+    <!-- Page header -->
+    <div class="maestros-header">
+      <div>
+        <h1 class="maestros-title">Datos Maestros</h1>
+        <p class="maestros-subtitle">Gestión de tablas de referencia del sistema</p>
+      </div>
+    </div>
+
+    <p v-if="loading" class="maestros-status">Cargando datos maestros...</p>
+    <p v-else-if="errorMessage" class="maestros-error">{{ errorMessage }}</p>
+
+    <!-- Content -->
+    <div class="maestros-content">
+      <MaestroNav
+        :groups="navGroups"
+        :active-key="activeKey"
+        @select="activeKey = $event"
+      />
+      <MaestroTable
+        :maestro="activeMaestro"
+        :related-data="relatedData"
+        @add="openAdd"
+        @edit="openEdit"
+        @delete="handleDelete"
+      />
+    </div>
+
+    <MaestroFormModal
+      :visible="modalVisible"
+      :maestro-label="activeMaestro.label"
+      :columns="activeMaestro.columns"
+      :row="editingRow"
+      :related-data="relatedData"
+      @close="closeModal"
+      @save="handleSave"
+    />
+  </div>
+</template>
+
+<style scoped>
+.maestros-status {
+  margin: 6px 0 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.maestros-error {
+  margin: 6px 0 12px;
+  font-size: 13px;
+  color: #dc2626;
+}
+
+.maestros-content {
+  display: flex;
+  gap: 20px;
+  min-height: 0;
+}
+
+@media (max-width: 768px) {
+  .maestros-content {
+    flex-direction: column;
+  }
+
+  :deep(.maestro-nav) {
+    width: 100%;
+    min-width: 0;
+  }
+}
+</style>

@@ -7,7 +7,7 @@ public partial class Location
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public string Name { get; set; }
 
     public int ClientId { get; set; }
 
@@ -17,9 +17,9 @@ public partial class Location
 
     public int CityId { get; set; }
 
-    public virtual City City { get; set; } = null!;
+    public virtual City City { get; set; }
 
-    public virtual Client Client { get; set; } = null!;
+    public virtual Client Client { get; set; }
 
     public virtual ICollection<ClientRequest> ClientRequestDestinations { get; set; } = new List<ClientRequest>();
 

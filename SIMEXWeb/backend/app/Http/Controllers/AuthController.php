@@ -28,15 +28,27 @@ class AuthController extends Controller
 
         $token = JWTAuth::fromUser($user);
 
+        $user->load('role');
+
         return response()->json([
             'token'      => $token,
             'token_type' => 'bearer',
             'expires_in' => config('jwt.ttl') * 60,
+            'user'       => [
+                'id'         => $user->id,
+                'first_name' => $user->first_name,
+                'last_name'  => $user->last_name,
+                'email'      => $user->email,
+                'role'       => [
+                    'id'   => $user->role->id,
+                    'name' => $user->role->name,
+                ],
+            ],
         ]);
     }
 
     public function me(): JsonResponse
     {
-        return response()->json(auth('api')->user());
+        return response()->json(auth('api')->user()->load('role'));
     }
 }

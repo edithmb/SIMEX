@@ -71,7 +71,7 @@ public partial class Simex06Context : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=vps-5d4cfa08.vps.ovh.net;Database=simex06;User Id=simex06;Password=diversion2.0;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=vps-5d4cfa08.vps.ovh.net;Database=simex06;User Id=simex06;Password=diversion2.0;Trusted_Connection=False;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -84,11 +84,13 @@ public partial class Simex06Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CityId).HasColumnName("city_id");
             entity.Property(e => e.Code)
+                .IsRequired()
                 .HasMaxLength(5)
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("code");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(120)
                 .IsUnicode(false)
                 .HasColumnName("name");
@@ -108,6 +110,7 @@ public partial class Simex06Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CityId).HasColumnName("city_id");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("name");
@@ -127,6 +130,7 @@ public partial class Simex06Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CountryId).HasColumnName("country_id");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("name");
@@ -147,18 +151,22 @@ public partial class Simex06Context : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Address)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("address");
             entity.Property(e => e.CompanyName)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("company_name");
             entity.Property(e => e.ContactName)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("contact_name");
             entity.Property(e => e.Country)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("country");
@@ -177,10 +185,12 @@ public partial class Simex06Context : DbContext
                 .HasColumnName("email");
             entity.Property(e => e.OdooInt).HasColumnName("odoo_int");
             entity.Property(e => e.Phone)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("phone");
             entity.Property(e => e.PostalCode)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("postal_code");
@@ -216,6 +226,7 @@ public partial class Simex06Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ClientId).HasColumnName("client_id");
             entity.Property(e => e.Comments)
+                .IsRequired()
                 .IsUnicode(false)
                 .HasColumnName("comments");
             entity.Property(e => e.CreatedAt)
@@ -224,6 +235,11 @@ public partial class Simex06Context : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.DestinationId).HasColumnName("destination_id");
+            entity.Property(e => e.Estado)
+                .IsRequired()
+                .HasMaxLength(30)
+                .IsUnicode(false)
+                .HasColumnName("estado");
             entity.Property(e => e.GrossWeightKg)
                 .HasColumnType("decimal(8, 2)")
                 .HasColumnName("gross_weight_kg");
@@ -281,6 +297,7 @@ public partial class Simex06Context : DbContext
                 .HasColumnType("decimal(12, 2)")
                 .HasColumnName("price");
             entity.Property(e => e.Reference)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("reference");
@@ -288,6 +305,7 @@ public partial class Simex06Context : DbContext
                 .IsUnicode(false)
                 .HasColumnName("rejection_reason");
             entity.Property(e => e.Status)
+                .IsRequired()
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasDefaultValue("draft")
@@ -345,6 +363,7 @@ public partial class Simex06Context : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.TypeName)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("type_name");
@@ -399,6 +418,7 @@ public partial class Simex06Context : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("name");
@@ -414,6 +434,7 @@ public partial class Simex06Context : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Code)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("code");
@@ -425,6 +446,7 @@ public partial class Simex06Context : DbContext
                 .HasDefaultValue(true)
                 .HasColumnName("is_active");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("name");
@@ -514,6 +536,7 @@ public partial class Simex06Context : DbContext
                 .HasColumnType("decimal(11, 8)")
                 .HasColumnName("longitude");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("name");
@@ -537,10 +560,12 @@ public partial class Simex06Context : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.DeviceType)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("device_type");
             entity.Property(e => e.IpAddress)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("ip_address");
@@ -554,6 +579,7 @@ public partial class Simex06Context : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("token_expires_at");
             entity.Property(e => e.UserAgent)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("user_agent");
@@ -591,10 +617,12 @@ public partial class Simex06Context : DbContext
             entity.Property(e => e.Etd).HasColumnName("etd");
             entity.Property(e => e.OdooId).HasColumnName("odoo_id");
             entity.Property(e => e.Reference)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("reference");
             entity.Property(e => e.Status)
+                .IsRequired()
                 .HasMaxLength(30)
                 .IsUnicode(false)
                 .HasDefaultValue("preparation")
@@ -671,6 +699,7 @@ public partial class Simex06Context : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Content)
+                .IsRequired()
                 .IsUnicode(false)
                 .HasColumnName("content");
             entity.Property(e => e.ConversationId).HasColumnName("conversation_id");
@@ -700,6 +729,7 @@ public partial class Simex06Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Batch).HasColumnName("batch");
             entity.Property(e => e.Migration1)
+                .IsRequired()
                 .HasMaxLength(255)
                 .HasColumnName("migration");
         });
@@ -721,14 +751,17 @@ public partial class Simex06Context : DbContext
                 .HasColumnName("encryption_key");
             entity.Property(e => e.EntityId).HasColumnName("entity_id");
             entity.Property(e => e.EntityType)
+                .IsRequired()
                 .HasMaxLength(30)
                 .IsUnicode(false)
                 .HasColumnName("entity_type");
             entity.Property(e => e.FileName)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("file_name");
             entity.Property(e => e.FilePath)
+                .IsRequired()
                 .HasMaxLength(500)
                 .IsUnicode(false)
                 .HasColumnName("file_path");
@@ -759,6 +792,7 @@ public partial class Simex06Context : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("name");
@@ -773,6 +807,7 @@ public partial class Simex06Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CityId).HasColumnName("city_id");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("name");
@@ -797,6 +832,7 @@ public partial class Simex06Context : DbContext
                 .IsUnicode(false)
                 .HasColumnName("description");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("name");
@@ -811,6 +847,7 @@ public partial class Simex06Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CityId).HasColumnName("city_id");
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("name");
@@ -858,10 +895,12 @@ public partial class Simex06Context : DbContext
                 .HasColumnName("deleted_at");
             entity.Property(e => e.DeletedBy).HasColumnName("deleted_by");
             entity.Property(e => e.Email)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("email");
             entity.Property(e => e.FirstName)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("first_name");
@@ -869,15 +908,18 @@ public partial class Simex06Context : DbContext
                 .HasDefaultValue(true)
                 .HasColumnName("is_active");
             entity.Property(e => e.LastName)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("last_name");
             entity.Property(e => e.OdooId).HasColumnName("odoo_id");
             entity.Property(e => e.PasswordHash)
+                .IsRequired()
                 .HasMaxLength(256)
                 .IsUnicode(false)
                 .HasColumnName("password_hash");
             entity.Property(e => e.PhoneNumber)
+                .IsRequired()
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("phone_number");
