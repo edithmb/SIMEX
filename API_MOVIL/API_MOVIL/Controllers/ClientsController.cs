@@ -87,5 +87,24 @@ namespace API_MOVIL.Controllers
             return Ok("Cliente eliminado correctamnete");
         }
 
+
+        //consultar clientes por nombre de empresa
+        [HttpGet("{id}/users")]
+        public async Task<ActionResult<IEnumerable<User>>> GetUsersByClientId(int id)
+        {
+
+            var clientExists = await _context.Clients.AnyAsync(c => c.Id == id);
+
+            if (!clientExists)
+            {
+                return NotFound("Cliente no encontrado");
+            }
+
+            var users = await _context.Users
+                .Where(u => u.ClientId == id)
+                .ToListAsync();
+
+            return Ok(users);
+        }
     }
 }

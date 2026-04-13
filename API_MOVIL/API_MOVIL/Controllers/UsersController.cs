@@ -16,20 +16,27 @@ namespace API_MOVIL.Controllers
             _context = context;
         }
 
+        //Consulta todos los usuarios
+
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            
-            var Users = await _context.Users.ToListAsync();
 
-            return Ok(Users);
+            var users = await _context.Users
+                                      .Where(u => u.DeletedAt == null)
+                                      .ToListAsync();
+
+            return Ok(users);
         }
+
+        //Consulta un usuario por ID
 
         [HttpGet("{id}")]
 
         public async Task<ActionResult> GetUser(int id)
         {
-            var users = await _context.Users.FindAsync(id);
+            var users = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == id && u.DeletedAt == null);
 
             if (users == null)
             {
@@ -39,6 +46,7 @@ namespace API_MOVIL.Controllers
             return Ok(users);
         }
 
+        //Crea un usuario
 
         [HttpPost]
         public async Task<IActionResult> CreateUser(User newUser)
@@ -53,11 +61,15 @@ namespace API_MOVIL.Controllers
                 return BadRequest(ModelState);
             }
 
+            newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newUser.PasswordHash);
+
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, newUser);
         }
+
+        //Edita un usuario
 
         [HttpPut("{id}")]
 
@@ -82,6 +94,10 @@ namespace API_MOVIL.Controllers
             existingUser.IsActive = updateUser.IsActive;
 
             existingUser.UpdatedAt = DateTime.Now;
+            if (updateUser.UpdatedBy != null)
+            {
+                existingUser.UpdatedBy = updateUser.UpdatedBy;
+            }
 
             try
             {
@@ -94,9 +110,11 @@ namespace API_MOVIL.Controllers
             return NoContent();
         }
 
+        //Elimina un usuario (soft delete)
+
         [HttpDelete("{id}")]
 
-        public async Task<IActionResult> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id, [FromQuery] int deletedBy)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
@@ -104,13 +122,22 @@ namespace API_MOVIL.Controllers
                 return NotFound("This user doesn't exist");
             }
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            user.IsActive = false;
+            user.DeletedAt = DateTime.Now;
+            user.DeletedBy = deletedBy;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, $"Error al aplicar el Soft Delete: {ex.Message}");
+            }
 
             return NoContent();
 
         }
-
 
 
     }
