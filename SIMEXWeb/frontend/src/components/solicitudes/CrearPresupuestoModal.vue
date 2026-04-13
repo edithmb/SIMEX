@@ -1,94 +1,57 @@
 <script setup>
-import { reactive, watch } from 'vue'
+import { reactive } from 'vue'
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
     solicitud: { type: Object, default: null },
+    incoterms: { type: Array, default: () => [] },
+    puertos: { type: Array, default: () => [] },
+    tiposContenedor: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['close', 'submit'])
 
 const form = reactive({
     reference: '',
-    incoterm: 'FOB',
-    origin_port: '',
-    destination_port: '',
-    container_type: '',
+    incoterm_id: '',
+    origin_port_id: '',
+    destination_port_id: '',
+    container_type_id: '',
     price: '',
     valid_until: '',
     comments: '',
 })
 
-// Reset form when solicitud changes
-watch(
-    () => props.solicitud,
-    (sol) => {
-        if (sol) {
-            form.reference = ''
-            form.incoterm = 'FOB'
-            form.origin_port = ''
-            form.destination_port = ''
-            form.container_type = ''
-            form.price = ''
-            form.valid_until = ''
-            form.comments = ''
-        }
-    },
-    { immediate: true },
-)
-
-const incotermOptions = [
-    { value: 'FOB', label: 'FOB (Free On Board)' },
-    { value: 'CIF', label: 'CIF (Cost, Insurance & Freight)' },
-    { value: 'EXW', label: 'EXW (Ex Works)' },
-    { value: 'DDP', label: 'DDP (Delivered Duty Paid)' },
-    { value: 'FCA', label: 'FCA (Free Carrier)' },
-    { value: 'CFR', label: 'CFR (Cost & Freight)' },
-    { value: 'CPT', label: 'CPT (Carriage Paid To)' },
-    { value: 'CIP', label: 'CIP (Carriage & Insurance Paid To)' },
-    { value: 'DAP', label: 'DAP (Delivered At Place)' },
-    { value: 'DPU', label: 'DPU (Delivered at Place Unloaded)' },
-]
-
-const portOptions = [
-    { value: '', label: 'Seleccionar...' },
-    { value: 'Barcelona', label: 'Barcelona' },
-    { value: 'Valencia', label: 'Valencia' },
-    { value: 'Bilbao', label: 'Bilbao' },
-    { value: 'Algeciras', label: 'Algeciras' },
-    { value: 'Shanghai', label: 'Shanghai' },
-    { value: 'Shenzhen', label: 'Shenzhen' },
-    { value: 'Ningbo', label: 'Ningbo' },
-    { value: 'Rotterdam', label: 'Rotterdam' },
-    { value: 'Hamburgo', label: 'Hamburgo' },
-    { value: 'Amberes', label: 'Amberes' },
-    { value: 'Miami', label: 'Miami' },
-    { value: 'Nueva York', label: 'Nueva York' },
-    { value: 'Los Ángeles', label: 'Los Ángeles' },
-    { value: 'Singapur', label: 'Singapur' },
-    { value: 'Busan', label: 'Busan' },
-    { value: 'Santos', label: 'Santos' },
-    { value: 'El Pireo', label: 'El Pireo' },
-    { value: 'Génova', label: 'Génova' },
-    { value: 'Jebel Ali', label: 'Jebel Ali' },
-    { value: 'Le Havre', label: 'Le Havre' },
-]
-
-const containerOptions = [
-    { value: '', label: 'Seleccionar...' },
-    { value: '20st', label: "20' Standard" },
-    { value: '40st', label: "40' Standard" },
-    { value: '40hc', label: "40' High Cube" },
-    { value: '20rf', label: "20' Reefer" },
-    { value: '40rf', label: "40' Reefer" },
-]
+function resetForm() {
+    form.reference = ''
+    form.incoterm_id = ''
+    form.origin_port_id = ''
+    form.destination_port_id = ''
+    form.container_type_id = ''
+    form.price = ''
+    form.valid_until = ''
+    form.comments = ''
+}
 
 function handleClose() {
+    resetForm()
     emit('close')
 }
 
 function handleSubmit() {
-    emit('submit', { ...form })
+    const payload = {
+        client_request_id:   props.solicitud.id,
+        incoterm_id:         Number(form.incoterm_id),
+        origin_port_id:      Number(form.origin_port_id),
+        destination_port_id: Number(form.destination_port_id),
+        container_type_id:   Number(form.container_type_id),
+        price:               Number(form.price),
+        valid_until:         form.valid_until,
+        reference:           form.reference,
+        comments:            form.comments,
+    }
+    emit('submit', payload)
+    resetForm()
 }
 
 function handleOverlayClick(e) {
@@ -101,7 +64,7 @@ function handleOverlayClick(e) {
 <template>
     <Teleport to="body">
         <Transition name="modal">
-            <div v-if="visible && solicitud" class="modal-overlay" @click="handleOverlayClick">
+            <div v-if="visible" class="modal-overlay" @click="handleOverlayClick">
                 <div class="modal-box">
                     <!-- Header -->
                     <div class="modal-header">
@@ -162,33 +125,37 @@ function handleOverlayClick(e) {
                             </div>
                             <div class="modal-field">
                                 <label class="modal-label">Incoterm</label>
-                                <select v-model="form.incoterm" class="modal-select">
-                                    <option v-for="opt in incotermOptions" :key="opt.value" :value="opt.value">
-                                        {{ opt.label }}
+                                <select v-model="form.incoterm_id" class="modal-select">
+                                    <option value="">Seleccionar...</option>
+                                    <option v-for="inc in incoterms" :key="inc.id" :value="inc.id">
+                                        {{ inc.incoterm_type?.code }} — {{ inc.incoterm_type?.name }}
                                     </option>
                                 </select>
                             </div>
                             <div class="modal-field">
                                 <label class="modal-label">Puerto Origen</label>
-                                <select v-model="form.origin_port" class="modal-select">
-                                    <option v-for="opt in portOptions" :key="opt.value" :value="opt.value">
-                                        {{ opt.label }}
+                                <select v-model="form.origin_port_id" class="modal-select">
+                                    <option value="">Seleccionar...</option>
+                                    <option v-for="p in puertos" :key="p.id" :value="p.id">
+                                        {{ p.name }}
                                     </option>
                                 </select>
                             </div>
                             <div class="modal-field">
                                 <label class="modal-label">Puerto Destino</label>
-                                <select v-model="form.destination_port" class="modal-select">
-                                    <option v-for="opt in portOptions" :key="opt.value" :value="opt.value">
-                                        {{ opt.label }}
+                                <select v-model="form.destination_port_id" class="modal-select">
+                                    <option value="">Seleccionar...</option>
+                                    <option v-for="p in puertos" :key="p.id" :value="p.id">
+                                        {{ p.name }}
                                     </option>
                                 </select>
                             </div>
                             <div class="modal-field">
                                 <label class="modal-label">Tipo de Contenedor</label>
-                                <select v-model="form.container_type" class="modal-select">
-                                    <option v-for="opt in containerOptions" :key="opt.value" :value="opt.value">
-                                        {{ opt.label }}
+                                <select v-model="form.container_type_id" class="modal-select">
+                                    <option value="">Seleccionar...</option>
+                                    <option v-for="c in tiposContenedor" :key="c.id" :value="c.id">
+                                        {{ c.type_name }}
                                     </option>
                                 </select>
                             </div>

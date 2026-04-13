@@ -23,6 +23,9 @@ const loading = ref(false)
 // 1. Creamos las listas reactivas para los desplegables del modal
 const clientesList = ref([])
 const localizacionesList = ref([])
+const incotermsList = ref([])
+const puertosList = ref([])
+const tiposContenedorList = ref([])
 
 function mapSolicitud(item) {
   return {
@@ -57,23 +60,32 @@ async function fetchSolicitudes() {
   }
 }
 
-// 2. Función para cargar localizaciones y clientes
+// 2. Función para cargar localizaciones, clientes y datos de presupuesto
 async function cargarDatos() {
   try {
     const peticionLocalizaciones = axios.get(LARAVEL + '/locations', { headers })
+    const peticionIncoterms = axios.get(LARAVEL + '/incoterms', { headers })
+    const peticionPuertos = axios.get(LARAVEL + '/ports', { headers })
+    const peticionTiposContenedor = axios.get(LARAVEL + '/container-types', { headers })
 
     let peticionClientes = Promise.resolve({ data: [] })
     if (roleStore.isAdmin) {
       peticionClientes = axios.get(LARAVEL + '/clients', { headers })
     }
 
-    const [resLocalizaciones, resClientes] = await Promise.all([
+    const [resLocalizaciones, resClientes, resIncoterms, resPuertos, resTiposContenedor] = await Promise.all([
       peticionLocalizaciones,
       peticionClientes,
+      peticionIncoterms,
+      peticionPuertos,
+      peticionTiposContenedor,
     ])
 
     localizacionesList.value = resLocalizaciones.data
     clientesList.value = resClientes.data
+    incotermsList.value = resIncoterms.data
+    puertosList.value = resPuertos.data
+    tiposContenedorList.value = resTiposContenedor.data
   } catch (error) {
     if (error.response?.status === 401) {
       await auth.logout()
@@ -129,9 +141,14 @@ function closePresupuestoModal() {
   selectedSolicitud.value = null
 }
 
-function handlePresupuestoSubmit(data) {
-  console.log('Presupuesto generado:', data)
-  closePresupuestoModal()
+async function handlePresupuestoSubmit(data) {
+  try {
+    await axios.post(LARAVEL + '/commercial-offers', data, { headers })
+    closePresupuestoModal()
+    await fetchSolicitudes()
+  } catch (error) {
+    console.error('Error al crear presupuesto:', error)
+  }
 }
 
 // Modal state — client/admin: solicitud modal
@@ -193,6 +210,7 @@ async function handleSolicitudSubmit(data) {
 
     <!-- Modal: Crear Presupuesto (admin) -->
     <CrearPresupuestoModal :visible="showPresupuestoModal" :solicitud="selectedSolicitud"
+      :incoterms="incotermsList" :puertos="puertosList" :tipos-contenedor="tiposContenedorList"
       @close="closePresupuestoModal" @submit="handlePresupuestoSubmit" />
 
     <!-- Modal: Crear Solicitud (client/admin) -->

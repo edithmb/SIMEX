@@ -1,15 +1,28 @@
 <script setup>
+import { computed } from 'vue'
 import StatCard from '@/components/dashboard/StatCard.vue'
+
+const props = defineProps({
+    presupuestos: { type: Array, default: () => [] },
+})
+
+const total = computed(() => props.presupuestos.length)
+const aceptados = computed(() => props.presupuestos.filter(p => p.status === 'Aceptado').length)
+const pendientes = computed(() => props.presupuestos.filter(p => p.status === 'Enviado').length)
+const valorTotal = computed(() => {
+    const sum = props.presupuestos.reduce((acc, p) => acc + Number(p.price || 0), 0)
+    if (sum >= 1_000_000) return '€' + (sum / 1_000_000).toFixed(1) + 'M'
+    if (sum >= 1_000) return '€' + (sum / 1_000).toFixed(1) + 'K'
+    return '€' + sum.toLocaleString('es-ES')
+})
 </script>
 
 <template>
     <div class="presupuestos-stats">
-        <StatCard title="Total Presupuestos" value="89" icon="offers" />
-        <StatCard title="Aceptados" value="45" trend="+12%" trend-label="vs mes anterior" trend-direction="up"
-            icon="check" />
-        <StatCard title="Enviados (Pendientes)" value="23" icon="offers" />
-        <StatCard title="Valor Total" value="€4.2M" trend="+5.4%" trend-label="vs mes anterior" trend-direction="up"
-            icon="money" />
+        <StatCard title="Total Presupuestos" :value="String(total)" icon="offers" />
+        <StatCard title="Aceptados" :value="String(aceptados)" icon="check" />
+        <StatCard title="Enviados (Pendientes)" :value="String(pendientes)" icon="offers" />
+        <StatCard title="Valor Total" :value="valorTotal" icon="money" />
     </div>
 </template>
 
