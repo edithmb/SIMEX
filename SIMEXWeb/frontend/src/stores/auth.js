@@ -43,7 +43,16 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function logout() {
+  async function logout() {
+    if (token.value) {
+      try {
+        await axios.post(LARAVEL + '/logout', null, {
+          headers: { Authorization: `Bearer ${token.value}` },
+        })
+      } catch {
+        // si el backend rechaza (token ya inválido, red caída…), seguimos limpiando en cliente
+      }
+    }
     clearToken()
   }
 

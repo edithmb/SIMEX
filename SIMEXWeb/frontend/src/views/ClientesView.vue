@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import ClientesStats from '@/components/clientes/ClientesStats.vue'
 import ClientesFilters from '@/components/clientes/ClientesFilters.vue'
@@ -56,6 +57,7 @@ function closeDropdownOutside(e) {
 
 const LARAVEL = import.meta.env.VITE_LARAVEL_API
 const auth = useAuthStore()
+const router = useRouter()
 
 onMounted(async () => {
     document.addEventListener('click', closeDropdownOutside)
@@ -65,6 +67,11 @@ onMounted(async () => {
         })
         clientes.value = res.data
     } catch (error) {
+        if (error.response?.status === 401) {
+            await auth.logout()
+            router.push({ name: 'login' })
+            return
+        }
         console.error('Error al cargar clientes:', error)
     }
 })

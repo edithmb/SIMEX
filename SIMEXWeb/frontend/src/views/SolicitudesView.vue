@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 import { useRoleStore } from '@/stores/role'
 import { useAuthStore } from '@/stores/auth'
 import SolicitudesStats from '@/components/solicitudes/SolicitudesStats.vue'
@@ -11,6 +12,7 @@ import CrearSolicitudModal from '@/components/solicitudes/CrearSolicitudModal.vu
 
 const roleStore = useRoleStore()
 const auth = useAuthStore()
+const router = useRouter()
 
 const LARAVEL = import.meta.env.VITE_LARAVEL_API
 const headers = { Authorization: `Bearer ${auth.token}` }
@@ -43,6 +45,13 @@ async function fetchSolicitudes() {
     const endpoint = roleStore.isAdmin ? '/client-requests-admin' : '/client-requests-client'
     const res = await axios.get(LARAVEL + endpoint, { headers })
     solicitudes.value = res.data.map(mapSolicitud)
+  } catch (error) {
+    if (error.response?.status === 401) {
+      await auth.logout()
+      router.push({ name: 'login' })
+      return
+    }
+    console.error('Error al cargar solicitudes:', error)
   } finally {
     loading.value = false
   }
@@ -66,6 +75,11 @@ async function cargarDatos() {
     localizacionesList.value = resLocalizaciones.data
     clientesList.value = resClientes.data
   } catch (error) {
+    if (error.response?.status === 401) {
+      await auth.logout()
+      router.push({ name: 'login' })
+      return
+    }
     console.error('Error al cargar datos para los desplegables:', error)
   }
 }
@@ -138,6 +152,11 @@ async function handleSolicitudSubmit(data) {
     closeSolicitudModal()
     await fetchSolicitudes()
   } catch (error) {
+    if (error.response?.status === 401) {
+      await auth.logout()
+      router.push({ name: 'login' })
+      return
+    }
     console.error('Error al enviar la solicitud:', error)
   }
 }

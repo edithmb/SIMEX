@@ -51,4 +51,11 @@ class AuthController extends Controller
     {
         return response()->json(auth('api')->user()->load('role'));
     }
+
+    public function logout(): JsonResponse
+    {
+        auth('api')->logout();
+
+        return response()->json(['message' => 'Sesión cerrada correctamente.']);
+    }
 }
