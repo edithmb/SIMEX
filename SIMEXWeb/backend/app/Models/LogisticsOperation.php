@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Incoterm;
 
 class LogisticsOperation extends Model
@@ -91,5 +92,10 @@ class LogisticsOperation extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function logisticsOperationDocuments(): HasMany
+    {
+        return $this->hasMany(LogisticsOperationDocument::class);
     }
 }
