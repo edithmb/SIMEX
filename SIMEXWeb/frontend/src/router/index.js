@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useRoleStore } from '@/stores/role'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,7 +39,7 @@ const router = createRouter({
       path: '/clientes',
       name: 'clientes',
       component: () => import('@/views/ClientesView.vue'),
-      meta: { title: 'Gestión de Clientes', breadcrumbParent: 'Inicio / Gestión' },
+      meta: { title: 'Gestión de Clientes', breadcrumbParent: 'Inicio / Gestión', roles: ['admin'] },
     },
     {
       path: '/documentos',
@@ -50,23 +51,29 @@ const router = createRouter({
       path: '/configuracion',
       name: 'configuracion',
       component: () => import('@/views/ConfiguracionView.vue'),
-      meta: { title: 'Configuración', breadcrumbParent: 'Inicio / Sistema' },
+      meta: { title: 'Configuración', breadcrumbParent: 'Inicio / Sistema', roles: ['admin'] },
     },
     {
       path: '/datos-maestros',
       name: 'datos-maestros',
       component: () => import('@/views/DatosMaestrosView.vue'),
-      meta: { title: 'Datos Maestros', breadcrumbParent: 'Inicio / Sistema' },
+      meta: { title: 'Datos Maestros', breadcrumbParent: 'Inicio / Sistema', roles: ['admin'] },
     },
   ],
 })
 
 router.beforeEach((to) => {
   const auth = useAuthStore()
+  const role = useRoleStore()
+
   if (!to.meta.public && !auth.isAuthenticated) {
     return { name: 'login' }
   }
   if (to.name === 'login' && auth.isAuthenticated) {
+    return { name: 'dashboard' }
+  }
+  // Verificación de rol
+  if (to.meta.roles && !to.meta.roles.includes(role.currentRole)) {
     return { name: 'dashboard' }
   }
 })

@@ -20,25 +20,34 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:api')->group(function () {
+    // Rutas compartidas para todos los usuarios autenticados
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
-
-    Route::apiResource('countries',       CountryController::class)->except('show');
-    Route::apiResource('cities',          CityController::class)->except('show');
-    Route::apiResource('ports',           PortController::class)->except('show');
-    Route::apiResource('airports',        AirportController::class)->except('show');
-    Route::apiResource('shipping-lines',  ShippingLineController::class)->except('show');
-    Route::apiResource('carriers',        CarrierController::class)->except('show');
-    Route::apiResource('container-types', ContainerTypeController::class)->except('show');
     Route::get('/locations', [LocationController::class, 'index']);
-    Route::get('/clients', [ClientController::class, 'index']);
     Route::get('/incoterms', [IncotermController::class, 'index']);
+    Route::get('/clients', [ClientController::class, 'index']);
+
+    // Comercial offers - compartido
     Route::get('/commercial-offers', [ComercialOfferController::class, 'index']);
     Route::get('/commercial-offers/mine', [ComercialOfferController::class, 'mine']);
     Route::post('/commercial-offers', [ComercialOfferController::class, 'store']);
     Route::put('/commercial-offers/{id}/approve', [ComercialOfferController::class, 'approve']);
     Route::put('/commercial-offers/{id}/reject', [ComercialOfferController::class, 'reject']);
+
+    // Client requests - compartido
     Route::apiResource('client-requests-client', ClientRequestClientController::class)->except('show');
     Route::apiResource('client-requests-admin', ClientRequestAdminController::class)->except('show');
+
     Route::get('/logistics-operations', [LogisticsOperationController::class, 'index']);
+
+    // Datos maestros - solo admin
+    Route::middleware('role:admin')->group(function () {
+        Route::apiResource('countries',       CountryController::class)->except('show');
+        Route::apiResource('cities',          CityController::class)->except('show');
+        Route::apiResource('ports',           PortController::class)->except('show');
+        Route::apiResource('airports',        AirportController::class)->except('show');
+        Route::apiResource('shipping-lines',  ShippingLineController::class)->except('show');
+        Route::apiResource('carriers',        CarrierController::class)->except('show');
+        Route::apiResource('container-types', ContainerTypeController::class)->except('show');
+    });
 });

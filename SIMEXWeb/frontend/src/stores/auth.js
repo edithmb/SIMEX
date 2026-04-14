@@ -31,9 +31,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (!token.value) return
     if (localStorage.getItem('backend_is_admin') !== null) return
     try {
-      const meRes = await axios.get(LARAVEL + '/me', {
-        headers: { Authorization: `Bearer ${token.value}` },
-      })
+      const meRes = await axios.get(LARAVEL + '/me')
       const roleName = meRes.data.role?.name ?? 'cliente'
       const isAdmin = roleName !== 'cliente'
       backendIsAdmin.value = isAdmin
@@ -41,9 +39,8 @@ export const useAuthStore = defineStore('auth', () => {
       const roleStore = useRoleStore()
       roleStore.setRole(roleName)
     } catch {
-      // si falla, asumimos admin para no romper la sesión activa
-      backendIsAdmin.value = true
-      localStorage.setItem('backend_is_admin', 'true')
+      // Si /me falla (token expirado, red caída), limpiar sesión
+      clearToken()
     }
   }
 
@@ -59,9 +56,7 @@ export const useAuthStore = defineStore('auth', () => {
     setToken(res.data.token)
 
     try {
-      const meRes = await axios.get(LARAVEL + '/me', {
-        headers: { Authorization: `Bearer ${token.value}` },
-      })
+      const meRes = await axios.get(LARAVEL + '/me')
       const roleName = meRes.data.role?.name ?? 'cliente'
       const isAdmin = roleName !== 'cliente'
 
@@ -78,9 +73,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout() {
     if (token.value) {
       try {
-        await axios.post(LARAVEL + '/logout', null, {
-          headers: { Authorization: `Bearer ${token.value}` },
-        })
+        await axios.post(LARAVEL + '/logout')
       } catch {
         // si el backend rechaza (token ya inválido, red caída…), seguimos limpiando en cliente
       }
