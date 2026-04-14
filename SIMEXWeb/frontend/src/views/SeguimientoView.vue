@@ -12,6 +12,7 @@ const roleStore = useRoleStore()
 const auth = useAuthStore()
 const router = useRouter()
 const LARAVEL = import.meta.env.VITE_LARAVEL_API
+const NET = import.meta.env.VITE_NET_API
 
 const STEP_COLORS = {
   pending:   { statusColor: '#e5e7eb', statusTextColor: '#4b5563', progressColor: '#9ca3af' },
@@ -124,7 +125,7 @@ function handleSelect(id) {
   selectedId.value = id
 }
 
-function updateShipmentStatus(id, newStatus) {
+async function updateShipmentStatus(id, newStatus) {
   const shipment = shipments.value.find((s) => s.id === id)
   if (!shipment) return
 
@@ -146,6 +147,13 @@ function updateShipmentStatus(id, newStatus) {
   shipment.timeline.forEach((step, i) => {
     step.state = i < currentIdx ? 'completed' : (i === currentIdx ? 'active' : 'pending')
   })
+
+  // Persiste en el backend
+  try {
+    await axios.put(`${NET}/LogisticsOperations/${id}/status`, { status: newStatus })
+  } catch (e) {
+    console.error('Error al actualizar estado en el backend:', e)
+  }
 }
 </script>
 

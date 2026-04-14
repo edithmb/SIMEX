@@ -148,19 +148,6 @@ const isActive = (itemRoute) => {
       </div>
     </nav>
 
-    <!-- Role Switcher -->
-    <div class="sidebar-role-switcher">
-      <span class="sidebar-role-switcher-label">VISTA ACTIVA</span>
-      <select
-        name="vista-activa"
-        class="sidebar-role-switcher-select"
-        :value="roleStore.currentRole"
-        @change="roleStore.setRole($event.target.value)"
-      >
-        <option value="admin">Administrador</option>
-        <option value="cliente">Cliente</option>
-      </select>
-    </div>
 
     <!-- User Footer -->
     <div class="sidebar-user">

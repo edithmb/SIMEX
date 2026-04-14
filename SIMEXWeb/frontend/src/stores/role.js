@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 
 export const useRoleStore = defineStore('role', () => {
   // Rol de vista: controlado por el selector del sidebar
-  const currentRole = ref(localStorage.getItem('user_role') ?? 'admin')
+  const currentRole = ref(localStorage.getItem('user_role') ?? null)
 
   const isAdmin = computed(() => currentRole.value === 'admin')
   const isCliente = computed(() => currentRole.value === 'cliente')

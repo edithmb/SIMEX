@@ -1,62 +1,82 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
 import { useRoleStore } from '@/stores/role'
+import { useAuthStore } from '@/stores/auth'
 import SubirDocumentoModal from '@/components/documentos/SubirDocumentoModal.vue'
 
 const roleStore = useRoleStore()
+const auth = useAuthStore()
+const router = useRouter()
 
+const LARAVEL = import.meta.env.VITE_LARAVEL_API
+const NET = import.meta.env.VITE_NET_API
+const headers = { Authorization: `Bearer ${auth.token}` }
+
+const operaciones = ref([])
+const loading = ref(false)
 const showModal = ref(false)
 
-function handleSubmit(data) {
-    console.log('Subir documento:', data)
-    showModal.value = false
+// Carga todas las operaciones logísticas con sus documentos
+async function fetchOperaciones() {
+    loading.value = true
+    try {
+        const res = await axios.get(LARAVEL + '/logistics-operations?per_page=100', { headers })
+        const rows = Array.isArray(res.data) ? res.data : (res.data.data || [])
+        operaciones.value = rows.map(mapOperacion)
+    } catch (error) {
+        if (error.response?.status === 401) {
+            await auth.logout()
+            router.push({ name: 'login' })
+        } else {
+            console.error('Error al cargar documentos:', error)
+        }
+    } finally {
+        loading.value = false
+    }
 }
 
-// ── Client data ──
-const operationDocuments = reactive([
-    {
-        operationRef: 'OP-2024-001',
-        clientName: 'Importaciones García S.L.',
-        route: 'Shanghai → Barcelona',
-        documents: [
-            { id: 1, type: 'Bill of Lading (BL)', status: 'subido', fileName: 'BL_OP001.pdf' },
-            { id: 2, type: 'Factura Comercial', status: 'subido', fileName: 'Factura_OP001.pdf' },
-            { id: 3, type: 'Certificado de Origen', status: 'pendiente', fileName: null },
-            { id: 4, type: 'DUA Importación', status: 'urgente', fileName: null },
-            { id: 5, type: 'Packing List', status: 'subido', fileName: 'PL_OP001.pdf' },
-            { id: 6, type: 'Seguro de Transporte', status: 'pendiente', fileName: null },
-        ],
-    },
-    {
-        operationRef: 'OP-2024-002',
-        clientName: 'Textiles Mediterráneo S.A.',
-        route: 'Rotterdam → Valencia',
-        documents: [
-            { id: 7, type: 'Bill of Lading (BL)', status: 'subido', fileName: 'BL_OP002.pdf' },
-            { id: 8, type: 'Factura Comercial', status: 'pendiente', fileName: null },
-            { id: 9, type: 'Certificado de Origen', status: 'urgente', fileName: null },
-            { id: 10, type: 'DUA Importación', status: 'pendiente', fileName: null },
-            { id: 11, type: 'Packing List', status: 'subido', fileName: 'PL_OP002.pdf' },
-        ],
-    },
-    {
-        operationRef: 'OP-2024-003',
-        clientName: 'Electrónica Levante S.A.',
-        route: 'Shenzhen → Bilbao',
-        documents: [
-            { id: 12, type: 'Air Waybill (AWB)', status: 'subido', fileName: 'AWB_OP003.pdf' },
-            { id: 13, type: 'Factura Comercial', status: 'subido', fileName: 'Factura_OP003.pdf' },
-            { id: 14, type: 'Packing List', status: 'subido', fileName: 'PL_OP003.pdf' },
-            { id: 15, type: 'DUA Importación', status: 'pendiente', fileName: null },
-        ],
-    },
-])
+function mapOperacion(op) {
+    const offer = op.commercial_offer || op.commercialOffer || {}
+    const originPort = offer.origin_port?.name || offer.originPort?.name || '—'
+    const destPort = offer.destination_port?.name || offer.destinationPort?.name || '—'
+    const route = originPort !== '—' || destPort !== '—'
+        ? `${originPort} → ${destPort}`
+        : '—'
+
+    const rawDocs = op.logistics_operation_documents || op.logisticsOperationDocuments || []
+    const documents = rawDocs.map((d) => ({
+        id: d.id,
+        type: d.custom_name || d.customName || d.document_type?.name || d.documentType?.name || 'Documento',
+        status: mapDocStatus(d.status),
+        fileName: d.file_name || d.fileName || null,
+        fileUrl: d.file_url || d.fileUrl || null,
+    }))
+
+    return {
+        operationRef: op.reference || `OP-${op.id}`,
+        clientName: op.client?.company_name || op.client?.companyName || '—',
+        route,
+        documents,
+    }
+}
+
+function mapDocStatus(status) {
+    if (!status) return 'pendiente'
+    const s = status.toLowerCase()
+    if (s === 'uploaded' || s === 'subido' || s === 'approved') return 'subido'
+    if (s === 'urgent' || s === 'urgente') return 'urgente'
+    return 'pendiente'
+}
+
+onMounted(fetchOperaciones)
 
 const clientFilters = ['Todos', 'Pendiente', 'Urgente', 'Subido']
 const activeDocFilter = ref('Todos')
 
 const filteredOperationDocs = computed(() => {
-    return operationDocuments
+    return operaciones.value
         .map((op) => {
             const filteredDocs =
                 activeDocFilter.value === 'Todos'
@@ -67,9 +87,51 @@ const filteredOperationDocs = computed(() => {
         .filter((op) => op.filteredDocs.length > 0)
 })
 
-function mockUpload(doc) {
-    doc.status = 'subido'
-    doc.fileName = doc.type.replace(/\s/g, '_') + '.pdf'
+// Subir documento a .NET API
+async function handleUpload(doc, operationRef) {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.onchange = async (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('documentId', doc.id)
+            await axios.post(NET + '/DocumentsTramite/upload', formData, {
+                headers: { ...headers, 'Content-Type': 'multipart/form-data' },
+            })
+            // Refresca la lista para mostrar el nuevo estado
+            await fetchOperaciones()
+        } catch (err) {
+            console.error('Error al subir documento:', err)
+        }
+    }
+    input.click()
+}
+
+// Descargar documento desde .NET API
+async function handleDownload(doc) {
+    if (!doc.id) return
+    try {
+        const res = await axios.get(`${NET}/DocumentsPerson/download/${doc.id}`, {
+            headers,
+            responseType: 'blob',
+        })
+        const url = URL.createObjectURL(res.data)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = doc.fileName || 'documento'
+        a.click()
+        URL.revokeObjectURL(url)
+    } catch (err) {
+        console.error('Error al descargar documento:', err)
+    }
+}
+
+function handleSubmit(data) {
+    console.log('Subir documento:', data)
+    showModal.value = false
 }
 </script>
 
@@ -93,8 +155,11 @@ function mockUpload(doc) {
             </button>
         </div>
 
+        <!-- Loading -->
+        <p v-if="loading" class="documentos-loading">Cargando documentos...</p>
+
         <!-- Filter buttons -->
-        <div class="doc-client-filters">
+        <div v-else class="doc-client-filters">
             <button v-for="f in clientFilters" :key="f" :class="[
                 'doc-client-filter-btn',
                 { 'doc-client-filter-btn--active': activeDocFilter === f },
@@ -102,6 +167,11 @@ function mockUpload(doc) {
                 {{ f }}
             </button>
         </div>
+
+        <!-- Sin datos -->
+        <p v-if="!loading && filteredOperationDocs.length === 0" class="documentos-empty">
+            No hay documentos disponibles.
+        </p>
 
         <!-- Operation cards -->
         <div v-for="op in filteredOperationDocs" :key="op.operationRef" class="doc-operation-card">
@@ -125,7 +195,22 @@ function mockUpload(doc) {
                         <span v-else-if="doc.status === 'urgente'"
                             class="doc-status-badge doc-status-badge--urgente">Urgente</span>
                         <span v-else class="doc-status-badge doc-status-badge--pendiente">Pendiente</span>
-                        <button v-if="doc.status !== 'subido'" class="doc-upload-btn" @click="mockUpload(doc)">
+
+                        <!-- Descargar si ya está subido -->
+                        <button v-if="doc.status === 'subido' && doc.id" class="doc-upload-btn"
+                            @click="handleDownload(doc)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                            Descargar
+                        </button>
+
+                        <!-- Subir si pendiente -->
+                        <button v-else-if="doc.status !== 'subido'" class="doc-upload-btn"
+                            @click="handleUpload(doc, op.operationRef)">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -189,6 +274,14 @@ function mockUpload(doc) {
 
 .documentos-header-btn:hover {
     background: #0d2440;
+}
+
+.documentos-loading,
+.documentos-empty {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    padding: 20px 0;
+    text-align: center;
 }
 
 /* ── Filters & cards ── */

@@ -51,16 +51,15 @@ namespace API_MOVIL.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser(User newUser)
         {
-            
             ModelState.Remove("Role");
             ModelState.Remove("Client");
 
-            
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
+            newUser.CreatedAt = DateTime.UtcNow;
             newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newUser.PasswordHash);
 
             _context.Users.Add(newUser);

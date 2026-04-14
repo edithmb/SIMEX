@@ -4,21 +4,23 @@ import { reactive } from 'vue'
 const props = defineProps({
     visible: { type: Boolean, default: false },
     empresas: { type: Array, default: () => [] },
+    roles: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['close', 'submit'])
 
 const form = reactive({
-    name: '',
-    empresa: '',
+    first_name: '',
+    last_name: '',
+    empresa_id: '',
     email: '',
     phone: '',
-    position: '',
-    rol: '',
+    password: '',
+    role_id: '',
 })
 
 function handleClose() {
-    Object.assign(form, { name: '', empresa: '', email: '', phone: '', position: '', rol: '' })
+    Object.assign(form, { first_name: '', last_name: '', empresa_id: '', email: '', phone: '', password: '', role_id: '' })
     emit('close')
 }
 
@@ -49,30 +51,34 @@ function handleOverlayClick(e) {
                     </div>
 
                     <div class="modal-body">
-                        <div class="modal-field">
-                            <label class="modal-label">Nombre Completo</label>
-                            <input v-model="form.name" type="text" class="modal-input"
-                                placeholder="Nombre y apellidos" />
+                        <div class="modal-grid">
+                            <div class="modal-field">
+                                <label class="modal-label">Nombre</label>
+                                <input v-model="form.first_name" type="text" class="modal-input"
+                                    placeholder="Nombre" />
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">Apellidos</label>
+                                <input v-model="form.last_name" type="text" class="modal-input"
+                                    placeholder="Apellidos" />
+                            </div>
                         </div>
                         <div class="modal-field">
                             <label class="modal-label">Empresa</label>
-                            <select v-model="form.empresa" class="modal-select">
+                            <select v-model="form.empresa_id" class="modal-select">
                                 <option value="" disabled>Seleccionar empresa...</option>
-                                <option v-for="e in empresas" :key="e" :value="e">{{ e }}</option>
+                                <option v-for="e in empresas" :key="e.id" :value="e.id">{{ e.company_name }}</option>
                             </select>
                         </div>
                         <div class="modal-field">
                             <label class="modal-label">Rol</label>
-                            <select v-model="form.rol" class="modal-select">
+                            <select v-model="form.role_id" class="modal-select">
                                 <option value="" disabled>Seleccionar rol...</option>
-                                <option value="operador_logistico">Operador Logístico</option>
-                                <option value="operador_comercial">Operador Comercial</option>
-                                <option value="cliente">Cliente</option>
-                                <option value="administrador">Administrador</option>
+                                <option v-for="r in roles" :key="r.id" :value="r.id">{{ r.name }}</option>
                             </select>
                         </div>
                         <div class="modal-field">
-                            <label class="modal-label">Email / Correo Electrónico</label>
+                            <label class="modal-label">Email</label>
                             <input v-model="form.email" type="email" class="modal-input"
                                 placeholder="correo@empresa.com" />
                         </div>
@@ -83,9 +89,9 @@ function handleOverlayClick(e) {
                                     placeholder="+34 600 000 000" />
                             </div>
                             <div class="modal-field">
-                                <label class="modal-label">Cargo</label>
-                                <input v-model="form.position" type="text" class="modal-input"
-                                    placeholder="Ej. Director Comercial" />
+                                <label class="modal-label">Contraseña</label>
+                                <input v-model="form.password" type="password" class="modal-input"
+                                    placeholder="••••••••" />
                             </div>
                         </div>
                     </div>
