@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LoginSession;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,14 +27,25 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = JWTAuth::fromUser($user);
+        $ttlMinutes = (int) config('jwt.ttl');
+
+        $session = LoginSession::create([
+            'user_id'          => $user->id,
+            'ip_address'       => $request->ip(),
+            'user_agent'       => $request->userAgent(),
+            'device_type'      => $this->detectDeviceType($request->userAgent()),
+            'logged_in_at'     => now(),
+            'token_expires_at' => now()->addMinutes($ttlMinutes),
+        ]);
+
+        $token = JWTAuth::claims(['sid' => $session->id])->fromUser($user);
 
         $user->load('role');
 
         return response()->json([
             'token'      => $token,
             'token_type' => 'bearer',
-            'expires_in' => config('jwt.ttl') * 60,
+            'expires_in' => $ttlMinutes * 60,
             'user'       => [
                 'id'         => $user->id,
                 'first_name' => $user->first_name,
@@ -54,8 +66,33 @@ class AuthController extends Controller
 
     public function logout(): JsonResponse
     {
+        try {
+            $sid = auth('api')->payload()->get('sid');
+            if ($sid) {
+                LoginSession::where('id', $sid)
+                    ->whereNull('logged_out_at')
+                    ->update(['logged_out_at' => now()]);
+            }
+        } catch (\Throwable $e) {
+            // ignoramos: aunque falle el tracking, el token debe invalidarse
+        }
+
         auth('api')->logout();
 
         return response()->json(['message' => 'Sesión cerrada correctamente.']);
+    }
+
+    private function detectDeviceType(?string $ua): string
+    {
+        if (! $ua) {
+            return 'unknown';
+        }
+        if (preg_match('/tablet|ipad/i', $ua)) {
+            return 'tablet';
+        }
+        if (preg_match('/mobile|android|iphone/i', $ua)) {
+            return 'mobile';
+        }
+        return 'desktop';
     }
 }
