@@ -80,11 +80,18 @@ function formatPrice(price) {
                     </td>
                     <td>
                         <div v-if="role === 'cliente' && p.status === 'Enviado'" class="pres-actions">
-                            <button class="pres-action-btn pres-action-btn--approve" @click="emit('aprobar', p)">
-                                Aprobar
+                            <button class="pres-icon-btn pres-icon-btn--approve" @click="emit('aprobar', p)" title="Aprobar presupuesto">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
                             </button>
-                            <button class="pres-action-btn pres-action-btn--reject" @click="emit('rechazar', p)">
-                                Rechazar
+                            <button class="pres-icon-btn pres-icon-btn--reject" @click="emit('rechazar', p)" title="Rechazar presupuesto">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
                             </button>
                         </div>
                     </td>
@@ -213,33 +220,39 @@ function formatPrice(price) {
     gap: 8px;
 }
 
-.pres-action-btn {
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 12.5px;
-    font-weight: 600;
+.pres-icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: all 0.15s ease;
-    white-space: nowrap;
+    flex-shrink: 0;
 }
 
-.pres-action-btn--approve {
+.pres-icon-btn--approve {
     background: #d1fae5;
     color: #047857;
+    border: 1.5px solid #6ee7b7;
 }
 
-.pres-action-btn--approve:hover {
+.pres-icon-btn--approve:hover {
     background: #047857;
     color: #ffffff;
+    border-color: #047857;
 }
 
-.pres-action-btn--reject {
+.pres-icon-btn--reject {
     background: #fee2e2;
     color: #dc2626;
+    border: 1.5px solid #fca5a5;
 }
 
-.pres-action-btn--reject:hover {
+.pres-icon-btn--reject:hover {
     background: #dc2626;
     color: #ffffff;
+    border-color: #dc2626;
 }
 </style>

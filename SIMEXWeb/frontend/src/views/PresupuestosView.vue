@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useRoleStore } from '@/stores/role'
 import { useAuthStore } from '@/stores/auth'
@@ -41,7 +41,7 @@ function mapPresupuesto(item) {
 async function fetchPresupuestos() {
     loading.value = true
     try {
-        const endpoint = roleStore.isAdmin ? '/commercial-offers' : '/commercial-offers/mine'
+        const endpoint = auth.backendIsAdmin ? '/commercial-offers' : '/commercial-offers/mine'
         const res = await axios.get(LARAVEL + endpoint, { headers })
         presupuestos.value = res.data.data.map(mapPresupuesto)
     } catch (error) {
@@ -52,6 +52,11 @@ async function fetchPresupuestos() {
 }
 
 onMounted(() => {
+    fetchPresupuestos()
+})
+
+// Re-fetch cuando cambia el rol para usar el endpoint correcto
+watch(() => roleStore.currentRole, () => {
     fetchPresupuestos()
 })
 
@@ -86,29 +91,31 @@ function openRejectModal(p) {
     showRejectModal.value = true
 }
 
-async function handleApprove() {
+async function handleApprove(id) {
     try {
-        await axios.put(LARAVEL + `/commercial-offers/${selectedPresupuesto.value.id}/approve`, {}, { headers })
+        await axios.put(LARAVEL + `/commercial-offers/${id}/approve`, {}, { headers })
         showApproveModal.value = false
         selectedPresupuesto.value = null
-        await fetchPresupuestos()
     } catch (error) {
         console.error('Error al aprobar presupuesto:', error)
+    } finally {
+        await fetchPresupuestos()
     }
 }
 
-async function handleReject(reason) {
+async function handleReject(reason, id) {
     try {
         await axios.put(
-            LARAVEL + `/commercial-offers/${selectedPresupuesto.value.id}/reject`,
+            LARAVEL + `/commercial-offers/${id}/reject`,
             { rejection_reason: reason },
             { headers },
         )
         showRejectModal.value = false
         selectedPresupuesto.value = null
-        await fetchPresupuestos()
     } catch (error) {
         console.error('Error al rechazar presupuesto:', error)
+    } finally {
+        await fetchPresupuestos()
     }
 }
 </script>

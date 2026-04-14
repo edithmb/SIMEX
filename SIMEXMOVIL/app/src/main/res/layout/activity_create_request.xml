@@ -41,7 +41,7 @@
         android:layout_height="0dp"
         android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/fondoCabecera"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -52,83 +52,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Datos de facturación y contacto"
-                android:textColor="#1A1A1A"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp"/>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:layout_marginBottom="24dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Nombre de la compañía"
-                        android:textSize="12sp"
-                        android:textColor="#7A7A7A"
-                        android:layout_marginBottom="4dp"/>
-                    <EditText
-                        android:id="@+id/inputCompania"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:background="@drawable/bg_caja_texto"
-                        android:hint="Ej. Peluche Corporations"
-                        android:paddingHorizontal="16dp"
-                        android:inputType="textPersonName"
-                        android:layout_marginBottom="12dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="CIF / Tax ID"
-                        android:textSize="12sp"
-                        android:textColor="#7A7A7A"
-                        android:layout_marginBottom="4dp"/>
-                    <EditText
-                        android:id="@+id/inputCif"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:background="@drawable/bg_caja_texto"
-                        android:hint="Ej. B12345678"
-                        android:paddingHorizontal="16dp"
-                        android:inputType="text"
-                        android:layout_marginBottom="12dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Email de contacto"
-                        android:textSize="12sp"
-                        android:textColor="#7A7A7A"
-                        android:layout_marginBottom="4dp"/>
-                    <EditText
-                        android:id="@+id/inputEmailContacto"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:background="@drawable/bg_caja_texto"
-                        android:hint="contacto@empresa.com"
-                        android:paddingHorizontal="16dp"
-                        android:inputType="textEmailAddress"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ruta y Operación"
+                android:text="Tipo de Operación"
                 android:textColor="#1A1A1A"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -140,7 +64,7 @@
                 android:layout_height="wrap_content"
                 app:singleSelection="true"
                 app:checkedButton="@id/btnImportacion"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="24dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnImportacion"
@@ -151,6 +75,7 @@
                     android:text="Importación"
                     app:strokeColor="#90A93E"
                     android:textColor="#1A1A1A"/>
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnExportacion"
                     style="?attr/materialButtonOutlinedStyle"
@@ -162,75 +87,10 @@
                     android:textColor="#1A1A1A"/>
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:layout_marginBottom="24dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Origen" android:textSize="12sp"
-                        android:textColor="#7A7A7A" android:layout_marginBottom="4dp"/>
-                    <EditText
-                        android:id="@+id/inputOrigen"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:background="@drawable/bg_caja_texto"
-                        android:hint="Ej. Shenzhen, China"
-                        android:paddingHorizontal="16dp"
-                        android:inputType="textPostalAddress"
-                        android:layout_marginBottom="12dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Destino"
-                        android:textSize="12sp"
-                        android:textColor="#7A7A7A"
-                        android:layout_marginBottom="4dp"/>
-                    <EditText
-                        android:id="@+id/inputDestino"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:background="@drawable/bg_caja_texto"
-                        android:hint="Ej. Barcelona, España"
-                        android:paddingHorizontal="16dp"
-                        android:inputType="textPostalAddress"
-                        android:layout_marginBottom="12dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Código Postal (Destino)"
-                        android:textSize="12sp"
-                        android:textColor="#7A7A7A"
-                        android:layout_marginBottom="4dp"/>
-                    <EditText
-                        android:id="@+id/inputCodigoPostal"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:background="@drawable/bg_caja_texto"
-                        android:hint="Ej. 08012"
-                        android:paddingHorizontal="16dp"
-                        android:inputType="textPostalAddress"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Detalles de la carga"
+                android:text="Ruta de la carga"
                 android:textColor="#1A1A1A"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -254,23 +114,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="¿Qué vas a enviar?"
-                        android:textSize="12sp"
-                        android:textColor="#7A7A7A"
-                        android:layout_marginBottom="4dp"/>
-                    <EditText
-                        android:id="@+id/inputDescripcion"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:background="@drawable/bg_caja_texto"
-                        android:hint="Ej. Componentes electrónicos"
-                        android:paddingHorizontal="16dp"
-                        android:inputType="text"
-                        android:layout_marginBottom="16dp"/>
-
-                    <TextView android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tipo de contenedor"
+                        android:text="Ubicación de Origen"
                         android:textSize="12sp"
                         android:textColor="#7A7A7A"
                         android:layout_marginBottom="4dp"/>
@@ -287,64 +131,113 @@
                         android:layout_marginBottom="16dp">
 
                         <AutoCompleteTextView
-                            android:id="@+id/dropdownContenedor"
+                            android:id="@+id/dropdownOrigen"
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
                             android:paddingHorizontal="16dp"
                             android:inputType="none"
-                            android:hint="Selecciona una opción"
+                            android:hint="Selecciona el origen"
                             android:textColor="#1A1A1A" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <LinearLayout
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ubicación de Destino"
+                        android:textSize="12sp"
+                        android:textColor="#7A7A7A"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        app:boxStrokeColor="#90A93E"
+                        app:boxCornerRadiusTopStart="8dp"
+                        app:boxCornerRadiusTopEnd="8dp"
+                        app:boxCornerRadiusBottomStart="8dp"
+                        app:boxCornerRadiusBottomEnd="8dp"
+                        android:layout_marginBottom="12dp">
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1" android:orientation="vertical"
-                            android:layout_marginEnd="8dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Peso (Kg)"
-                                android:textSize="12sp"
-                                android:textColor="#7A7A7A"
-                                android:layout_marginBottom="4dp"/>
-                            <EditText
-                                android:id="@+id/inputPeso"
-                                android:layout_width="match_parent"
-                                android:layout_height="50dp"
-                                android:background="@drawable/bg_caja_texto"
-                                android:hint="Ej. 1500"
-                                android:paddingHorizontal="16dp"
-                                android:inputType="numberDecimal"/>
-                        </LinearLayout>
+                        <AutoCompleteTextView
+                            android:id="@+id/dropdownDestino"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:paddingHorizontal="16dp"
+                            android:inputType="none"
+                            android:hint="Selecciona el destino"
+                            android:textColor="#1A1A1A" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                        <LinearLayout
-                            android:layout_width="0dp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dimensiones y Peso"
+                android:textColor="#1A1A1A"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical"
+                        android:layout_marginEnd="8dp">
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginStart="8dp">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Volumen (m³)"
-                                android:textSize="12sp"
-                                android:textColor="#7A7A7A"
-                                android:layout_marginBottom="4dp"/>
-                            <EditText
-                                android:id="@+id/inputVolumen"
-                                android:layout_width="match_parent"
-                                android:layout_height="50dp"
-                                android:background="@drawable/bg_caja_texto"
-                                android:hint="Ej. 12.5"
-                                android:paddingHorizontal="16dp"
-                                android:inputType="numberDecimal"/>
-                        </LinearLayout>
+                            android:text="Peso (Kg)"
+                            android:textSize="12sp"
+                            android:textColor="#7A7A7A"
+                            android:layout_marginBottom="4dp"/>
+                        <EditText
+                            android:id="@+id/inputPeso"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:background="@drawable/bg_caja_texto"
+                            android:hint="Ej. 1500"
+                            android:paddingHorizontal="16dp"
+                            android:inputType="numberDecimal"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="8dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Volumen (m³)"
+                            android:textSize="12sp"
+                            android:textColor="#7A7A7A"
+                            android:layout_marginBottom="4dp"/>
+                        <EditText
+                            android:id="@+id/inputVolumen"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:background="@drawable/bg_caja_texto"
+                            android:hint="Ej. 12.5"
+                            android:paddingHorizontal="16dp"
+                            android:inputType="numberDecimal"/>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -376,27 +269,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Fecha disponible para recogida"
-                        android:textSize="12sp"
-                        android:textColor="#7A7A7A"
-                        android:layout_marginBottom="4dp"/>
-                    <EditText
-                        android:id="@+id/inputFecha"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:background="@drawable/bg_caja_texto"
-                        android:hint="DD/MM/AAAA"
-                        android:paddingHorizontal="16dp"
-                        android:focusable="false"
-                        android:clickable="true"
-                        app:drawableEndCompat="@drawable/ic_calendar"
-                        app:drawableTint="#90A93E"
-                        android:layout_marginBottom="16dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Comentarios o peticiones especiales"
+                        android:text="Comentarios (Opcional)"
                         android:textSize="12sp"
                         android:textColor="#7A7A7A"
                         android:layout_marginBottom="4dp"/>
@@ -405,7 +278,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="100dp"
                         android:background="@drawable/bg_caja_texto"
-                        android:hint="Ej. La mercancía requiere control de temperatura..."
+                        android:hint="Ej. La mercancía es frágil..."
                         android:padding="16dp"
                         android:gravity="top|start"
                         android:inputType="textMultiLine"
