@@ -1,9 +1,11 @@
 <script setup>
 import { ref, watch } from 'vue'
+import Spinner from '@/components/common/Spinner.vue'
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
     presupuesto: { type: Object, default: null },
+    submitting: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'confirm'])
@@ -22,7 +24,7 @@ function handleClose() {
 }
 
 function handleConfirm() {
-    if (capturedId.value == null) return
+    if (props.submitting || capturedId.value == null) return
     emit('confirm', capturedId.value)
 }
 
@@ -82,8 +84,11 @@ function formatPrice(price) {
 
                     <!-- Footer -->
                     <div class="modal-footer">
-                        <button class="modal-footer-cancel" @click="handleClose">Cancelar</button>
-                        <button class="modal-footer-confirm" @click="handleConfirm">Confirmar Aprobación</button>
+                        <button class="modal-footer-cancel" :disabled="submitting" @click="handleClose">Cancelar</button>
+                        <button class="modal-footer-confirm" :disabled="submitting" @click="handleConfirm">
+                            <Spinner v-if="submitting" :size="14" />
+                            <span v-else>Confirmar Aprobación</span>
+                        </button>
                     </div>
                 </div>
             </div>

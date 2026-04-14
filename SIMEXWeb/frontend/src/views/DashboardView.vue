@@ -7,12 +7,14 @@ import ShipmentVolumeChart from '@/components/dashboard/ShipmentVolumeChart.vue'
 import TransportDistribution from '@/components/dashboard/TransportDistribution.vue'
 import RecentOperations from '@/components/dashboard/RecentOperations.vue'
 import RecentActivity from '@/components/dashboard/RecentActivity.vue'
+import Spinner from '@/components/common/Spinner.vue'
 
 const auth = useAuthStore()
 const LARAVEL = import.meta.env.VITE_LARAVEL_API
 const headers = { Authorization: `Bearer ${auth.token}` }
 
 // KPI state
+const loading = ref(true)
 const enviosActivos = ref('—')
 const ofertasPendientes = ref('—')
 const operacionesCompletadas = ref('—')
@@ -21,6 +23,7 @@ const totalClientes = ref('—')
 const completedStatuses = ['descarga', 'completed', 'completado']
 
 onMounted(async () => {
+    loading.value = true
     try {
         const [opsRes, offersRes, clientsRes] = await Promise.all([
             axios.get(LARAVEL + '/logistics-operations?per_page=1000', { headers }),
@@ -42,12 +45,18 @@ onMounted(async () => {
         totalClientes.value = String(clients.length)
     } catch (e) {
         console.error('Error al cargar KPIs del dashboard:', e)
+    } finally {
+        loading.value = false
     }
 })
 </script>
 
 <template>
   <div class="dashboard">
+    <div v-if="loading" class="view-loading">
+      <Spinner :size="40" />
+    </div>
+    <template v-else>
     <!-- KPI Cards Row -->
     <div class="dashboard-stats">
       <StatCard
@@ -83,6 +92,7 @@ onMounted(async () => {
       <RecentOperations class="dashboard-bottom-operations" />
       <RecentActivity class="dashboard-bottom-activity" />
     </div>
+    </template>
   </div>
 </template>
 
@@ -91,6 +101,14 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.view-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100px 0;
+  color: var(--accent-blue);
 }
 
 .dashboard-stats {

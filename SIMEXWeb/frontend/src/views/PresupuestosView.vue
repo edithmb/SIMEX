@@ -8,6 +8,7 @@ import PresupuestosFilters from '@/components/presupuestos/PresupuestosFilters.v
 import PresupuestosTable from '@/components/presupuestos/PresupuestosTable.vue'
 import AprobarPresupuestoModal from '@/components/presupuestos/AprobarPresupuestoModal.vue'
 import RechazarPresupuestoModal from '@/components/presupuestos/RechazarPresupuestoModal.vue'
+import Spinner from '@/components/common/Spinner.vue'
 
 const roleStore = useRoleStore()
 const auth = useAuthStore()
@@ -17,6 +18,8 @@ const headers = { Authorization: `Bearer ${auth.token}` }
 
 const presupuestos = ref([])
 const loading = ref(false)
+const submittingApprove = ref(false)
+const submittingReject = ref(false)
 
 const statusMap = { draft: 'Enviado', accepted: 'Aceptado', rejected: 'Rechazado' }
 
@@ -92,6 +95,8 @@ function openRejectModal(p) {
 }
 
 async function handleApprove(id) {
+    if (submittingApprove.value) return
+    submittingApprove.value = true
     try {
         await axios.put(LARAVEL + `/commercial-offers/${id}/approve`, {}, { headers })
         showApproveModal.value = false
@@ -99,11 +104,14 @@ async function handleApprove(id) {
     } catch (error) {
         console.error('Error al aprobar presupuesto:', error)
     } finally {
+        submittingApprove.value = false
         await fetchPresupuestos()
     }
 }
 
 async function handleReject(reason, id) {
+    if (submittingReject.value) return
+    submittingReject.value = true
     try {
         await axios.put(
             LARAVEL + `/commercial-offers/${id}/reject`,
@@ -115,6 +123,7 @@ async function handleReject(reason, id) {
     } catch (error) {
         console.error('Error al rechazar presupuesto:', error)
     } finally {
+        submittingReject.value = false
         await fetchPresupuestos()
     }
 }
@@ -130,12 +139,18 @@ async function handleReject(reason, id) {
         <PresupuestosStats :presupuestos="presupuestos" />
         <PresupuestosFilters :active-filter="activeFilter" :search-query="searchQuery"
             @update:active-filter="activeFilter = $event" @update:search-query="searchQuery = $event" />
-        <PresupuestosTable :presupuestos="filteredPresupuestos" :role="roleStore.currentRole"
+
+        <div v-if="loading" class="view-loading">
+            <Spinner :size="40" />
+        </div>
+        <PresupuestosTable v-else :presupuestos="filteredPresupuestos" :role="roleStore.currentRole"
             @aprobar="openApproveModal" @rechazar="openRejectModal" />
 
         <AprobarPresupuestoModal :visible="showApproveModal" :presupuesto="selectedPresupuesto"
+            :submitting="submittingApprove"
             @close="showApproveModal = false" @confirm="handleApprove" />
         <RechazarPresupuestoModal :visible="showRejectModal" :presupuesto="selectedPresupuesto"
+            :submitting="submittingReject"
             @close="showRejectModal = false" @confirm="handleReject" />
     </div>
 </template>
@@ -164,4 +179,11 @@ async function handleReject(reason, id) {
     color: var(--text-secondary);
 }
 
+.view-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 0;
+    color: var(--accent-blue);
+}
 </style>

@@ -9,6 +9,7 @@ import SolicitudesFilters from '@/components/solicitudes/SolicitudesFilters.vue'
 import SolicitudesTable from '@/components/solicitudes/SolicitudesTable.vue'
 import CrearPresupuestoModal from '@/components/solicitudes/CrearPresupuestoModal.vue'
 import CrearSolicitudModal from '@/components/solicitudes/CrearSolicitudModal.vue'
+import Spinner from '@/components/common/Spinner.vue'
 
 const roleStore = useRoleStore()
 const auth = useAuthStore()
@@ -19,6 +20,8 @@ const headers = { Authorization: `Bearer ${auth.token}` }
 
 const solicitudes = ref([])
 const loading = ref(false)
+const submittingSolicitud = ref(false)
+const submittingPresupuesto = ref(false)
 
 // 1. Creamos las listas reactivas para los desplegables del modal
 const clientesList = ref([])
@@ -142,12 +145,16 @@ function closePresupuestoModal() {
 }
 
 async function handlePresupuestoSubmit(data) {
+  if (submittingPresupuesto.value) return
+  submittingPresupuesto.value = true
   try {
     await axios.post(LARAVEL + '/commercial-offers', data, { headers })
     closePresupuestoModal()
     await fetchSolicitudes()
   } catch (error) {
     console.error('Error al crear presupuesto:', error)
+  } finally {
+    submittingPresupuesto.value = false
   }
 }
 
@@ -163,6 +170,8 @@ function closeSolicitudModal() {
 }
 
 async function handleSolicitudSubmit(data) {
+  if (submittingSolicitud.value) return
+  submittingSolicitud.value = true
   try {
     const endpoint = auth.backendIsAdmin ? '/client-requests-admin' : '/client-requests-client'
     await axios.post(LARAVEL + endpoint, data, { headers })
@@ -175,6 +184,8 @@ async function handleSolicitudSubmit(data) {
       return
     }
     console.error('Error al enviar la solicitud:', error)
+  } finally {
+    submittingSolicitud.value = false
   }
 }
 </script>
@@ -205,17 +216,22 @@ async function handleSolicitudSubmit(data) {
       @update:active-filter="activeFilter = $event" @update:search-query="searchQuery = $event" />
 
     <!-- Table -->
-    <SolicitudesTable :solicitudes="filteredSolicitudes" :role="roleStore.currentRole"
+    <div v-if="loading" class="view-loading">
+      <Spinner :size="40" />
+    </div>
+    <SolicitudesTable v-else :solicitudes="filteredSolicitudes" :role="roleStore.currentRole"
       @crear-presupuesto="openPresupuestoModal" />
 
     <!-- Modal: Crear Presupuesto (admin) -->
     <CrearPresupuestoModal :visible="showPresupuestoModal" :solicitud="selectedSolicitud"
       :incoterms="incotermsList" :puertos="puertosList" :tipos-contenedor="tiposContenedorList"
+      :submitting="submittingPresupuesto"
       @close="closePresupuestoModal" @submit="handlePresupuestoSubmit" />
 
     <!-- Modal: Crear Solicitud (client/admin) -->
     <CrearSolicitudModal :visible="showSolicitudModal" :role="roleStore.currentRole"
       :clientes="clientesList" :localizaciones="localizacionesList"
+      :submitting="submittingSolicitud"
       @close="closeSolicitudModal" @submit="handleSolicitudSubmit" />
   </div>
 </template>
@@ -272,5 +288,13 @@ async function handleSolicitudSubmit(data) {
 
 .solicitudes-header-btn:hover {
   background: #0d2440;
+}
+
+.view-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 0;
+  color: var(--accent-blue);
 }
 </style>

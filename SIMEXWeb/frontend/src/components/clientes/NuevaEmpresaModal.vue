@@ -1,8 +1,10 @@
 <script setup>
 import { reactive } from 'vue'
+import Spinner from '@/components/common/Spinner.vue'
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
+    submitting: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'submit'])
@@ -31,8 +33,8 @@ function handleClose() {
 }
 
 function handleSubmit() {
+    if (props.submitting) return
     emit('submit', { ...form })
-    handleClose()
 }
 
 function handleOverlayClick(e) {
@@ -113,8 +115,11 @@ function handleOverlayClick(e) {
                     </div>
 
                     <div class="modal-footer">
-                        <button class="modal-footer-cancel" @click="handleClose">Cancelar</button>
-                        <button class="modal-footer-submit" @click="handleSubmit">Crear Empresa</button>
+                        <button class="modal-footer-cancel" :disabled="submitting" @click="handleClose">Cancelar</button>
+                        <button class="modal-footer-submit" :disabled="submitting" @click="handleSubmit">
+                            <Spinner v-if="submitting" :size="14" />
+                            <span v-else>Crear Empresa</span>
+                        </button>
                     </div>
                 </div>
             </div>

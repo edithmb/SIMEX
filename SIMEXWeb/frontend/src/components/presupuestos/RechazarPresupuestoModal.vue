@@ -1,9 +1,11 @@
 <script setup>
 import { ref, watch } from 'vue'
+import Spinner from '@/components/common/Spinner.vue'
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
     presupuesto: { type: Object, default: null },
+    submitting: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'confirm'])
@@ -31,7 +33,7 @@ function handleClose() {
 }
 
 function handleConfirm() {
-    if (!reason.value.trim() || capturedId.value == null) return
+    if (props.submitting || !reason.value.trim() || capturedId.value == null) return
     emit('confirm', reason.value.trim(), capturedId.value)
 }
 
@@ -76,9 +78,10 @@ function handleOverlayClick(e) {
 
                     <!-- Footer -->
                     <div class="modal-footer">
-                        <button class="modal-footer-cancel" @click="handleClose">Cancelar</button>
-                        <button class="modal-footer-confirm" :disabled="!reason.trim()" @click="handleConfirm">
-                            Confirmar Rechazo
+                        <button class="modal-footer-cancel" :disabled="submitting" @click="handleClose">Cancelar</button>
+                        <button class="modal-footer-confirm" :disabled="submitting || !reason.trim()" @click="handleConfirm">
+                            <Spinner v-if="submitting" :size="14" />
+                            <span v-else>Confirmar Rechazo</span>
                         </button>
                     </div>
                 </div>

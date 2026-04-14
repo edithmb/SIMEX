@@ -9,6 +9,7 @@ import ClientesList from '@/components/clientes/ClientesList.vue'
 import NuevaEmpresaModal from '@/components/clientes/NuevaEmpresaModal.vue'
 import NuevoUsuarioModal from '@/components/clientes/NuevoUsuarioModal.vue'
 import UsuariosList from '@/components/clientes/UsuariosList.vue'
+import Spinner from '@/components/common/Spinner.vue'
 
 const LARAVEL = import.meta.env.VITE_LARAVEL_API
 const NET = import.meta.env.VITE_NET_API
@@ -19,6 +20,9 @@ const headers = { Authorization: `Bearer ${auth.token}` }
 
 const clientes = ref([])
 const roles = ref([])
+const loading = ref(false)
+const submittingEmpresa = ref(false)
+const submittingUsuario = ref(false)
 
 const activeTab = ref('empresas')
 const searchQuery = ref('')
@@ -94,7 +98,12 @@ async function fetchRoles() {
 
 onMounted(async () => {
     document.addEventListener('click', closeDropdownOutside)
-    await Promise.all([fetchClientes(), fetchRoles()])
+    loading.value = true
+    try {
+        await Promise.all([fetchClientes(), fetchRoles()])
+    } finally {
+        loading.value = false
+    }
 })
 onUnmounted(() => document.removeEventListener('click', closeDropdownOutside))
 
@@ -113,6 +122,8 @@ function openContactoModal() {
 }
 
 async function handleEmpresaSubmit(data) {
+    if (submittingEmpresa.value) return
+    submittingEmpresa.value = true
     try {
         await axios.post(NET + '/Clients', {
             companyName: data.company_name,
@@ -128,10 +139,14 @@ async function handleEmpresaSubmit(data) {
         await fetchClientes()
     } catch (error) {
         console.error('Error al crear empresa:', error)
+    } finally {
+        submittingEmpresa.value = false
     }
 }
 
 async function handleContactoSubmit(data) {
+    if (submittingUsuario.value) return
+    submittingUsuario.value = true
     try {
         await axios.post(NET + '/Users', {
             firstName: data.first_name,
@@ -147,6 +162,8 @@ async function handleContactoSubmit(data) {
         await fetchClientes()
     } catch (error) {
         console.error('Error al crear usuario:', error)
+    } finally {
+        submittingUsuario.value = false
     }
 }
 </script>
@@ -193,13 +210,20 @@ async function handleContactoSubmit(data) {
         <ClientesStats :total-empresas="clientes.length" :total-usuarios="allUsers.length" />
         <ClientesFilters :active-tab="activeTab" :search-query="searchQuery" @update:active-tab="activeTab = $event"
             @update:search-query="searchQuery = $event" />
-        <ClientesList v-if="activeTab === 'empresas'" :clientes="filteredClientes" />
-        <UsuariosList v-else :usuarios="allUsers" />
+
+        <div v-if="loading" class="view-loading">
+            <Spinner :size="40" />
+        </div>
+        <template v-else>
+            <ClientesList v-if="activeTab === 'empresas'" :clientes="filteredClientes" />
+            <UsuariosList v-else :usuarios="allUsers" />
+        </template>
 
         <!-- Modals -->
-        <NuevaEmpresaModal :visible="showEmpresaModal" @close="showEmpresaModal = false"
-            @submit="handleEmpresaSubmit" />
+        <NuevaEmpresaModal :visible="showEmpresaModal" :submitting="submittingEmpresa"
+            @close="showEmpresaModal = false" @submit="handleEmpresaSubmit" />
         <NuevoUsuarioModal :visible="showContactoModal" :empresas="clientes" :roles="roles"
+            :submitting="submittingUsuario"
             @close="showContactoModal = false" @submit="handleContactoSubmit" />
     </div>
 </template>
@@ -284,5 +308,13 @@ async function handleContactoSubmit(data) {
 .dropdown-leave-to {
     opacity: 0;
     transform: translateY(-4px);
+}
+
+.view-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 0;
+    color: var(--accent-blue);
 }
 </style>

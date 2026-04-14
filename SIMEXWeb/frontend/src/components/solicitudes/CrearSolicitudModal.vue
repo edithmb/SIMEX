@@ -1,5 +1,6 @@
 <script setup>
 import { reactive } from 'vue' // Quitamos 'ref' y 'onMounted' porque ya no los usaremos aquí
+import Spinner from '@/components/common/Spinner.vue'
 
 // --- CAMBIO 1: Recibir los datos desde el padre ---
 const props = defineProps({
@@ -7,6 +8,7 @@ const props = defineProps({
     role: { type: String, default: 'cliente' },
     clientes: { type: Array, default: () => [] },       // Recibimos la lista de clientes
     localizaciones: { type: Array, default: () => [] }, // Recibimos la lista de localizaciones
+    submitting: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'submit'])
@@ -40,7 +42,8 @@ function handleClose() {
 }
 
 function handleSubmit() {
-    // Tu lógica aquí está perfecta. 
+    if (props.submitting) return
+    // Tu lógica aquí está perfecta.
     // Castear a Number() asegura que tu backend reciba enteros, no strings.
     const payload = {
         origin_id: Number(form.origin_id),
@@ -53,7 +56,7 @@ function handleSubmit() {
     if (props.role === 'admin') {
         payload.client_id = Number(form.client_id)
     }
-    
+
     emit('submit', payload)
     resetForm()
 }
@@ -142,8 +145,11 @@ function handleOverlayClick(e) {
                     </div>
 
                     <div class="modal-footer">
-                        <button class="modal-footer-cancel" @click="handleClose">Cancelar</button>
-                        <button class="modal-footer-submit" @click="handleSubmit">Enviar Solicitud</button>
+                        <button class="modal-footer-cancel" :disabled="submitting" @click="handleClose">Cancelar</button>
+                        <button class="modal-footer-submit" :disabled="submitting" @click="handleSubmit">
+                            <Spinner v-if="submitting" :size="14" />
+                            <span v-else>Enviar Solicitud</span>
+                        </button>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 <script setup>
 import { reactive } from 'vue'
+import Spinner from '@/components/common/Spinner.vue'
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
@@ -7,6 +8,7 @@ const props = defineProps({
     incoterms: { type: Array, default: () => [] },
     puertos: { type: Array, default: () => [] },
     tiposContenedor: { type: Array, default: () => [] },
+    submitting: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'submit'])
@@ -39,6 +41,7 @@ function handleClose() {
 }
 
 function handleSubmit() {
+    if (props.submitting) return
     const payload = {
         client_request_id:   props.solicitud.id,
         incoterm_id:         Number(form.incoterm_id),
@@ -184,8 +187,11 @@ function handleOverlayClick(e) {
 
                     <!-- Footer -->
                     <div class="modal-footer">
-                        <button class="modal-footer-cancel" @click="handleClose">Cancelar</button>
-                        <button class="modal-footer-submit" @click="handleSubmit">Generar Presupuesto</button>
+                        <button class="modal-footer-cancel" :disabled="submitting" @click="handleClose">Cancelar</button>
+                        <button class="modal-footer-submit" :disabled="submitting" @click="handleSubmit">
+                            <Spinner v-if="submitting" :size="14" />
+                            <span v-else>Generar Presupuesto</span>
+                        </button>
                     </div>
                 </div>
             </div>

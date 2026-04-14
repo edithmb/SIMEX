@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { useRoleStore } from '@/stores/role'
 import { useAuthStore } from '@/stores/auth'
 import SubirDocumentoModal from '@/components/documentos/SubirDocumentoModal.vue'
+import Spinner from '@/components/common/Spinner.vue'
 
 const roleStore = useRoleStore()
 const auth = useAuthStore()
@@ -17,6 +18,7 @@ const headers = { Authorization: `Bearer ${auth.token}` }
 const operaciones = ref([])
 const loading = ref(false)
 const showModal = ref(false)
+const submittingUpload = ref(false)
 
 // Carga todas las operaciones logísticas con sus documentos
 async function fetchOperaciones() {
@@ -129,9 +131,15 @@ async function handleDownload(doc) {
     }
 }
 
-function handleSubmit(data) {
-    console.log('Subir documento:', data)
-    showModal.value = false
+async function handleSubmit(data) {
+    if (submittingUpload.value) return
+    submittingUpload.value = true
+    try {
+        console.log('Subir documento:', data)
+        showModal.value = false
+    } finally {
+        submittingUpload.value = false
+    }
 }
 </script>
 
@@ -156,7 +164,9 @@ function handleSubmit(data) {
         </div>
 
         <!-- Loading -->
-        <p v-if="loading" class="documentos-loading">Cargando documentos...</p>
+        <div v-if="loading" class="view-loading">
+            <Spinner :size="40" />
+        </div>
 
         <!-- Filter buttons -->
         <div v-else class="doc-client-filters">
@@ -224,7 +234,8 @@ function handleSubmit(data) {
             </div>
         </div>
 
-        <SubirDocumentoModal :visible="showModal" @close="showModal = false" @submit="handleSubmit" />
+        <SubirDocumentoModal :visible="showModal" :submitting="submittingUpload"
+            @close="showModal = false" @submit="handleSubmit" />
     </div>
 </template>
 
@@ -276,12 +287,19 @@ function handleSubmit(data) {
     background: #0d2440;
 }
 
-.documentos-loading,
 .documentos-empty {
     font-size: 13.5px;
     color: var(--text-secondary);
     padding: 20px 0;
     text-align: center;
+}
+
+.view-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 0;
+    color: var(--accent-blue);
 }
 
 /* ── Filters & cards ── */

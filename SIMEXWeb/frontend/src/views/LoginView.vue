@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import Spinner from '@/components/common/Spinner.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -63,7 +64,8 @@ async function handleLogin() {
         <p v-if="error" class="login-error">{{ error }}</p>
 
         <button type="submit" class="login-btn" :disabled="loading">
-          {{ loading ? 'Entrando…' : 'Entrar' }}
+          <Spinner v-if="loading" :size="16" />
+          <span>{{ loading ? 'Entrando…' : 'Entrar' }}</span>
         </button>
       </form>
     </div>
@@ -165,6 +167,10 @@ async function handleLogin() {
   font-family: inherit;
   transition: background 0.15s;
   margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .login-btn:hover:not(:disabled) {

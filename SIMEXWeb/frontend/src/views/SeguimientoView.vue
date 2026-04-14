@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import TrackingFilters from '@/components/seguimiento/TrackingFilters.vue'
 import ShipmentList from '@/components/seguimiento/ShipmentList.vue'
 import ShipmentDetail from '@/components/seguimiento/ShipmentDetail.vue'
+import Spinner from '@/components/common/Spinner.vue'
 import { useRoleStore } from '@/stores/role'
 import { useAuthStore } from '@/stores/auth'
 
@@ -178,7 +179,9 @@ async function updateShipmentStatus(id, newStatus) {
           :role="roleStore.currentRole"
           @update-status="updateShipmentStatus"
         />
-        <div v-else-if="loading" class="seguimiento-placeholder">Cargando operaciones…</div>
+        <div v-else-if="loading" class="seguimiento-placeholder">
+          <Spinner :size="40" />
+        </div>
         <div v-else-if="loadError" class="seguimiento-placeholder error">{{ loadError }}</div>
         <div v-else class="seguimiento-placeholder">No hay operaciones logísticas.</div>
       </div>
