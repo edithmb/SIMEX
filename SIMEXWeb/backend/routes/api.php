@@ -40,14 +40,43 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get('/logistics-operations', [LogisticsOperationController::class, 'index']);
 
-    // Datos maestros - solo admin
+    // Datos maestros - GET para todos, POST/PUT/DELETE solo admin
+    Route::get('/countries', [CountryController::class, 'index']);
+    Route::get('/cities', [CityController::class, 'index']);
+    Route::get('/ports', [PortController::class, 'index']);
+    Route::get('/airports', [AirportController::class, 'index']);
+    Route::get('/shipping-lines', [ShippingLineController::class, 'index']);
+    Route::get('/carriers', [CarrierController::class, 'index']);
+    Route::get('/container-types', [ContainerTypeController::class, 'index']);
+
+    // POST/PUT/DELETE solo admin
     Route::middleware('role:admin')->group(function () {
-        Route::apiResource('countries',       CountryController::class)->except('show');
-        Route::apiResource('cities',          CityController::class)->except('show');
-        Route::apiResource('ports',           PortController::class)->except('show');
-        Route::apiResource('airports',        AirportController::class)->except('show');
-        Route::apiResource('shipping-lines',  ShippingLineController::class)->except('show');
-        Route::apiResource('carriers',        CarrierController::class)->except('show');
-        Route::apiResource('container-types', ContainerTypeController::class)->except('show');
+        Route::post('/countries', [CountryController::class, 'store']);
+        Route::put('/countries/{country}', [CountryController::class, 'update']);
+        Route::delete('/countries/{country}', [CountryController::class, 'destroy']);
+
+        Route::post('/cities', [CityController::class, 'store']);
+        Route::put('/cities/{city}', [CityController::class, 'update']);
+        Route::delete('/cities/{city}', [CityController::class, 'destroy']);
+
+        Route::post('/ports', [PortController::class, 'store']);
+        Route::put('/ports/{port}', [PortController::class, 'update']);
+        Route::delete('/ports/{port}', [PortController::class, 'destroy']);
+
+        Route::post('/airports', [AirportController::class, 'store']);
+        Route::put('/airports/{airport}', [AirportController::class, 'update']);
+        Route::delete('/airports/{airport}', [AirportController::class, 'destroy']);
+
+        Route::post('/shipping-lines', [ShippingLineController::class, 'store']);
+        Route::put('/shipping-lines/{shipping_line}', [ShippingLineController::class, 'update']);
+        Route::delete('/shipping-lines/{shipping_line}', [ShippingLineController::class, 'destroy']);
+
+        Route::post('/carriers', [CarrierController::class, 'store']);
+        Route::put('/carriers/{carrier}', [CarrierController::class, 'update']);
+        Route::delete('/carriers/{carrier}', [CarrierController::class, 'destroy']);
+
+        Route::post('/container-types', [ContainerTypeController::class, 'store']);
+        Route::put('/container-types/{container_type}', [ContainerTypeController::class, 'update']);
+        Route::delete('/container-types/{container_type}', [ContainerTypeController::class, 'destroy']);
     });
 });
