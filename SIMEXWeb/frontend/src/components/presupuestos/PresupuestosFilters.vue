@@ -6,7 +6,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:activeFilter', 'update:searchQuery'])
 
-const filters = ['Todos', 'Borrador', 'Enviado', 'Aceptado', 'Rechazado']
+const filters = ['Todos', 'Enviado', 'Aceptado', 'Rechazado']
 </script>
 
 <template>

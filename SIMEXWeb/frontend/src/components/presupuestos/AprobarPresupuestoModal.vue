@@ -1,4 +1,6 @@
 <script setup>
+import { ref, watch } from 'vue'
+
 const props = defineProps({
     visible: { type: Boolean, default: false },
     presupuesto: { type: Object, default: null },
@@ -6,12 +8,22 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'confirm'])
 
+// Capturamos el ID cuando el modal se abre para que persista
+// durante la transición de salida (cuando props.presupuesto ya es null)
+const capturedId = ref(null)
+watch(
+    () => props.presupuesto,
+    (p) => { if (p) capturedId.value = p.id },
+    { immediate: true },
+)
+
 function handleClose() {
     emit('close')
 }
 
 function handleConfirm() {
-    emit('confirm')
+    if (capturedId.value == null) return
+    emit('confirm', capturedId.value)
 }
 
 function handleOverlayClick(e) {

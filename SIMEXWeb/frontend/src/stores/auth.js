@@ -9,6 +9,9 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('jwt_token') ?? null)
   const isAuthenticated = computed(() => !!token.value)
 
+  // Rol real del backend — solo se actualiza en login o al inicializar, nunca desde la UI
+  const backendIsAdmin = ref(localStorage.getItem('backend_is_admin') === 'true')
+
   function setToken(newToken) {
     token.value = newToken
     localStorage.setItem('jwt_token', newToken)
@@ -16,8 +19,32 @@ export const useAuthStore = defineStore('auth', () => {
 
   function clearToken() {
     token.value = null
+    backendIsAdmin.value = false
     localStorage.removeItem('jwt_token')
     localStorage.removeItem('user_role')
+    localStorage.removeItem('backend_role')
+    localStorage.removeItem('backend_is_admin')
+  }
+
+  // Si hay token pero aún no se ha guardado backend_is_admin, lo resolvemos con /me
+  async function initBackendRole() {
+    if (!token.value) return
+    if (localStorage.getItem('backend_is_admin') !== null) return
+    try {
+      const meRes = await axios.get(LARAVEL + '/me', {
+        headers: { Authorization: `Bearer ${token.value}` },
+      })
+      const roleName = meRes.data.role?.name ?? 'cliente'
+      const isAdmin = roleName !== 'cliente'
+      backendIsAdmin.value = isAdmin
+      localStorage.setItem('backend_is_admin', String(isAdmin))
+      const roleStore = useRoleStore()
+      roleStore.setRole(roleName)
+    } catch {
+      // si falla, asumimos admin para no romper la sesión activa
+      backendIsAdmin.value = true
+      localStorage.setItem('backend_is_admin', 'true')
+    }
   }
 
   async function login(email, password) {
@@ -36,6 +63,11 @@ export const useAuthStore = defineStore('auth', () => {
         headers: { Authorization: `Bearer ${token.value}` },
       })
       const roleName = meRes.data.role?.name ?? 'cliente'
+      const isAdmin = roleName !== 'cliente'
+
+      backendIsAdmin.value = isAdmin
+      localStorage.setItem('backend_is_admin', String(isAdmin))
+
       const roleStore = useRoleStore()
       roleStore.setRole(roleName)
     } catch {
@@ -56,5 +88,5 @@ export const useAuthStore = defineStore('auth', () => {
     clearToken()
   }
 
-  return { token, isAuthenticated, login, logout }
+  return { token, isAuthenticated, backendIsAdmin, initBackendRole, login, logout }
 })

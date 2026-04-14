@@ -38,14 +38,14 @@ function mapSolicitud(item) {
     destinationName: item.destination?.name ?? '—',
     comments: item.comments,
     created_at: item.created_at ? new Date(item.created_at).toLocaleDateString('es-ES') : '—',
-    hasOffer: (item.commercial_offers?.length ?? 0) > 0,
+    hasOffer: item.commercial_offers?.some((o) => o.status !== 'rejected') ?? false,
   }
 }
 
 async function fetchSolicitudes() {
   loading.value = true
   try {
-    const endpoint = roleStore.isAdmin ? '/client-requests-admin' : '/client-requests-client'
+    const endpoint = auth.backendIsAdmin ? '/client-requests-admin' : '/client-requests-client'
     const res = await axios.get(LARAVEL + endpoint, { headers })
     solicitudes.value = res.data.map(mapSolicitud)
   } catch (error) {
@@ -69,7 +69,7 @@ async function cargarDatos() {
     const peticionTiposContenedor = axios.get(LARAVEL + '/container-types', { headers })
 
     let peticionClientes = Promise.resolve({ data: [] })
-    if (roleStore.isAdmin) {
+    if (auth.backendIsAdmin) {
       peticionClientes = axios.get(LARAVEL + '/clients', { headers })
     }
 
@@ -164,7 +164,7 @@ function closeSolicitudModal() {
 
 async function handleSolicitudSubmit(data) {
   try {
-    const endpoint = roleStore.isAdmin ? '/client-requests-admin' : '/client-requests-client'
+    const endpoint = auth.backendIsAdmin ? '/client-requests-admin' : '/client-requests-client'
     await axios.post(LARAVEL + endpoint, data, { headers })
     closeSolicitudModal()
     await fetchSolicitudes()

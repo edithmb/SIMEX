@@ -152,6 +152,7 @@ const isActive = (itemRoute) => {
     <div class="sidebar-role-switcher">
       <span class="sidebar-role-switcher-label">VISTA ACTIVA</span>
       <select
+        name="vista-activa"
         class="sidebar-role-switcher-select"
         :value="roleStore.currentRole"
         @change="roleStore.setRole($event.target.value)"

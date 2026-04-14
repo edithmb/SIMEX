@@ -10,12 +10,19 @@ const emit = defineEmits(['close', 'confirm'])
 
 const reason = ref('')
 
+// Capturamos el ID cuando el modal se abre para que persista
+// durante la transición de salida (cuando props.presupuesto ya es null)
+const capturedId = ref(null)
+watch(
+    () => props.presupuesto,
+    (p) => { if (p) capturedId.value = p.id },
+    { immediate: true },
+)
+
 watch(
     () => props.visible,
     (val) => {
-        if (val) {
-            reason.value = ''
-        }
+        if (val) reason.value = ''
     },
 )
 
@@ -24,9 +31,8 @@ function handleClose() {
 }
 
 function handleConfirm() {
-    if (reason.value.trim()) {
-        emit('confirm', reason.value.trim())
-    }
+    if (!reason.value.trim() || capturedId.value == null) return
+    emit('confirm', reason.value.trim(), capturedId.value)
 }
 
 function handleOverlayClick(e) {
