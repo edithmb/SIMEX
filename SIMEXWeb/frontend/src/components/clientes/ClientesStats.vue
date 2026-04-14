@@ -1,20 +1,23 @@
 <script setup>
 import StatCard from '@/components/dashboard/StatCard.vue'
+
+const props = defineProps({
+    totalEmpresas: { type: Number, default: 0 },
+    totalUsuarios: { type: Number, default: 0 },
+})
 </script>
 
 <template>
     <div class="clientes-stats">
-        <StatCard title="Total Empresas" value="8" icon="offers" />
-        <StatCard title="Total Contactos" value="12" trend="+2" trend-label="vs mes anterior" trend-direction="up"
-            icon="offers" />
-        <StatCard title="Operaciones en Curso" value="47" icon="money" />
+        <StatCard title="Total Empresas" :value="String(totalEmpresas)" icon="offers" />
+        <StatCard title="Total Usuarios" :value="String(totalUsuarios)" icon="offers" />
     </div>
 </template>
 
 <style scoped>
 .clientes-stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 

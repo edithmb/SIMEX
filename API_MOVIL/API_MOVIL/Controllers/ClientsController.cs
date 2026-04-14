@@ -41,6 +41,9 @@ namespace API_MOVIL.Controllers
         [HttpPost]
         public async Task<ActionResult<Client>> PostClient(Client client)
         {
+            client.CreatedAt = DateTime.UtcNow;
+            client.CreatedBy = 1; // TODO: obtener del usuario autenticado
+
             _context.Clients.Add(client);
             await _context.SaveChangesAsync();
 

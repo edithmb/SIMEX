@@ -17,18 +17,25 @@ function toggleExpand(id) {
     expandedId.value = expandedId.value === id ? null : id
 }
 
-const rolLabels = {
-    operador_logistico: 'Operador Logístico',
-    operador_comercial: 'Operador Comercial',
-    cliente: 'Cliente',
-    administrador: 'Administrador',
-}
+const rolPalette = [
+    { bg: '#dbeafe', color: '#1d4ed8' },
+    { bg: '#d1fae5', color: '#047857' },
+    { bg: '#fef9c3', color: '#92400e' },
+    { bg: '#ede9fe', color: '#5b21b6' },
+    { bg: '#fee2e2', color: '#dc2626' },
+    { bg: '#cffafe', color: '#0e7490' },
+]
 
-const rolColors = {
-    operador_logistico: { bg: '#dbeafe', color: '#1d4ed8' },
-    operador_comercial: { bg: '#fef9c3', color: '#92400e' },
-    cliente: { bg: '#d1fae5', color: '#047857' },
-    administrador: { bg: '#ede9fe', color: '#5b21b6' },
+const rolCache = {}
+let rolPaletteIdx = 0
+
+function rolStyle(rolName) {
+    if (!rolName) return { background: '#e5e7eb', color: '#4b5563' }
+    if (!rolCache[rolName]) {
+        rolCache[rolName] = rolPalette[rolPaletteIdx % rolPalette.length]
+        rolPaletteIdx++
+    }
+    return { background: rolCache[rolName].bg, color: rolCache[rolName].color }
 }
 </script>
 
@@ -102,13 +109,13 @@ const rolColors = {
                     <div v-if="c.users && c.users.length > 0" class="clientes-card-users-list">
                         <div v-for="u in c.users" :key="u.email" class="clientes-user-row">
                             <div class="clientes-user-info">
-                                <span class="clientes-user-name">{{ u.name }}</span>
+                                <span class="clientes-user-name">{{ u.first_name }} {{ u.last_name }}</span>
                                 <span class="clientes-user-email">{{ u.email }}</span>
                             </div>
-                            <span class="clientes-user-position">{{ u.position }}</span>
+                            <span class="clientes-user-position">{{ u.phone_number ?? '—' }}</span>
                             <span class="clientes-user-rol"
-                                :style="{ background: rolColors[u.rol]?.bg, color: rolColors[u.rol]?.color }">
-                                {{ rolLabels[u.rol] ?? u.rol }}
+                                :style="rolStyle(u.role?.name)">
+                                {{ u.role?.name ?? '—' }}
                             </span>
                         </div>
                     </div>

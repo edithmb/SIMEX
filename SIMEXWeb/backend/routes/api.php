@@ -15,6 +15,7 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\LogisticsOperationController;
 use App\Http\Controllers\PortController;
 use App\Http\Controllers\ShippingLineController;
+use App\Models\Role;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -39,6 +40,7 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('client-requests-admin', ClientRequestAdminController::class)->except('show');
 
     Route::get('/logistics-operations', [LogisticsOperationController::class, 'index']);
+    Route::get('/roles', fn () => response()->json(Role::select('id', 'name', 'description')->get()));
 
     // Datos maestros - GET para todos, POST/PUT/DELETE solo admin
     Route::get('/countries', [CountryController::class, 'index']);
