@@ -18,6 +18,7 @@ const form = reactive({
     gross_weight_kg: '',
     comments: '',
     client_id: '',
+    responsability: '',
 })
 
 // --- CAMBIO 2: Eliminamos los 'ref' locales y el 'onMounted' ---
@@ -30,6 +31,7 @@ function resetForm() {
     form.gross_weight_kg = ''
     form.comments = ''
     form.client_id = ''
+    form.responsability = ''
 }
 
 function handleClose() {
@@ -46,6 +48,7 @@ function handleSubmit() {
         volume_m3: Number(form.volume_m3),
         gross_weight_kg: Number(form.gross_weight_kg),
         comments: form.comments,
+        responsability: form.responsability,
     }
     if (props.role === 'admin') {
         payload.client_id = Number(form.client_id)
@@ -106,6 +109,15 @@ function handleOverlayClick(e) {
                                 <option v-for="loc in localizaciones" :key="loc.id" :value="loc.id">
                                     {{ loc.name }}
                                 </option>
+                            </select>
+                        </div>
+
+                        <div class="modal-field">
+                            <label class="modal-label">Responsabilidad</label>
+                            <select v-model="form.responsability" class="modal-select">
+                                <option value="">Seleccionar...</option>
+                                <option value="BUYER">Comprador</option>
+                                <option value="SELLER">Vendedor</option>
                             </select>
                         </div>
 

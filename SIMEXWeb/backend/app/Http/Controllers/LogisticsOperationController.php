@@ -60,6 +60,7 @@ class LogisticsOperationController extends Controller
                                 'gross_weight_kg',
                                 'origin_id',
                                 'destination_id',
+                                'responsability',
                             ])
                             ->with([
                                 'origin:id,name,city_id',
@@ -132,6 +133,7 @@ class LogisticsOperationController extends Controller
                                 'gross_weight_kg',
                                 'origin_id',
                                 'destination_id',
+                                'responsability',
                             ])
                             ->with([
                                 'origin:id,name,city_id',

@@ -13,71 +13,83 @@ const auth = useAuthStore()
 const router = useRouter()
 const LARAVEL = import.meta.env.VITE_LARAVEL_API
 
-const statusOrder = ['embalaje', 'carga', 'transporte', 'aduana_exp', 'manip_origen', 'flete', 'manip_destino', 'aduana_imp', 'transporte_destino', 'descarga']
-
-const statusMap = {
-  embalaje:           { progress: 10,  progressColor: '#9ca3af', statusLabel: 'Embalaje y Verificación', statusColor: '#e5e7eb', statusTextColor: '#4b5563' },
-  carga:              { progress: 20,  progressColor: '#10b981', statusLabel: 'Carga',                    statusColor: '#dbeafe', statusTextColor: '#1a6fb5' },
-  transporte:         { progress: 30,  progressColor: '#10b981', statusLabel: 'Transporte',               statusColor: '#dbeafe', statusTextColor: '#1a6fb5' },
-  aduana_exp:         { progress: 40,  progressColor: '#f59e0b', statusLabel: 'Aduana de Exportación',   statusColor: '#fef3c7', statusTextColor: '#b45309' },
-  manip_origen:       { progress: 50,  progressColor: '#10b981', statusLabel: 'Manipulación Origen',      statusColor: '#dbeafe', statusTextColor: '#1a6fb5' },
-  flete:              { progress: 60,  progressColor: '#10b981', statusLabel: 'Flete',                    statusColor: '#dbeafe', statusTextColor: '#1a6fb5' },
-  manip_destino:      { progress: 70,  progressColor: '#10b981', statusLabel: 'Manipulación Destino',     statusColor: '#dbeafe', statusTextColor: '#1a6fb5' },
-  aduana_imp:         { progress: 80,  progressColor: '#f59e0b', statusLabel: 'Aduana de Importación',   statusColor: '#fef3c7', statusTextColor: '#b45309' },
-  transporte_destino: { progress: 90,  progressColor: '#10b981', statusLabel: 'Transporte a Destino',     statusColor: '#dbeafe', statusTextColor: '#1a6fb5' },
-  descarga:           { progress: 100, progressColor: '#6b8e23', statusLabel: 'Descarga',                 statusColor: '#d1fae5', statusTextColor: '#047857' },
+const STEP_COLORS = {
+  pending:   { statusColor: '#e5e7eb', statusTextColor: '#4b5563', progressColor: '#9ca3af' },
+  active:    { statusColor: '#dbeafe', statusTextColor: '#1a6fb5', progressColor: '#1a6fb5' },
+  completed: { statusColor: '#d1fae5', statusTextColor: '#047857', progressColor: '#6b8e23' },
 }
-
-const stepNames = ['Embalaje y Verificación', 'Carga', 'Transporte', 'Aduana de Exportación', 'Manipulación Origen', 'Flete', 'Manipulación Destino', 'Aduana de Importación', 'Transporte a Destino', 'Descarga']
 
 const shipments = ref([])
 const loading = ref(false)
 const loadError = ref(null)
 const selectedId = shallowRef(null)
 
+function formatPrice(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return '—'
+  return n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 })
+}
+
+function formatShortDate(value) {
+  if (!value) return '—'
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('es-ES')
+}
+
 function mapToShipment(op) {
-  const offer = op.commercialOffer || {}
-  const req = offer.clientRequest || {}
-  const incotermCode = offer.incoterm?.incotermType?.code || '—'
+  const offer = op.commercial_offer || {}
+  const req = offer.client_request || {}
+  const incotermCode = offer.incoterm?.incoterm_type?.code?.trim() || '—'
 
-  const statusKey = statusMap[op.status] ? op.status : 'embalaje'
-  const cfg = statusMap[statusKey]
+  const incotermSteps = Array.isArray(op.incoterm_steps) ? op.incoterm_steps : []
+  const stepNames = incotermSteps.map((s) => s.name).filter(Boolean)
 
-  const currentIdx = statusOrder.indexOf(statusKey)
+  let currentIdx = stepNames.indexOf(op.status)
+  if (currentIdx === -1) currentIdx = 0
+
   const timeline = stepNames.map((name, i) => ({
     name,
-    location: null,
-    date: null,
     state: i < currentIdx ? 'completed' : (i === currentIdx ? 'active' : 'pending'),
   }))
+
+  const total = stepNames.length
+  const progress = total > 0 ? Math.round(((currentIdx + 1) / total) * 100) : 0
+  const statusLabel = stepNames[currentIdx] || op.status || '—'
+  const colors = total > 0 && currentIdx === total - 1 ? STEP_COLORS.completed : STEP_COLORS.active
 
   return {
     id: String(op.id),
     ref: op.reference,
     client: op.client?.company_name || '—',
-    routeFrom: offer.originPort?.name || req.origin?.city?.name || req.origin?.name || '—',
-    routeTo:   offer.destinationPort?.name || req.destination?.city?.name || req.destination?.name || '—',
-    transport: 'ship',
-    transportLabel: 'marítimo',
+    routeFrom: offer.origin_port?.name || '—',
+    routeTo:   offer.destination_port?.name || '—',
     incoterm: incotermCode,
     incotermColor: '#1a6fb5',
-    status: statusKey,
-    statusLabel: cfg.statusLabel,
-    statusColor: cfg.statusColor,
-    statusTextColor: cfg.statusTextColor,
-    progress: cfg.progress,
-    progressColor: cfg.progressColor,
+    responsability: req.responsability || null,
+    status: op.status,
+    statusLabel,
+    statusColor: colors.statusColor,
+    statusTextColor: colors.statusTextColor,
+    progress,
+    progressColor: colors.progressColor,
     etd: op.etd,
     eta: op.eta,
     atd: op.atd,
     ata: op.ata,
+    steps: stepNames,
     timeline,
     data: [
-      { label: 'Peso Bruto',      value: req.gross_weight_kg ? `${req.gross_weight_kg} kg` : '—' },
-      { label: 'Volumen',         value: req.volume_m3 ? `${req.volume_m3} m³` : '—' },
-      { label: 'Tipo Contenedor', value: offer.containerType?.type_name || '—' },
+      { label: 'Ref. Presupuesto', value: offer.reference || '—' },
+      { label: 'Responsabilidad',  value: req.responsability || '—' },
+      { label: 'Peso Bruto',       value: req.gross_weight_kg ? `${req.gross_weight_kg} kg` : '—' },
+      { label: 'Volumen',          value: req.volume_m3 ? `${req.volume_m3} m³` : '—' },
+      { label: 'Tipo Contenedor',  value: offer.container_type?.type_name || '—' },
+      { label: 'Puerto Origen',    value: offer.origin_port?.name || '—' },
+      { label: 'Puerto Destino',   value: offer.destination_port?.name || '—' },
+      { label: 'Precio',           value: formatPrice(offer.price) },
+      { label: 'Válido Hasta',     value: formatShortDate(offer.valid_until) },
     ],
-    documents: [],
   }
 }
 
@@ -116,33 +128,24 @@ function updateShipmentStatus(id, newStatus) {
   const shipment = shipments.value.find((s) => s.id === id)
   if (!shipment) return
 
+  const steps = shipment.steps || []
+  const currentIdx = steps.indexOf(newStatus)
+  if (currentIdx === -1) return
+
   shipment.status = newStatus
+  shipment.statusLabel = newStatus
 
-  const cfg = statusMap[newStatus]
-  if (cfg) {
-    shipment.progress = cfg.progress
-    shipment.progressColor = cfg.progressColor
-    shipment.statusLabel = cfg.statusLabel
-    shipment.statusColor = cfg.statusColor
-    shipment.statusTextColor = cfg.statusTextColor
-  }
+  const total = steps.length
+  shipment.progress = total > 0 ? Math.round(((currentIdx + 1) / total) * 100) : 0
 
-  const currentIdx = statusOrder.indexOf(newStatus)
+  const colors = currentIdx === total - 1 ? STEP_COLORS.completed : STEP_COLORS.active
+  shipment.statusColor = colors.statusColor
+  shipment.statusTextColor = colors.statusTextColor
+  shipment.progressColor = colors.progressColor
+
   shipment.timeline.forEach((step, i) => {
-    if (i < currentIdx) {
-      step.state = 'completed'
-    } else if (i === currentIdx) {
-      step.state = 'active'
-    } else {
-      step.state = 'pending'
-    }
+    step.state = i < currentIdx ? 'completed' : (i === currentIdx ? 'active' : 'pending')
   })
-}
-
-function handleUploadDocument(id, newDoc) {
-  const shipment = shipments.value.find((s) => s.id === id)
-  if (!shipment) return
-  shipment.documents.push(newDoc)
 }
 </script>
 
@@ -166,7 +169,6 @@ function handleUploadDocument(id, newDoc) {
           :shipment="selectedShipment"
           :role="roleStore.currentRole"
           @update-status="updateShipmentStatus"
-          @upload-document="handleUploadDocument"
         />
         <div v-else-if="loading" class="seguimiento-placeholder">Cargando operaciones…</div>
         <div v-else-if="loadError" class="seguimiento-placeholder error">{{ loadError }}</div>

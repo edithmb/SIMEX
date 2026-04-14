@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\ClientRequest;
 use App\Models\CommercialOffer;
+use App\Models\Incoterm;
+use App\Models\LogisticsOperation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ComercialOfferController extends Controller
 {
@@ -53,9 +56,39 @@ class ComercialOfferController extends Controller
 
     public function approve($id): JsonResponse
     {
-        $offer = CommercialOffer::findOrFail($id);
-        $offer->update(['status' => 'accepted', 'updated_by' => auth()->id()]);
-        return response()->json($offer);
+        $offer = CommercialOffer::with(['incoterm', 'clientRequest'])->findOrFail($id);
+
+        DB::transaction(function () use ($offer) {
+            $offer->update(['status' => 'accepted', 'updated_by' => auth()->id()]);
+
+            if (LogisticsOperation::where('commercial_offer_id', $offer->id)->exists()) {
+                return;
+            }
+
+            $responsability = $offer->clientRequest?->responsability;
+            $incotermTypeId = $offer->incoterm?->incoterm_type_id;
+
+            $firstStepName = null;
+            if ($responsability && $incotermTypeId) {
+                $firstStep = Incoterm::where('incoterm_type_id', $incotermTypeId)
+                    ->where('responsability', $responsability)
+                    ->orderBy('order_num')
+                    ->with('trackingStep:id,name')
+                    ->first();
+                $firstStepName = $firstStep?->trackingStep?->name;
+            }
+
+            $reference = 'OP-' . date('Y') . '-' . str_pad(LogisticsOperation::count() + 1, 3, '0', STR_PAD_LEFT);
+
+            LogisticsOperation::create([
+                'reference'           => $reference,
+                'commercial_offer_id' => $offer->id,
+                'client_id'           => $offer->client_id,
+                'status'              => $firstStepName ?? 'preparation',
+            ]);
+        });
+
+        return response()->json($offer->fresh());
     }
 
     public function reject(Request $request, $id): JsonResponse

@@ -26,6 +26,7 @@ class ClientRequestClientController extends Controller
             'volume_m3'       => 'required|numeric|min:0',
             'gross_weight_kg' => 'required|numeric|min:0',
             'comments'        => 'nullable|string',
+            'responsability'  => 'required|in:BUYER,SELLER',
         ]);
 
         $clientRequest = ClientRequest::create([

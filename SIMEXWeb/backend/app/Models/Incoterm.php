@@ -13,7 +13,7 @@ class Incoterm extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['incoterm_type_id', 'tracking_step_id', 'order_num'];
+    protected $fillable = ['incoterm_type_id', 'tracking_step_id', 'order_num', 'responsability'];
 
     public function incotermType(): BelongsTo
     {
