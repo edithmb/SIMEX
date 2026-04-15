@@ -14,13 +14,8 @@ services:
 
   # Tu aplicación de Vue
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: DOCKERFILE
-      args:
-        VITE_LARAVEL_API: http://localhost:8000/api
-        VITE_NET_API: http://localhost:5000/api/
-    image: ddelacortep/simex-daw:frontend
+    image: ddelacortep/simex-daw:frontend-latest
+    pull_policy: always
     container_name: simex-frontend
     restart: always
     ports:
@@ -28,10 +23,8 @@ services:
 
   # Tu aplicación de Laravel
   backend:
-    build:
-      context: ./backend
-      dockerfile: DOCKERFILE
-    image: ddelacortep/simex-daw:backend
+    image: ddelacortep/simex-daw:backend-latest
+    pull_policy: always
     container_name: simex-backend
     restart: always
     ports:
