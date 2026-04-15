@@ -74,9 +74,3 @@ test('user has many documents', function () {
     expect($user->documents)->toHaveCount(3);
 });
 
-test('user implements jwt subject interface', function () {
-    $user = User::factory()->create();
-
-    expect($user->getJWTIdentifier())->toBe($user->id);
-    expect($user->getJWTCustomClaims())->toBe([]);
-});

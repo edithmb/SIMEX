@@ -6,10 +6,10 @@ describe('role store', () => {
     setActivePinia(createPinia())
   })
 
-  it('defaults currentRole to admin', () => {
+  it('defaults currentRole to null when localStorage is empty', () => {
     const store = useRoleStore()
-    expect(store.currentRole).toBe('admin')
-    expect(store.isAdmin).toBe(true)
+    expect(store.currentRole).toBeNull()
+    expect(store.isAdmin).toBe(false)
     expect(store.isCliente).toBe(false)
   })
 
@@ -31,7 +31,11 @@ describe('role store', () => {
 
   it('isAdmin and isCliente react to setRole', () => {
     const store = useRoleStore()
+    expect(store.isAdmin).toBe(false)
+    expect(store.isCliente).toBe(false)
+    store.setRole('admin')
     expect(store.isAdmin).toBe(true)
+    expect(store.isCliente).toBe(false)
     store.setRole('cliente')
     expect(store.isAdmin).toBe(false)
     expect(store.isCliente).toBe(true)

@@ -31,6 +31,7 @@ test('admin can create a request with client_id', function () {
         'comments' => 'Admin request',
         'origin_id' => $origin->id,
         'destination_id' => $destination->id,
+        'responsability' => 'SELLER',
     ], authHeaders($token));
 
     $response->assertStatus(201);
