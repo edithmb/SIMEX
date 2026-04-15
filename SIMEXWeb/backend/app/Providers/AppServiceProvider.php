@@ -17,7 +17,7 @@ class AppServiceProvider extends ServiceProvider
         DB::extend('dblib', function($config) {
             return new \Illuminate\Database\Connection(
                 new \PDO(
-                    'dblib:host=' . $config['host'] . ',' . ($config['port'] ?? 1433) . ';dbname=' . $config['database'],
+                    'dblib:host=' . $config['host'] . ':' . ($config['port'] ?? 1433) . ';dbname=' . $config['database'],
                     $config['username'] ?? '',
                     $config['password'] ?? '',
                     [
