@@ -31,18 +31,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp" />
 
-    <ImageView
-        android:id="@+id/iconoEditarFoto"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:background="@drawable/bg_white_circle"
-        android:backgroundTint="#8AB242"
-        android:src="@drawable/ic_lapiz"
-        android:padding="6dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/imgPerfil"
-        app:layout_constraintEnd_toEndOf="@id/imgPerfil" />
-
     <TextView
         android:id="@+id/nombreEmpresa"
         android:layout_width="wrap_content"
@@ -95,16 +83,41 @@
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
-            <TextView style="@style/EstiloEtiquetaFormulario" android:text="Nombre completo" />
-            <EditText android:id="@+id/inputName" style="@style/EstiloInputFormulario" android:enabled="false" android:hint="Federico Maradonio" android:inputType="textPersonName" />
+            <TextView style="@style/EstiloEtiquetaFormulario" android:text="Nombre" />
+            <EditText android:id="@+id/inputFirstName" style="@style/EstiloInputFormulario" android:enabled="false" android:hint="Federico" android:inputType="textPersonName" />
 
-            <TextView style="@style/EstiloEtiquetaFormulario" android:text="Correo electronico" />
+            <TextView style="@style/EstiloEtiquetaFormulario" android:text="Apellido" />
+            <EditText android:id="@+id/inputLastName" style="@style/EstiloInputFormulario" android:enabled="false" android:hint="Maradonio" android:inputType="textPersonName" />
+
+            <TextView style="@style/EstiloEtiquetaFormulario" android:text="Correo electrónico" />
             <EditText android:id="@+id/inputEmail" style="@style/EstiloInputFormulario" android:enabled="false" android:hint="Fpeluche@corporation.com" android:inputType="textEmailAddress" />
 
-            <TextView style="@style/EstiloEtiquetaFormulario" android:text="Telefono móvil" />
+            <TextView style="@style/EstiloEtiquetaFormulario" android:text="Teléfono móvil" />
             <EditText android:id="@+id/inputTelephoneNumber" style="@style/EstiloInputFormulario" android:enabled="false" android:hint="000000000" android:inputType="phone" />
 
+            <LinearLayout
+                android:id="@+id/seccionPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="Cambiar Contraseña"
+                    android:textColor="#8AB242"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView style="@style/EstiloEtiquetaFormulario" android:text="Nueva Contraseña (Opcional)" />
+                <EditText android:id="@+id/inputPassword" style="@style/EstiloInputFormulario" android:hint="Dejar en blanco para no cambiar" android:inputType="textPassword" />
+
+                <TextView style="@style/EstiloEtiquetaFormulario" android:text="Confirmar Nueva Contraseña" />
+                <EditText android:id="@+id/inputConfirmarPass" style="@style/EstiloInputFormulario" android:inputType="textPassword" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
@@ -166,7 +179,6 @@
                     app:backgroundTint="#5C82B1"
                     android:text="Subir archivo"
                     android:textColor="#FFFFFF" />
-
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
