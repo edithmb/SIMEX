@@ -1,10 +1,13 @@
 ﻿using API_MOVIL.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API_MOVIL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CommercialOffersController : ControllerBase
     {
         private readonly Simex06Context _context;
@@ -25,13 +28,18 @@ namespace API_MOVIL.Controllers
 
             // validar que se mande un estado correcto
             string newStatus = request.Status.ToLower();
-            if (newStatus != "approved" && newStatus != "rejected")
-                return BadRequest("Just approved or rejected");
+            if (newStatus != "accepted" && newStatus != "rejected")
+                return BadRequest("Just accepted or rejected");
 
             // actualizar campos
             offer.Status = newStatus;
             offer.UpdatedAt = DateTime.UtcNow;
-            offer.UpdatedBy = 1;
+
+            var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userToken)) return Unauthorized("invalid token");
+            offer.UpdatedBy = int.Parse(userToken);
+
+            //offer.UpdatedBy = 1;//pruebas
 
             // si recahza debe de decir proque
             if (newStatus == "rejected")

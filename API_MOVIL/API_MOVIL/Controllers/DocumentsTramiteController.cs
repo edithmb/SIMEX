@@ -2,12 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using API_MOVIL.Models;
 using Microsoft.AspNetCore.Http; // para IForm file
-using Microsoft.AspNetCore.Hosting; // para saber donde guardar archivo
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authorization; // para saber donde guardar archivo
 
 namespace API_MOVIL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DocumentsTramiteController : ControllerBase
     {
         private readonly Simex06Context _context;

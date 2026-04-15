@@ -2,12 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using API_MOVIL.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace API_MOVIL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    // [Authorize] solo para logueados 
+    [Authorize] 
     public class ClientsController : ControllerBase
     {
         private readonly Simex06Context _context;
@@ -41,8 +42,14 @@ namespace API_MOVIL.Controllers
         [HttpPost]
         public async Task<ActionResult<Client>> PostClient(Client client)
         {
+
+            var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userToken)) return Unauthorized("invalid token");
+            client.CreatedBy = int.Parse(userToken);
+
+            
+            //client.CreatedBy = 1; 
             client.CreatedAt = DateTime.UtcNow;
-            client.CreatedBy = 1; // TODO: obtener del usuario autenticado
 
             _context.Clients.Add(client);
             await _context.SaveChangesAsync();
@@ -55,6 +62,14 @@ namespace API_MOVIL.Controllers
         public async Task<ActionResult<Client>> PutClient(int id, Client client)
         {
             if (id != client.Id) return BadRequest("Id does not match");
+
+            var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userToken)) return Unauthorized("invalid token");
+            client.UpdatedBy = int.Parse(userToken);
+
+            //client.UpdatedBy = 1; // pruebas
+
+            client.UpdatedAt = DateTime.UtcNow;
 
             _context.Entry(client).State = EntityState.Modified;
 
@@ -86,7 +101,13 @@ namespace API_MOVIL.Controllers
 
             // rellenar espacios de datos de "eliminacion"
             client.DeletedAt = DateTime.UtcNow;
-            client.DeletedBy = 1;
+
+            var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userToken)) return Unauthorized("invalid token");
+            client.DeletedBy = int.Parse(userToken);
+
+
+            //client.DeletedBy = 1;
 
             // avisar al orm que se han actualizado cositas
             _context.Entry(client).State = EntityState.Modified;
