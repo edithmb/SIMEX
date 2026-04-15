@@ -1,45 +1,82 @@
 <script setup>
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+import { useAuthStore } from '@/stores/auth'
 import StatCard from '@/components/dashboard/StatCard.vue'
 import ShipmentVolumeChart from '@/components/dashboard/ShipmentVolumeChart.vue'
 import TransportDistribution from '@/components/dashboard/TransportDistribution.vue'
 import RecentOperations from '@/components/dashboard/RecentOperations.vue'
 import RecentActivity from '@/components/dashboard/RecentActivity.vue'
+import Spinner from '@/components/common/Spinner.vue'
+
+const auth = useAuthStore()
+const LARAVEL = import.meta.env.VITE_LARAVEL_API
+const headers = { Authorization: `Bearer ${auth.token}` }
+
+// KPI state
+const loading = ref(true)
+const enviosActivos = ref('—')
+const ofertasPendientes = ref('—')
+const operacionesCompletadas = ref('—')
+const totalClientes = ref('—')
+
+const completedStatuses = ['descarga', 'completed', 'completado']
+
+onMounted(async () => {
+    loading.value = true
+    try {
+        const [opsRes, offersRes, clientsRes] = await Promise.all([
+            axios.get(LARAVEL + '/logistics-operations?per_page=1000', { headers }),
+            axios.get(LARAVEL + '/commercial-offers?per_page=1000', { headers }),
+            axios.get(LARAVEL + '/clients', { headers }),
+        ])
+
+        const ops = Array.isArray(opsRes.data) ? opsRes.data : (opsRes.data.data || [])
+        const offers = Array.isArray(offersRes.data) ? offersRes.data : (offersRes.data.data || [])
+        const clients = Array.isArray(clientsRes.data) ? clientsRes.data : []
+
+        const activos = ops.filter((o) => !completedStatuses.includes(o.status)).length
+        const completadas = ops.filter((o) => completedStatuses.includes(o.status)).length
+        const pendientes = offers.filter((o) => o.status === 'draft').length
+
+        enviosActivos.value = String(activos)
+        operacionesCompletadas.value = String(completadas)
+        ofertasPendientes.value = String(pendientes)
+        totalClientes.value = String(clients.length)
+    } catch (e) {
+        console.error('Error al cargar KPIs del dashboard:', e)
+    } finally {
+        loading.value = false
+    }
+})
 </script>
 
 <template>
   <div class="dashboard">
+    <div v-if="loading" class="view-loading">
+      <Spinner :size="40" />
+    </div>
+    <template v-else>
     <!-- KPI Cards Row -->
     <div class="dashboard-stats">
       <StatCard
         title="Envíos Activos"
-        value="47"
-        trend="+12.5%"
-        trend-label="vs mes anterior"
-        trend-direction="up"
+        :value="enviosActivos"
         icon="truck"
       />
       <StatCard
-        title="Ingresos Totales"
-        value="€2,847,350"
-        trend="+8.3%"
-        trend-label="vs mes anterior"
-        trend-direction="up"
-        icon="money"
+        title="Clientes"
+        :value="totalClientes"
+        icon="offers"
       />
       <StatCard
         title="Ofertas Pendientes"
-        value="23"
-        trend="-5.2%"
-        trend-label="vs mes anterior"
-        trend-direction="down"
+        :value="ofertasPendientes"
         icon="offers"
       />
       <StatCard
         title="Operaciones Completadas"
-        value="156"
-        trend="+15.7%"
-        trend-label="vs mes anterior"
-        trend-direction="up"
+        :value="operacionesCompletadas"
         icon="check"
       />
     </div>
@@ -55,6 +92,7 @@ import RecentActivity from '@/components/dashboard/RecentActivity.vue'
       <RecentOperations class="dashboard-bottom-operations" />
       <RecentActivity class="dashboard-bottom-activity" />
     </div>
+    </template>
   </div>
 </template>
 
@@ -63,6 +101,14 @@ import RecentActivity from '@/components/dashboard/RecentActivity.vue'
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.view-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100px 0;
+  color: var(--accent-blue);
 }
 
 .dashboard-stats {

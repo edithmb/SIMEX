@@ -1,32 +1,54 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import ClientesStats from '@/components/clientes/ClientesStats.vue'
 import ClientesFilters from '@/components/clientes/ClientesFilters.vue'
 import ClientesList from '@/components/clientes/ClientesList.vue'
 import NuevaEmpresaModal from '@/components/clientes/NuevaEmpresaModal.vue'
-import NuevoContactoModal from '@/components/clientes/NuevoContactoModal.vue'
+import NuevoUsuarioModal from '@/components/clientes/NuevoUsuarioModal.vue'
+import UsuariosList from '@/components/clientes/UsuariosList.vue'
+import Spinner from '@/components/common/Spinner.vue'
 
-const clientes = [
-    { name: 'Importaciones García S.L.', initial: 'I', cif: 'B12345678', city: 'Madrid', contacts: 2, active: true, operations: 5, lastActivity: 'Hace 2 horas' },
-    { name: 'Textiles Mediterráneo S.A.', initial: 'T', cif: 'A87654321', city: 'Valencia', contacts: 3, active: true, operations: 12, lastActivity: 'Hace 1 día' },
-    { name: 'Alimentación Ibérica S.L.', initial: 'A', cif: 'B11223344', city: 'Barcelona', contacts: 1, active: true, operations: 3, lastActivity: 'Hace 3 días' },
-    { name: 'Electrónica Levante S.A.', initial: 'E', cif: 'A55667788', city: 'Alicante', contacts: 2, active: true, operations: 8, lastActivity: 'Hace 5 horas' },
-    { name: 'Maquinaria Industrial Norte', initial: 'M', cif: 'B99887766', city: 'Bilbao', contacts: 1, active: false, operations: 1, lastActivity: 'Hace 1 semana' },
-    { name: 'Farmacéutica del Sur S.A.', initial: 'F', cif: 'A11122233', city: 'Sevilla', contacts: 1, active: true, operations: 4, lastActivity: 'Hace 2 días' },
-    { name: 'Vinos y Licores Rioja S.L.', initial: 'V', cif: 'B44455566', city: 'Logroño', contacts: 1, active: false, operations: 0, lastActivity: 'Hace 1 mes' },
-    { name: 'Autopartes Castilla S.A.', initial: 'A', cif: 'A77788899', city: 'Valladolid', contacts: 1, active: true, operations: 2, lastActivity: 'Hace 4 días' },
-]
+const LARAVEL = import.meta.env.VITE_LARAVEL_API
+const NET = import.meta.env.VITE_NET_API
 
-const empresaNames = clientes.map((c) => c.name)
+const auth = useAuthStore()
+const router = useRouter()
+const headers = { Authorization: `Bearer ${auth.token}` }
+
+const clientes = ref([])
+const roles = ref([])
+const loading = ref(false)
+const submittingEmpresa = ref(false)
+const submittingUsuario = ref(false)
 
 const activeTab = ref('empresas')
 const searchQuery = ref('')
 
 const filteredClientes = computed(() => {
-    if (!searchQuery.value.trim()) return clientes
+    if (!searchQuery.value.trim()) return clientes.value
     const q = searchQuery.value.toLowerCase()
-    return clientes.filter(
-        (c) => c.name.toLowerCase().includes(q) || c.cif.toLowerCase().includes(q) || c.city.toLowerCase().includes(q),
+    return clientes.value.filter(
+        (c) =>
+            c.company_name?.toLowerCase().includes(q) ||
+            c.vat_number?.toLowerCase().includes(q) ||
+            c.country?.toLowerCase().includes(q),
+    )
+})
+
+const allUsers = computed(() => {
+    const flat = clientes.value.flatMap((c) =>
+        (c.users || []).map((u) => ({ ...u, company_name: c.company_name })),
+    )
+    if (!searchQuery.value.trim()) return flat
+    const q = searchQuery.value.toLowerCase()
+    return flat.filter(
+        (u) =>
+            u.name?.toLowerCase().includes(q) ||
+            u.email?.toLowerCase().includes(q) ||
+            u.company_name?.toLowerCase().includes(q),
     )
 })
 
@@ -43,7 +65,46 @@ function closeDropdownOutside(e) {
     }
 }
 
-onMounted(() => document.addEventListener('click', closeDropdownOutside))
+function mapCliente(c) {
+    return {
+        ...c,
+        initial: (c.company_name || '?')[0].toUpperCase(),
+        active: true,
+        operations: '—',
+        lastActivity: '—',
+    }
+}
+
+async function fetchClientes() {
+    try {
+        const res = await axios.get(LARAVEL + '/clients', { headers })
+        clientes.value = res.data.map(mapCliente)
+    } catch (error) {
+        if (error.response?.status === 401) {
+            await auth.logout()
+            router.push({ name: 'login' })
+        }
+    }
+}
+
+async function fetchRoles() {
+    try {
+        const res = await axios.get(LARAVEL + '/roles', { headers })
+        roles.value = res.data
+    } catch {
+        // Si falla, seguimos sin roles precargados
+    }
+}
+
+onMounted(async () => {
+    document.addEventListener('click', closeDropdownOutside)
+    loading.value = true
+    try {
+        await Promise.all([fetchClientes(), fetchRoles()])
+    } finally {
+        loading.value = false
+    }
+})
 onUnmounted(() => document.removeEventListener('click', closeDropdownOutside))
 
 // Modals
@@ -60,14 +121,50 @@ function openContactoModal() {
     showContactoModal.value = true
 }
 
-function handleEmpresaSubmit(data) {
-    console.log('Nueva empresa:', data)
-    showEmpresaModal.value = false
+async function handleEmpresaSubmit(data) {
+    if (submittingEmpresa.value) return
+    submittingEmpresa.value = true
+    try {
+        await axios.post(NET + '/Clients', {
+            companyName: data.company_name,
+            vatNumber: data.vat_number,
+            address: data.address,
+            country: data.country,
+            postalCode: data.postal_code,
+            contactName: data.contact_name,
+            email: data.email,
+            phone: data.phone,
+        })
+        showEmpresaModal.value = false
+        await fetchClientes()
+    } catch (error) {
+        console.error('Error al crear empresa:', error)
+    } finally {
+        submittingEmpresa.value = false
+    }
 }
 
-function handleContactoSubmit(data) {
-    console.log('Nuevo contacto:', data)
-    showContactoModal.value = false
+async function handleContactoSubmit(data) {
+    if (submittingUsuario.value) return
+    submittingUsuario.value = true
+    try {
+        await axios.post(NET + '/Users', {
+            firstName: data.first_name,
+            lastName: data.last_name,
+            email: data.email,
+            phoneNumber: data.phone,
+            passwordHash: data.password,
+            roleId: data.role_id || null,
+            clientId: data.empresa_id || null,
+            isActive: true,
+        })
+        showContactoModal.value = false
+        await fetchClientes()
+    } catch (error) {
+        console.error('Error al crear usuario:', error)
+    } finally {
+        submittingUsuario.value = false
+    }
 }
 </script>
 
@@ -104,22 +201,30 @@ function handleContactoSubmit(data) {
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                                 <circle cx="12" cy="7" r="4" />
                             </svg>
-                            Nuevo Contacto
+                            Nuevo Usuario
                         </button>
                     </div>
                 </Transition>
             </div>
         </div>
-        <ClientesStats />
+        <ClientesStats :total-empresas="clientes.length" :total-usuarios="allUsers.length" />
         <ClientesFilters :active-tab="activeTab" :search-query="searchQuery" @update:active-tab="activeTab = $event"
             @update:search-query="searchQuery = $event" />
-        <ClientesList :clientes="filteredClientes" />
+
+        <div v-if="loading" class="view-loading">
+            <Spinner :size="40" />
+        </div>
+        <template v-else>
+            <ClientesList v-if="activeTab === 'empresas'" :clientes="filteredClientes" />
+            <UsuariosList v-else :usuarios="allUsers" />
+        </template>
 
         <!-- Modals -->
-        <NuevaEmpresaModal :visible="showEmpresaModal" @close="showEmpresaModal = false"
-            @submit="handleEmpresaSubmit" />
-        <NuevoContactoModal :visible="showContactoModal" :empresas="empresaNames" @close="showContactoModal = false"
-            @submit="handleContactoSubmit" />
+        <NuevaEmpresaModal :visible="showEmpresaModal" :submitting="submittingEmpresa"
+            @close="showEmpresaModal = false" @submit="handleEmpresaSubmit" />
+        <NuevoUsuarioModal :visible="showContactoModal" :empresas="clientes" :roles="roles"
+            :submitting="submittingUsuario"
+            @close="showContactoModal = false" @submit="handleContactoSubmit" />
     </div>
 </template>
 
@@ -203,5 +308,13 @@ function handleContactoSubmit(data) {
 .dropdown-leave-to {
     opacity: 0;
     transform: translateY(-4px);
+}
+
+.view-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 0;
+    color: var(--accent-blue);
 }
 </style>

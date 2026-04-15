@@ -1,200 +1,160 @@
 <script setup>
-import { shallowRef, computed } from 'vue'
+import { ref, shallowRef, computed, onMounted } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
 import TrackingFilters from '@/components/seguimiento/TrackingFilters.vue'
 import ShipmentList from '@/components/seguimiento/ShipmentList.vue'
 import ShipmentDetail from '@/components/seguimiento/ShipmentDetail.vue'
+import Spinner from '@/components/common/Spinner.vue'
+import { useRoleStore } from '@/stores/role'
+import { useAuthStore } from '@/stores/auth'
 
-const shipments = [
-  {
-    id: 'ENV-2024-4521',
-    ref: 'ENV-2024-4521',
-    client: 'Importaciones García S.L.',
-    routeFrom: 'Shanghai',
-    routeTo: 'Barcelona',
-    transport: 'ship',
-    transportLabel: 'marítimo',
-    incoterm: 'CIF',
-    incotermColor: '#1a6fb5',
-    status: 'En Tránsito',
-    statusColor: '#dbeafe',
-    statusTextColor: '#1a6fb5',
-    progress: 55,
-    progressColor: '#10b981',
-    timeline: [
-      { name: 'Preparación Mercadería', location: 'Fábrica Origen', date: '15 Ene 2024', state: 'completed' },
-      { name: 'Transporte Interior Origen', location: 'Shanghai', date: '18 Ene 2024', state: 'completed' },
-      { name: 'Terminal / Puerto Origen', location: 'Puerto de Shanghai', date: '20 Ene 2024', state: 'completed' },
-      { name: 'Carga a Bordo', location: null, date: '22 Ene 2024', state: 'completed' },
-      { name: 'Transporte Marítimo Principal', location: null, date: null, state: 'active', badge: 'En Curso', badgeColor: '#dbeafe', badgeTextColor: '#1a6fb5', detail: 'Buque: Ever Given - Posición actual: Mar Mediterráneo' },
-      { name: 'Puerto Destino', location: 'Puerto de Barcelona', date: 'Est. 18 Feb 2024', state: 'pending' },
-    ],
-    data: [
-      { label: 'Peso Bruto', value: '12,450 kg' },
-      { label: 'Volumen', value: '45 m³' },
-      { label: 'Tipo Contenedor', value: "40' HC" },
-      { label: 'Naviera/Carrier', value: 'Maersk Line' },
-    ],
-    documents: [
-      { name: 'Bill of Lading (BL)', ready: true },
-      { name: 'Factura Comercial', ready: true },
-      { name: 'Packing List', ready: true },
-      { name: 'Certificado de Origen', ready: false },
-      { name: 'DUA Importación', ready: false },
-    ],
-  },
-  {
-    id: 'ENV-2024-4520',
-    ref: 'ENV-2024-4520',
-    client: 'Textiles Mediterráneo S.A.',
-    routeFrom: 'Rotterdam',
-    routeTo: 'Valencia',
-    transport: 'ship',
-    transportLabel: 'marítimo',
-    incoterm: 'FOB',
-    incotermColor: '#1a6fb5',
-    status: 'En Aduana',
-    statusColor: '#fef3c7',
-    statusTextColor: '#b45309',
-    progress: 78,
-    progressColor: '#f59e0b',
-    timeline: [
-      { name: 'Preparación Mercadería', location: 'Fábrica Origen', date: '10 Ene 2024', state: 'completed' },
-      { name: 'Transporte Interior Origen', location: 'Rotterdam', date: '12 Ene 2024', state: 'completed' },
-      { name: 'Puerto Origen', location: 'Puerto de Rotterdam', date: '14 Ene 2024', state: 'completed' },
-      { name: 'Transporte Marítimo', location: null, date: '15 Ene 2024', state: 'completed' },
-      { name: 'Puerto Destino', location: 'Puerto de Valencia', date: '28 Ene 2024', state: 'completed' },
-      { name: 'Despacho Aduana', location: 'Valencia', date: null, state: 'active', badge: 'En Proceso', badgeColor: '#fef3c7', badgeTextColor: '#b45309' },
-      { name: 'Entrega Final', location: null, date: null, state: 'pending' },
-    ],
-    data: [
-      { label: 'Peso Bruto', value: '8,200 kg' },
-      { label: 'Volumen', value: '32 m³' },
-      { label: 'Tipo Contenedor', value: "20' ST" },
-      { label: 'Naviera/Carrier', value: 'MSC' },
-    ],
-    documents: [
-      { name: 'Bill of Lading (BL)', ready: true },
-      { name: 'Factura Comercial', ready: true },
-      { name: 'Packing List', ready: true },
-      { name: 'Certificado de Origen', ready: true },
-      { name: 'DUA Importación', ready: false },
-    ],
-  },
-  {
-    id: 'ENV-2024-4519',
-    ref: 'ENV-2024-4519',
-    client: 'Electrónica Levante S.A.',
-    routeFrom: 'Shenzhen',
-    routeTo: 'Madrid',
-    transport: 'plane',
-    transportLabel: 'aéreo',
-    incoterm: 'DDP',
-    incotermColor: '#1a6fb5',
-    status: 'En Tránsito',
-    statusColor: '#dbeafe',
-    statusTextColor: '#1a6fb5',
-    progress: 40,
-    progressColor: '#10b981',
-    timeline: [
-      { name: 'Recogida Mercadería', location: 'Almacén Shenzhen', date: '25 Ene 2024', state: 'completed' },
-      { name: 'Consolidación Carga', location: 'Aeropuerto Shenzhen', date: '26 Ene 2024', state: 'completed' },
-      { name: 'Transporte Aéreo', location: null, date: null, state: 'active', badge: 'En Vuelo', badgeColor: '#dbeafe', badgeTextColor: '#1a6fb5', detail: 'Vuelo: CX5420 - ETA: 28 Ene 2024' },
-      { name: 'Llegada Aeropuerto Destino', location: 'Madrid Barajas', date: null, state: 'pending' },
-      { name: 'Despacho Aduana', location: null, date: null, state: 'pending' },
-      { name: 'Entrega Final', location: null, date: null, state: 'pending' },
-    ],
-    data: [
-      { label: 'Peso Bruto', value: '1,850 kg' },
-      { label: 'Volumen', value: '6.5 m³' },
-      { label: 'Tipo Carga', value: 'Paquetería' },
-      { label: 'Aerolínea', value: 'Cathay Pacific' },
-    ],
-    documents: [
-      { name: 'Air Waybill (AWB)', ready: true },
-      { name: 'Factura Comercial', ready: true },
-      { name: 'Packing List', ready: true },
-      { name: 'DUA Importación', ready: false },
-    ],
-  },
-  {
-    id: 'ENV-2024-4518',
-    ref: 'ENV-2024-4518',
-    client: 'Maquinaria Industrial Norte',
-    routeFrom: 'Frankfurt',
-    routeTo: 'Zaragoza',
-    transport: 'truck',
-    transportLabel: 'terrestre',
-    incoterm: 'DAP',
-    incotermColor: '#1a6fb5',
-    status: 'En Tránsito',
-    statusColor: '#dbeafe',
-    statusTextColor: '#1a6fb5',
-    progress: 65,
-    progressColor: '#10b981',
-    timeline: [
-      { name: 'Recogida Mercadería', location: 'Fábrica Frankfurt', date: '22 Ene 2024', state: 'completed' },
-      { name: 'Transporte Terrestre', location: null, date: null, state: 'active', badge: 'En Ruta', badgeColor: '#dbeafe', badgeTextColor: '#1a6fb5', detail: 'Camión: SP-4521-AB - Posición: Sur de Francia' },
-      { name: 'Llegada Destino', location: 'Zaragoza', date: null, state: 'pending' },
-      { name: 'Entrega Final', location: null, date: null, state: 'pending' },
-    ],
-    data: [
-      { label: 'Peso Bruto', value: '18,500 kg' },
-      { label: 'Volumen', value: '55 m³' },
-      { label: 'Tipo Transporte', value: 'Camión Completo' },
-      { label: 'Transportista', value: 'DB Schenker' },
-    ],
-    documents: [
-      { name: 'CMR', ready: true },
-      { name: 'Factura Comercial', ready: true },
-      { name: 'Packing List', ready: true },
-    ],
-  },
-  {
-    id: 'ENV-2024-4517',
-    ref: 'ENV-2024-4517',
-    client: 'Alimentación Ibérica S.L.',
-    routeFrom: 'Miami',
-    routeTo: 'Barcelona',
-    transport: 'ship',
-    transportLabel: 'marítimo',
-    incoterm: 'CIF',
-    incotermColor: '#1a6fb5',
-    status: 'Pendiente',
-    statusColor: '#e5e7eb',
-    statusTextColor: '#4b5563',
-    progress: 10,
-    progressColor: '#9ca3af',
-    timeline: [
-      { name: 'Preparación Mercadería', location: 'Almacén Miami', date: null, state: 'active', badge: 'Preparando', badgeColor: '#e5e7eb', badgeTextColor: '#4b5563' },
-      { name: 'Transporte Interior Origen', location: null, date: null, state: 'pending' },
-      { name: 'Puerto Origen', location: 'Puerto de Miami', date: null, state: 'pending' },
-      { name: 'Transporte Marítimo', location: null, date: null, state: 'pending' },
-      { name: 'Puerto Destino', location: 'Puerto de Barcelona', date: null, state: 'pending' },
-      { name: 'Entrega Final', location: null, date: null, state: 'pending' },
-    ],
-    data: [
-      { label: 'Peso Bruto', value: '5,600 kg' },
-      { label: 'Volumen', value: '22 m³' },
-      { label: 'Tipo Contenedor', value: "20' RF" },
-      { label: 'Naviera/Carrier', value: 'Hapag-Lloyd' },
-    ],
-    documents: [
-      { name: 'Bill of Lading (BL)', ready: false },
-      { name: 'Factura Comercial', ready: false },
-      { name: 'Packing List', ready: false },
-      { name: 'Certificado Sanitario', ready: false },
-    ],
-  },
-]
+const roleStore = useRoleStore()
+const auth = useAuthStore()
+const router = useRouter()
+const LARAVEL = import.meta.env.VITE_LARAVEL_API
+const NET = import.meta.env.VITE_NET_API
 
-const selectedId = shallowRef('ENV-2024-4521')
+const STEP_COLORS = {
+  pending:   { statusColor: '#e5e7eb', statusTextColor: '#4b5563', progressColor: '#9ca3af' },
+  active:    { statusColor: '#dbeafe', statusTextColor: '#1a6fb5', progressColor: '#1a6fb5' },
+  completed: { statusColor: '#d1fae5', statusTextColor: '#047857', progressColor: '#6b8e23' },
+}
+
+const shipments = ref([])
+const loading = ref(false)
+const loadError = ref(null)
+const selectedId = shallowRef(null)
+
+function formatPrice(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return '—'
+  return n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 })
+}
+
+function formatShortDate(value) {
+  if (!value) return '—'
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('es-ES')
+}
+
+function mapToShipment(op) {
+  const offer = op.commercial_offer || {}
+  const req = offer.client_request || {}
+  const incotermCode = offer.incoterm?.incoterm_type?.code?.trim() || '—'
+
+  const incotermSteps = Array.isArray(op.incoterm_steps) ? op.incoterm_steps : []
+  const stepNames = incotermSteps.map((s) => s.name).filter(Boolean)
+
+  let currentIdx = stepNames.indexOf(op.status)
+  if (currentIdx === -1) currentIdx = 0
+
+  const timeline = stepNames.map((name, i) => ({
+    name,
+    state: i < currentIdx ? 'completed' : (i === currentIdx ? 'active' : 'pending'),
+  }))
+
+  const total = stepNames.length
+  const progress = total > 0 ? Math.round(((currentIdx + 1) / total) * 100) : 0
+  const statusLabel = stepNames[currentIdx] || op.status || '—'
+  const colors = total > 0 && currentIdx === total - 1 ? STEP_COLORS.completed : STEP_COLORS.active
+
+  return {
+    id: String(op.id),
+    ref: op.reference,
+    client: op.client?.company_name || '—',
+    routeFrom: offer.origin_port?.name || '—',
+    routeTo:   offer.destination_port?.name || '—',
+    incoterm: incotermCode,
+    incotermColor: '#1a6fb5',
+    responsability: req.responsability || null,
+    status: op.status,
+    statusLabel,
+    statusColor: colors.statusColor,
+    statusTextColor: colors.statusTextColor,
+    progress,
+    progressColor: colors.progressColor,
+    etd: op.etd,
+    eta: op.eta,
+    atd: op.atd,
+    ata: op.ata,
+    steps: stepNames,
+    timeline,
+    data: [
+      { label: 'Ref. Presupuesto', value: offer.reference || '—' },
+      { label: 'Responsabilidad',  value: req.responsability || '—' },
+      { label: 'Peso Bruto',       value: req.gross_weight_kg ? `${req.gross_weight_kg} kg` : '—' },
+      { label: 'Volumen',          value: req.volume_m3 ? `${req.volume_m3} m³` : '—' },
+      { label: 'Tipo Contenedor',  value: offer.container_type?.type_name || '—' },
+      { label: 'Puerto Origen',    value: offer.origin_port?.name || '—' },
+      { label: 'Puerto Destino',   value: offer.destination_port?.name || '—' },
+      { label: 'Precio',           value: formatPrice(offer.price) },
+      { label: 'Válido Hasta',     value: formatShortDate(offer.valid_until) },
+    ],
+  }
+}
+
+onMounted(async () => {
+  loading.value = true
+  try {
+    const res = await axios.get(LARAVEL + '/logistics-operations', {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    })
+    const rows = Array.isArray(res.data) ? res.data : (res.data.data || [])
+    shipments.value = rows.map(mapToShipment)
+    if (shipments.value.length) selectedId.value = shipments.value[0].id
+  } catch (e) {
+    if (e.response?.status === 401) {
+      await auth.logout()
+      router.push({ name: 'login' })
+      return
+    }
+    console.error('Error al cargar operaciones logísticas:', e)
+    loadError.value = 'No se pudieron cargar las operaciones'
+  } finally {
+    loading.value = false
+  }
+})
 
 const selectedShipment = computed(() => {
-  return shipments.find((s) => s.id === selectedId.value) || shipments[0]
+  if (!shipments.value.length) return null
+  return shipments.value.find((s) => s.id === selectedId.value) || shipments.value[0]
 })
 
 function handleSelect(id) {
   selectedId.value = id
+}
+
+async function updateShipmentStatus(id, newStatus) {
+  const shipment = shipments.value.find((s) => s.id === id)
+  if (!shipment) return
+
+  const steps = shipment.steps || []
+  const currentIdx = steps.indexOf(newStatus)
+  if (currentIdx === -1) return
+
+  shipment.status = newStatus
+  shipment.statusLabel = newStatus
+
+  const total = steps.length
+  shipment.progress = total > 0 ? Math.round(((currentIdx + 1) / total) * 100) : 0
+
+  const colors = currentIdx === total - 1 ? STEP_COLORS.completed : STEP_COLORS.active
+  shipment.statusColor = colors.statusColor
+  shipment.statusTextColor = colors.statusTextColor
+  shipment.progressColor = colors.progressColor
+
+  shipment.timeline.forEach((step, i) => {
+    step.state = i < currentIdx ? 'completed' : (i === currentIdx ? 'active' : 'pending')
+  })
+
+  // Persiste en el backend
+  try {
+    await axios.put(`${NET}/LogisticsOperations/${id}/status`, { status: newStatus })
+  } catch (e) {
+    console.error('Error al actualizar estado en el backend:', e)
+  }
 }
 </script>
 
@@ -213,7 +173,17 @@ function handleSelect(id) {
         />
       </div>
       <div class="seguimiento-detail-col">
-        <ShipmentDetail :shipment="selectedShipment" />
+        <ShipmentDetail
+          v-if="selectedShipment"
+          :shipment="selectedShipment"
+          :role="roleStore.currentRole"
+          @update-status="updateShipmentStatus"
+        />
+        <div v-else-if="loading" class="seguimiento-placeholder">
+          <Spinner :size="40" />
+        </div>
+        <div v-else-if="loadError" class="seguimiento-placeholder error">{{ loadError }}</div>
+        <div v-else class="seguimiento-placeholder">No hay operaciones logísticas.</div>
       </div>
     </div>
   </div>
@@ -239,6 +209,18 @@ function handleSelect(id) {
 
 .seguimiento-detail-col {
   min-width: 0;
+}
+
+.seguimiento-placeholder {
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.seguimiento-placeholder.error {
+  color: #b91c1c;
 }
 
 @media (max-width: 1100px) {

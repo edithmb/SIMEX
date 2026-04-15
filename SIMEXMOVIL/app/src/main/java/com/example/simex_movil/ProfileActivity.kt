@@ -1,8 +1,6 @@
 package com.example.simex_movil
 
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -18,7 +16,4 @@ class ProfileActivity: AppCompatActivity() {
         menuConfiguration(this, navButton)
 
     }
-
-
-
 }

@@ -17,5 +17,13 @@ class HomeClientActivity : AppCompatActivity() {
         navButton.selectedItemId = R.id.nav_home
 
         menuConfiguration(this, navButton)
+
+        val btnCrearSolicitud = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCrearSolicitud)
+
+        btnCrearSolicitud.setOnClickListener {
+            // Nos envia a la pantalla de crear solicitud
+            val intent = Intent(this, CreateRequestActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace API_MOVIL.Models;
+
+public partial class TrackingStep
+{
+    public int Id { get; set; }
+
+    public string Name { get; set; }
+
+    public string Status { get; set; }
+
+    public virtual ICollection<Incoterm> Incoterms { get; set; } = new List<Incoterm>();
+}

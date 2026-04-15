@@ -1,7 +1,28 @@
 <script setup>
+import { computed } from 'vue'
+
 const props = defineProps({
   shipment: { type: Object, required: true },
+  role: { type: String, default: 'admin' },
 })
+
+defineEmits(['update-status'])
+
+function formatDate(dateStr) {
+  if (!dateStr) return 'Pendiente'
+  const d = new Date(dateStr)
+  const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
+}
+
+const statusOptions = computed(() =>
+  (props.shipment?.steps || []).map((name) => ({
+    value: name,
+    label: name,
+    color: '#dbeafe',
+    textColor: '#1a6fb5',
+  })),
+)
 </script>
 
 <template>
@@ -13,33 +34,30 @@ const props = defineProps({
         <span
           class="detail-status"
           :style="{ background: shipment.statusColor, color: shipment.statusTextColor }"
-        >{{ shipment.status }}</span>
+        >{{ shipment.statusLabel }}</span>
       </div>
       <div class="detail-header-right">
-        <span class="detail-transport-badge">
-          <!-- Ship -->
-          <svg v-if="shipment.transport === 'ship'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" />
-            <path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 7.76" />
-            <path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6" />
-            <line x1="12" y1="1" x2="12" y2="5" />
-          </svg>
-          <!-- Truck -->
-          <svg v-else-if="shipment.transport === 'truck'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="1" y="3" width="15" height="13" rx="1" />
-            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-            <circle cx="5.5" cy="18.5" r="2.5" />
-            <circle cx="18.5" cy="18.5" r="2.5" />
-          </svg>
-          <!-- Plane -->
-          <svg v-else-if="shipment.transport === 'plane'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
-          </svg>
-          <span>{{ shipment.transportLabel }}</span>
-        </span>
         <span class="detail-incoterm" :style="{ background: shipment.incotermColor || '#1a6fb5' }">
           {{ shipment.incoterm }}
         </span>
+      </div>
+    </div>
+
+    <!-- Admin Status Control -->
+    <div v-if="role === 'admin' && statusOptions.length" class="detail-step-control">
+      <span class="detail-step-label">Estado:</span>
+      <div class="status-btn-row">
+        <button
+          v-for="opt in statusOptions"
+          :key="opt.value"
+          :class="['status-btn', { 'status-btn--active': shipment.status === opt.value }]"
+          :style="shipment.status === opt.value
+            ? { background: opt.color, color: opt.textColor, borderColor: opt.color }
+            : {}"
+          @click="$emit('update-status', shipment.id, opt.value)"
+        >
+          {{ opt.label }}
+        </button>
       </div>
     </div>
 
@@ -130,33 +148,37 @@ const props = defineProps({
           </div>
         </div>
 
-        <!-- Documentación -->
+        <!-- Fechas del Envío -->
         <div class="data-block">
           <h3 class="detail-section-title">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-            Documentación
+            Fechas del Envío
           </h3>
-          <div class="docs-list">
-            <div v-for="doc in shipment.documents" :key="doc.name" class="doc-item">
-              <span class="doc-item-name">{{ doc.name }}</span>
-              <span :class="['doc-item-status', doc.ready ? 'doc-item-status--ready' : 'doc-item-status--pending']">
-                <!-- Check -->
-                <svg v-if="doc.ready" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-                <!-- Clock/pending -->
-                <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-              </span>
+          <div class="data-grid">
+            <div class="data-item">
+              <span class="data-item-label">ETD (Salida Estimada)</span>
+              <span class="data-item-value">{{ formatDate(shipment.etd) }}</span>
+            </div>
+            <div class="data-item">
+              <span class="data-item-label">ETA (Llegada Estimada)</span>
+              <span class="data-item-value">{{ formatDate(shipment.eta) }}</span>
+            </div>
+            <div class="data-item">
+              <span class="data-item-label">ATD (Salida Real)</span>
+              <span class="data-item-value">{{ formatDate(shipment.atd) }}</span>
+            </div>
+            <div class="data-item">
+              <span class="data-item-label">ATA (Llegada Real)</span>
+              <span class="data-item-value">{{ formatDate(shipment.ata) }}</span>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -225,6 +247,52 @@ const props = defineProps({
   font-size: 11px;
   font-weight: 700;
   color: #ffffff;
+}
+
+/* Step Control */
+.detail-step-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--page-bg);
+  border-radius: 8px;
+}
+
+.detail-step-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.status-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.status-btn {
+  padding: 5px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-family);
+}
+
+.status-btn:hover:not(.status-btn--active) {
+  border-color: #1a6fb5;
+  color: #1a6fb5;
+}
+
+.status-btn--active {
+  font-weight: 700;
+  border-width: 2px;
 }
 
 /* Client & Route */
@@ -468,5 +536,31 @@ const props = defineProps({
 .doc-item-status {
   display: flex;
   align-items: center;
+}
+
+.doc-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doc-upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--page-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.doc-upload-btn:hover {
+  border-color: #1a6fb5;
+  color: #1a6fb5;
+  background: #eff6ff;
 }
 </style>
