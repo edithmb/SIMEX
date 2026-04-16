@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.simex_movil.ui.HomeViewModel
 import com.example.simex_movil.ui.OperacionesAdapter
 import com.example.simex_movil.ui.TrackingActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class HomeClientActivity : AppCompatActivity() {
 
@@ -21,6 +22,11 @@ class HomeClientActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_homeclient)
+        val navButton = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+
+        navButton.selectedItemId = R.id.nav_game
+
+        menuConfiguration(this, navButton)
 
         val rvOperaciones = findViewById<RecyclerView>(R.id.listaSeguimientos)
         rvOperaciones.layoutManager = LinearLayoutManager(this)
@@ -35,7 +41,6 @@ class HomeClientActivity : AppCompatActivity() {
             // Metemos el ID de la operación en la "maleta" del viaje
             intent.putExtra("OPERACION_ID", operacionClickeada.id)
 
-            // ¡Iniciamos el viaje!
             startActivity(intent)
         }
         rvOperaciones.adapter = adaptador
