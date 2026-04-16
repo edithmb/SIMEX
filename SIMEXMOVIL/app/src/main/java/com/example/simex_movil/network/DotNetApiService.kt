@@ -1,5 +1,7 @@
 package com.example.simex_movil.network
 
+import com.example.simex_movil.ui.UpdateLogisticsStatusRequest
+import com.example.simex_movil.ui.UpdateStatusResponse
 import com.example.simex_movil.ui.UserProfileRequest
 import com.example.simex_movil.ui.UserResponse
 import okhttp3.MultipartBody
@@ -39,4 +41,12 @@ interface DotNetApiService {
         @Part archive: MultipartBody.Part,
         @Part("clientId") clientId: okhttp3.RequestBody
     ): Response<Void>
+
+    // cambio de estado
+    @PUT("LogisticsOperations/{id}/status")
+    suspend fun changeTrackingStatus(
+        @Path("id") id: Int,
+        @Header("Authorization") token: String,
+        @Body request: UpdateLogisticsStatusRequest
+    ): retrofit2.Response<UpdateStatusResponse>
 }

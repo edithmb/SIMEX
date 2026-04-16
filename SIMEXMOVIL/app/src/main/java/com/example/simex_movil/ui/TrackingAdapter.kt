@@ -14,10 +14,11 @@ class TrackingAdapter(
 
     // Clase interna para encontrar los IDs del diseño de la tarjeta
     class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvOrderId: TextView = view.findViewById(R.id.tvOrderId)
-        val tvOrigen: TextView = view.findViewById(R.id.tvOrigenPrincipal)
-        val tvDestino: TextView = view.findViewById(R.id.tvDestinoPrincipal)
-        val tvEstado: TextView = view.findViewById(R.id.tvBadgeEstadoGeneral)
+        val tvTituloOrden: TextView = view.findViewById(R.id.tvTituloOrden)
+        val tvOrigen: TextView = view.findViewById(R.id.tvOrigen)
+        val tvDestino: TextView = view.findViewById(R.id.tvDestino)
+        val tvBadgeEstado: TextView = view.findViewById(R.id.tvBadgeEstado)
+        val tvEta: TextView = view.findViewById(R.id.tvEta)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -31,8 +32,9 @@ class TrackingAdapter(
         val operacion = lista[position]
 
         // Rellenamos con los datos del modelo Tracking
-        holder.tvOrderId.text = operacion.reference
-        holder.tvEstado.text = operacion.status.uppercase()
+        holder.tvTituloOrden.text = operacion.reference
+        holder.tvBadgeEstado.text = operacion.status.uppercase()
+        holder.tvEta.text = operacion.eta ?: "Por confirmar"
 
         // Navegamos por el JSON: commercialOffer -> clientRequest -> origin/destination
         val origen = operacion.commercialOffer?.clientRequest?.origin?.name ?: "N/A"

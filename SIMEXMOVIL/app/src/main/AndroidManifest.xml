@@ -63,6 +63,7 @@
             android:name=".ui.TrackingActivity"
             android:exported="true">
         </activity>
+
     </application>
 
 </manifest>
