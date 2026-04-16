@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.simex_movil.ui.LocationResponse
 import com.example.simex_movil.ui.NewRequestViewModel
-import com.example.simex_movil.ui.Request
+import com.example.simex_movil.ui.RequestOffer
 import com.example.simex_movil.ui.SolicitudState
 import com.google.android.material.button.MaterialButton
 
@@ -112,7 +112,7 @@ class CreateRequestActivity: AppCompatActivity() {
             }
 
             // Armamos nuestro "Paquete"
-            val paquete = Request(
+            val paquete = RequestOffer(
                 origin_id = origenIdSeleccionado!!,
                 destination_id = destinoIdSeleccionado!!,
                 gross_weight_kg = pesoNum,
