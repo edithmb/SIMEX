@@ -75,7 +75,7 @@ class CreateRequestActivity: AppCompatActivity() {
         val btnSolicitar = findViewById<MaterialButton>(R.id.btnSolicitarCotizacion)
 
         // RECUPERAMOS EL TOKEN DE LA CAJA FUERTE
-        val sharedPref = getSharedPreferences("Mis preferencias", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("PreferenciasUsuario", Context.MODE_PRIVATE)
         val token = sharedPref.getString("token", "") ?: ""
 
         //ACCIÓN AL PULSAR EL BOTÓN DE SOLICITAR
