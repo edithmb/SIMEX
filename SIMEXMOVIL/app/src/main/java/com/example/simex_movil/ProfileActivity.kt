@@ -1,26 +1,44 @@
 package com.example.simex_movil
 
-import android.os.Bundle
+import android.content.Context
 import android.net.Uri
-import androidx.activity.result.contract.ActivityResultContracts
+import android.os.Bundle
+import android.provider.OpenableColumns
+import android.view.View
+import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.example.simex_movil.network.DniSocketManager
-import com.google.android.material.button.MaterialButton
+import com.example.simex_movil.ui.PerfilState
+import com.example.simex_movil.ui.ProfileViewModel
+import com.example.simex_movil.ui.UserProfileRequest
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.button.MaterialButton
+import okhttp3.MultipartBody
+import java.io.File
+import java.io.FileOutputStream
 
 class ProfileActivity: AppCompatActivity() {
 
-    // gestor de sockets
-    private lateinit var dniSocketManager: DniSocketManager
+    private lateinit var viewModel: ProfileViewModel
+    private var idUsuarioActual: Int = 0
+    private var uriArchivoSeleccionado: Uri? = null
 
-    private val pickFileLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) {
-        uri: Uri? ->
+    private lateinit var dniSocketManager: DniSocketManager //
+
+    //Entrar a la galeria
+    private val selectorDeArchivos = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
-            Toast.makeText(this, "Iniciando túnel seguro...", Toast.LENGTH_SHORT).show()
-            subirDniConHilosYSockets(uri)
-        } else {
-            Toast.makeText(this, "No se seleccionó ningún archivo", Toast.LENGTH_SHORT).show()
+            uriArchivoSeleccionado = uri
+            val nombreArchivo = obtenerNombreArchivo(uri)
+            val btnSeleccionar = findViewById<MaterialButton>(R.id.btn_seleccionar_archivo)
+
+            // Cambiamos el texto para que vea que sí se seleccionó
+            btnSeleccionar.text = "Subir: $nombreArchivo"
+            btnSeleccionar.setBackgroundColor(android.graphics.Color.parseColor("#8AB242"))
         }
     }
 
@@ -28,27 +46,128 @@ class ProfileActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
-        val navButton = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        navButton.selectedItemId = R.id.nav_profile
-        menuConfiguration(this, navButton)
+        viewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
 
-        // inicializar el manager de dni socket
-        val tokenGuardado = "hdahd"
-        dniSocketManager = DniSocketManager(this, tokenGuardado)
+        // 1. BUSCAMOS LOS ELEMENTOS
+        val inputFirstName = findViewById<EditText>(R.id.inputFirstName)
+        val inputLastName = findViewById<EditText>(R.id.inputLastName)
+        val inputEmail = findViewById<EditText>(R.id.inputEmail)
+        val inputTelephone = findViewById<EditText>(R.id.inputTelephoneNumber)
 
-        val btnSelectFile = findViewById<MaterialButton>(R.id.btn_seleccionar_archivo)
+        val inputPassword = findViewById<EditText>(R.id.inputPassword)
+        val inputConfirmarPass = findViewById<EditText>(R.id.inputConfirmarPass)
+        val seccionPassword = findViewById<LinearLayout>(R.id.seccionPassword)
 
-        btnSelectFile.setOnClickListener {
-            pickFileLauncher.launch("*/*") //abre galeria pidiendo pdfs o imagenes
+        val btnEditar = findViewById<android.widget.Button>(R.id.btnEditarPerfil)
+        val btnGuardar = findViewById<MaterialButton>(R.id.btn_guardar_cambios)
+        val btnSeleccionarArchivo = findViewById<MaterialButton>(R.id.btn_seleccionar_archivo)
+
+        // 2. DATOS DE SESIÓN
+        val sharedPref = getSharedPreferences("PreferenciasUsuario", Context.MODE_PRIVATE)
+        val rawToken = sharedPref.getString("token", "") ?: ""
+        val tokenRetrofit = "Bearer $rawToken"
+        idUsuarioActual = sharedPref.getInt("client_id", 0)
+
+        dniSocketManager = DniSocketManager(this, rawToken)
+
+        // 3. CARGAMOS DATOS AL ABRIR
+        if (idUsuarioActual != 0) {
+            viewModel.obtenerPerfil(tokenRetrofit, idUsuarioActual)
         }
 
+        // 4. BOTÓN: HABILIAR EDICIÓN
+        btnEditar.setOnClickListener {
+            inputFirstName.isEnabled = true
+            inputLastName.isEnabled = true
+            inputEmail.isEnabled = true
+            inputTelephone.isEnabled = true
+
+            seccionPassword.visibility = View.VISIBLE
+            btnGuardar.visibility = View.VISIBLE
+            btnEditar.visibility = View.GONE
+        }
+
+        // 5. BOTÓN: GUARDAR PERFIL
+        btnGuardar.setOnClickListener {
+            val pass1 = inputPassword.text.toString()
+            val pass2 = inputConfirmarPass.text.toString()
+
+            if (pass1.isNotEmpty() || pass2.isNotEmpty()) {
+                if (pass1 != pass2) {
+                    Toast.makeText(this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+            }
+
+            val usuarioActualizado = UserProfileRequest(
+                id = idUsuarioActual,
+                firstName = inputFirstName.text.toString(),
+                lastName = inputLastName.text.toString(),
+                email = inputEmail.text.toString(),
+                phoneNumber = inputTelephone.text.toString(),
+                passwordHash = if (pass1.isNotEmpty()) pass1 else null,
+                isActive = true
+            )
+            viewModel.actualizarPerfil(tokenRetrofit, idUsuarioActual, usuarioActualizado)
+        }
+
+        // 6. BOTÓN: ABRIR GALERÍA
+        btnSeleccionarArchivo.setOnClickListener {
+            if (uriArchivoSeleccionado == null) {
+                // Si no hay foto, abrimos la galería
+                selectorDeArchivos.launch("*/*")
+            } else {
+                // Si ya eligió una foto, la enviamos al servidor
+                Toast.makeText(this, "Iniciando túnel seguro...", Toast.LENGTH_SHORT).show()
+                subirDniConHilosYSockets(uriArchivoSeleccionado!!)
+            }
+        }
+
+        // 7. OBSERVADOR DE RESPUESTAS DEL SERVIDOR
+        viewModel.estado.observe(this) { estado ->
+            when (estado) {
+                is PerfilState.SuccessLoad -> {
+                    val user = estado.user
+                    inputFirstName.setText(user.firstName)
+                    inputLastName.setText(user.lastName)
+                    inputEmail.setText(user.email)
+                    inputTelephone.setText(user.phoneNumber ?: "")
+                }
+                is PerfilState.SuccessUpdate -> {
+                    Toast.makeText(this, "Perfil actualizado con éxito", Toast.LENGTH_SHORT).show()
+                    // Restauramos la vista
+                    seccionPassword.visibility = View.GONE
+                    btnGuardar.visibility = View.GONE
+                    btnEditar.visibility = View.VISIBLE
+                    inputPassword.setText("")
+                    inputConfirmarPass.setText("")
+                    // Volvemos a bloquear campos
+                    inputFirstName.isEnabled = false
+                    inputLastName.isEnabled = false
+                    inputEmail.isEnabled = false
+                    inputTelephone.isEnabled = false
+                }
+                is PerfilState.SuccessUploadDni -> {
+                    Toast.makeText(this, "DNI subido con éxito", Toast.LENGTH_SHORT).show()
+                    uriArchivoSeleccionado = null
+                    btnSeleccionarArchivo.text = "Subir archivo"
+                    btnSeleccionarArchivo.setBackgroundColor(android.graphics.Color.parseColor("#5C82B1"))
+                }
+                is PerfilState.Error -> {
+                    Toast.makeText(this, estado.message, Toast.LENGTH_LONG).show()
+                }
+                is PerfilState.Loading -> { }
+                else -> {}
+            }
+        }
     }
 
-    private fun subirDniConHilosYSockets(uri:Uri){
-        // datos de prueba
-        val entityId = 1
+    private fun subirDniConHilosYSockets(uri: Uri) {
+        val entityId = idUsuarioActual // Usamos el ID real de SharedPreferences
         val entityType = "Client"
-        val fileName = "dni_seguro.jpg"
+        val fileName = obtenerNombreArchivo(uri)
+
+        val btnSeleccionarArchivo = findViewById<MaterialButton>(R.id.btn_seleccionar_archivo)
 
         dniSocketManager.connectAndUpload(
             uri = uri,
@@ -56,8 +175,31 @@ class ProfileActivity: AppCompatActivity() {
             entityType = entityType,
             fileName = fileName,
             onStatusUpdate = { mensajeDelServidor ->
-                Toast.makeText(this, mensajeDelServidor, Toast.LENGTH_LONG).show()
+                // Actualizamos la interfaz en el hilo principal
+                runOnUiThread {
+                    Toast.makeText(this, mensajeDelServidor, Toast.LENGTH_LONG).show()
+
+                    // Si el servidor confirma el éxito, reseteamos el botón a su estado original
+                    if (mensajeDelServidor.contains("Éxito", ignoreCase = true) || mensajeDelServidor.contains("uploaded", ignoreCase = true)) {
+                        uriArchivoSeleccionado = null
+                        btnSeleccionarArchivo.text = "Subir archivo"
+                        btnSeleccionarArchivo.setBackgroundColor(android.graphics.Color.parseColor("#5C82B1"))
+                    }
+                }
             }
         )
+    }
+
+    private fun obtenerNombreArchivo(uri: Uri): String {
+        var nombre = "archivo_desconocido"
+        contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (index != -1) {
+                    nombre = cursor.getString(index)
+                }
+            }
+        }
+        return nombre
     }
 }
