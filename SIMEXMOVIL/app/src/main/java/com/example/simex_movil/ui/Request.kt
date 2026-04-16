@@ -26,3 +26,16 @@ data class UpdateStatusResponse(
     val newStatus: String,
     val deliveredAt: String?
 )
+
+// info para .net para cambiar estado de operacion logistica
+data class UpdateLogisticsStatusRequest(
+    val status: String
+)
+
+// respuesta de la api
+data class UpdateStatusResponse(
+    val message: String,
+    val operationId: Int,
+    val newStatus: String,
+    val deliveredAt: String?
+)
