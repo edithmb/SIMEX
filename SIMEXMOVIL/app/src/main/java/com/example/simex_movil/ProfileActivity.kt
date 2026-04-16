@@ -47,6 +47,9 @@ class ProfileActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
+        val menuInferior = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        menuConfiguration(this, menuInferior)
+
         viewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
 
         // 1. BUSCAMOS LOS ELEMENTOS
