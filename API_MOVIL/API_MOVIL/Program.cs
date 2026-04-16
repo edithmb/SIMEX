@@ -10,15 +10,31 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://127.0.0.1:5173",
+                "http://127.0.0.1:5174"
+              )
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddDbContext<Simex06Context>();
-builder.Services.AddSingleton<EncryptionService>(); // archivo deencriptación
+builder.Services.AddSingleton<EncryptionService>(); // archivo deencriptaciï¿½n
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR(options =>
 {
-    // Ensanchamos el túnel para aceptar archivos de hasta 10 Megabytes
+    // Ensanchamos el tï¿½nel para aceptar archivos de hasta 10 Megabytes
     options.MaximumReceiveMessageSize = 10 * 1024 * 1024;
 });
 
@@ -31,7 +47,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuerSigningKey = true, // firma válida
+            ValidateIssuerSigningKey = true, // firma vï¿½lida
             IssuerSigningKey = new SymmetricSecurityKey(keyBytes), // clave secreta
             ValidateIssuer = false,   
             ValidateAudience = false,
@@ -47,6 +63,8 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication(); // lee token
 app.UseAuthorization(); // lee permisos

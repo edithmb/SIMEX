@@ -21,7 +21,8 @@ class ClientRequest extends Model
         'origin_id',
         'destination_id',
         'created_by',
-        'estado'
+        'estado',
+        'responsability',
     ];
 
     protected function casts(): array

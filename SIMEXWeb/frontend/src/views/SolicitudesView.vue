@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 import { useRoleStore } from '@/stores/role'
 import { useAuthStore } from '@/stores/auth'
 import SolicitudesStats from '@/components/solicitudes/SolicitudesStats.vue'
@@ -8,19 +9,26 @@ import SolicitudesFilters from '@/components/solicitudes/SolicitudesFilters.vue'
 import SolicitudesTable from '@/components/solicitudes/SolicitudesTable.vue'
 import CrearPresupuestoModal from '@/components/solicitudes/CrearPresupuestoModal.vue'
 import CrearSolicitudModal from '@/components/solicitudes/CrearSolicitudModal.vue'
+import Spinner from '@/components/common/Spinner.vue'
 
 const roleStore = useRoleStore()
 const auth = useAuthStore()
+const router = useRouter()
 
 const LARAVEL = import.meta.env.VITE_LARAVEL_API
 const headers = { Authorization: `Bearer ${auth.token}` }
 
 const solicitudes = ref([])
 const loading = ref(false)
+const submittingSolicitud = ref(false)
+const submittingPresupuesto = ref(false)
 
 // 1. Creamos las listas reactivas para los desplegables del modal
 const clientesList = ref([])
 const localizacionesList = ref([])
+const incotermsList = ref([])
+const puertosList = ref([])
+const tiposContenedorList = ref([])
 
 function mapSolicitud(item) {
   return {
@@ -33,39 +41,60 @@ function mapSolicitud(item) {
     destinationName: item.destination?.name ?? '—',
     comments: item.comments,
     created_at: item.created_at ? new Date(item.created_at).toLocaleDateString('es-ES') : '—',
-    hasOffer: (item.commercial_offers?.length ?? 0) > 0,
+    hasOffer: item.commercial_offers?.some((o) => o.status !== 'rejected') ?? false,
   }
 }
 
 async function fetchSolicitudes() {
   loading.value = true
   try {
-    const endpoint = roleStore.isAdmin ? '/client-requests-admin' : '/client-requests-client'
+    const endpoint = auth.backendIsAdmin ? '/client-requests-admin' : '/client-requests-client'
     const res = await axios.get(LARAVEL + endpoint, { headers })
     solicitudes.value = res.data.map(mapSolicitud)
+  } catch (error) {
+    if (error.response?.status === 401) {
+      await auth.logout()
+      router.push({ name: 'login' })
+      return
+    }
+    console.error('Error al cargar solicitudes:', error)
   } finally {
     loading.value = false
   }
 }
 
-// 2. Función para cargar localizaciones y clientes
+// 2. Función para cargar localizaciones, clientes y datos de presupuesto
 async function cargarDatos() {
   try {
     const peticionLocalizaciones = axios.get(LARAVEL + '/locations', { headers })
+    const peticionIncoterms = axios.get(LARAVEL + '/incoterms', { headers })
+    const peticionPuertos = axios.get(LARAVEL + '/ports', { headers })
+    const peticionTiposContenedor = axios.get(LARAVEL + '/container-types', { headers })
 
     let peticionClientes = Promise.resolve({ data: [] })
-    if (roleStore.isAdmin) {
+    if (auth.backendIsAdmin) {
       peticionClientes = axios.get(LARAVEL + '/clients', { headers })
     }
 
-    const [resLocalizaciones, resClientes] = await Promise.all([
+    const [resLocalizaciones, resClientes, resIncoterms, resPuertos, resTiposContenedor] = await Promise.all([
       peticionLocalizaciones,
       peticionClientes,
+      peticionIncoterms,
+      peticionPuertos,
+      peticionTiposContenedor,
     ])
 
     localizacionesList.value = resLocalizaciones.data
     clientesList.value = resClientes.data
+    incotermsList.value = resIncoterms.data
+    puertosList.value = resPuertos.data
+    tiposContenedorList.value = resTiposContenedor.data
   } catch (error) {
+    if (error.response?.status === 401) {
+      await auth.logout()
+      router.push({ name: 'login' })
+      return
+    }
     console.error('Error al cargar datos para los desplegables:', error)
   }
 }
@@ -115,9 +144,18 @@ function closePresupuestoModal() {
   selectedSolicitud.value = null
 }
 
-function handlePresupuestoSubmit(data) {
-  console.log('Presupuesto generado:', data)
-  closePresupuestoModal()
+async function handlePresupuestoSubmit(data) {
+  if (submittingPresupuesto.value) return
+  submittingPresupuesto.value = true
+  try {
+    await axios.post(LARAVEL + '/commercial-offers', data, { headers })
+    closePresupuestoModal()
+    await fetchSolicitudes()
+  } catch (error) {
+    console.error('Error al crear presupuesto:', error)
+  } finally {
+    submittingPresupuesto.value = false
+  }
 }
 
 // Modal state — client/admin: solicitud modal
@@ -132,13 +170,22 @@ function closeSolicitudModal() {
 }
 
 async function handleSolicitudSubmit(data) {
+  if (submittingSolicitud.value) return
+  submittingSolicitud.value = true
   try {
-    const endpoint = roleStore.isAdmin ? '/client-requests-admin' : '/client-requests-client'
+    const endpoint = auth.backendIsAdmin ? '/client-requests-admin' : '/client-requests-client'
     await axios.post(LARAVEL + endpoint, data, { headers })
     closeSolicitudModal()
     await fetchSolicitudes()
   } catch (error) {
+    if (error.response?.status === 401) {
+      await auth.logout()
+      router.push({ name: 'login' })
+      return
+    }
     console.error('Error al enviar la solicitud:', error)
+  } finally {
+    submittingSolicitud.value = false
   }
 }
 </script>
@@ -169,16 +216,22 @@ async function handleSolicitudSubmit(data) {
       @update:active-filter="activeFilter = $event" @update:search-query="searchQuery = $event" />
 
     <!-- Table -->
-    <SolicitudesTable :solicitudes="filteredSolicitudes" :role="roleStore.currentRole"
+    <div v-if="loading" class="view-loading">
+      <Spinner :size="40" />
+    </div>
+    <SolicitudesTable v-else :solicitudes="filteredSolicitudes" :role="roleStore.currentRole"
       @crear-presupuesto="openPresupuestoModal" />
 
     <!-- Modal: Crear Presupuesto (admin) -->
     <CrearPresupuestoModal :visible="showPresupuestoModal" :solicitud="selectedSolicitud"
+      :incoterms="incotermsList" :puertos="puertosList" :tipos-contenedor="tiposContenedorList"
+      :submitting="submittingPresupuesto"
       @close="closePresupuestoModal" @submit="handlePresupuestoSubmit" />
 
     <!-- Modal: Crear Solicitud (client/admin) -->
     <CrearSolicitudModal :visible="showSolicitudModal" :role="roleStore.currentRole"
       :clientes="clientesList" :localizaciones="localizacionesList"
+      :submitting="submittingSolicitud"
       @close="closeSolicitudModal" @submit="handleSolicitudSubmit" />
   </div>
 </template>
@@ -235,5 +288,13 @@ async function handleSolicitudSubmit(data) {
 
 .solicitudes-header-btn:hover {
   background: #0d2440;
+}
+
+.view-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 0;
+  color: var(--accent-blue);
 }
 </style>

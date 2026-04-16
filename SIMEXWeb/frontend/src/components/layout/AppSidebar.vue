@@ -1,10 +1,18 @@
 <script setup>
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useRoleStore } from '@/stores/role'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const router = useRouter()
 const roleStore = useRoleStore()
+const auth = useAuthStore()
+
+async function handleLogout() {
+  await auth.logout()
+  router.push({ name: 'login' })
+}
 
 const allMenuSections = [
   {
@@ -140,18 +148,6 @@ const isActive = (itemRoute) => {
       </div>
     </nav>
 
-    <!-- Role Switcher -->
-    <div class="sidebar-role-switcher">
-      <span class="sidebar-role-switcher-label">VISTA ACTIVA</span>
-      <select
-        class="sidebar-role-switcher-select"
-        :value="roleStore.currentRole"
-        @change="roleStore.setRole($event.target.value)"
-      >
-        <option value="admin">Administrador</option>
-        <option value="cliente">Cliente</option>
-      </select>
-    </div>
 
     <!-- User Footer -->
     <div class="sidebar-user">
@@ -160,7 +156,7 @@ const isActive = (itemRoute) => {
         <span class="sidebar-user-name">{{ roleStore.isAdmin ? 'María García' : 'Javier Ruiz' }}</span>
         <span class="sidebar-user-role">{{ roleStore.isAdmin ? 'Administradora' : 'Cliente' }}</span>
       </div>
-      <button class="sidebar-user-logout" title="Cerrar sesión">
+      <button class="sidebar-user-logout" title="Cerrar sesión" @click="handleLogout">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
           <polyline points="16 17 21 12 16 7" />

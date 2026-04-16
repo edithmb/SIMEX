@@ -30,7 +30,19 @@ class LogisticsOperationController extends Controller
         $query = LogisticsOperation::select($select)
             ->with([
                 'client:id,company_name',
-
+                'logisticsOperationDocuments' => function($q) {
+                    $q->select([
+                        'id',
+                        'logistics_operation_id',
+                        'document_type_id',
+                        'file_url',
+                        'file_name',
+                        'status',
+                        'is_ad_hoc',
+                        'custom_name',
+                        'uploaded_at',
+                    ])->with('documentType:id,code,name');
+                },
                 'commercialOffer' => function($q) {
                     $q->select([
                         'id',
@@ -60,6 +72,7 @@ class LogisticsOperationController extends Controller
                                 'gross_weight_kg',
                                 'origin_id',
                                 'destination_id',
+                                'responsability',
                             ])
                             ->with([
                                 'origin:id,name,city_id',
@@ -132,6 +145,7 @@ class LogisticsOperationController extends Controller
                                 'gross_weight_kg',
                                 'origin_id',
                                 'destination_id',
+                                'responsability',
                             ])
                             ->with([
                                 'origin:id,name,city_id',

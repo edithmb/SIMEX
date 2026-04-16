@@ -47,7 +47,33 @@ class SignInActivity : AppCompatActivity() {
                     btnLogin.isEnabled  = true
                     btnLogin.text = "Iniciar Sesión"
 
-                    Toast.makeText(this, "Bienvenido", Toast.LENGTH_SHORT).show()
+                    //guardamos los datos
+                    val sharedPreferences = getSharedPreferences("PreferenciasUsuario", MODE_PRIVATE)
+                    with(sharedPreferences.edit()) {
+                        putString("token", state.token)
+                        putString("nombre", state.firstName)
+                        putString("rol", state.roleName)
+                        putInt("client_id", state.userId)
+
+                        apply()
+                    }
+
+                    Toast.makeText(this, "Bienvenido, ${state.firstName}", Toast.LENGTH_SHORT).show()
+
+                    val destino = when (state.roleName.lowercase()) {
+                        "cliente" -> HomeClientActivity::class.java
+                        "agente comercial", "agente" -> HomeAgentActivity::class.java
+                        else -> {
+                            Toast.makeText(this,"Rol no reconocido", Toast.LENGTH_SHORT).show()
+                            null
+                        }
+                    }
+
+                    if (destino !=null) {
+                        val intentNavegation = Intent(this, destino)
+                        startActivity(intentNavegation)
+                        finish()
+                    }
                 }
                 is LoginState.Error -> {
                     btnLogin.isEnabled = true

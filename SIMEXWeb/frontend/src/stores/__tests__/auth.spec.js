@@ -37,9 +37,7 @@ describe('auth store', () => {
       email: 'user@test.com',
       password: 'pass',
     })
-    expect(axios.get).toHaveBeenCalledWith('http://localhost:8000/api/me', {
-      headers: { Authorization: 'Bearer abc123' },
-    })
+    expect(axios.get).toHaveBeenCalledWith('http://localhost:8000/api/me')
 
     const roleStore = useRoleStore()
     expect(roleStore.currentRole).toBe('cliente')
@@ -79,12 +77,14 @@ describe('auth store', () => {
     expect(store.isAuthenticated).toBe(false)
   })
 
-  it('logout clears token and localStorage', () => {
+  it('logout clears token and localStorage', async () => {
     localStorage.setItem('jwt_token', 'tok')
     localStorage.setItem('user_role', 'admin')
     setActivePinia(createPinia())
+    axios.post.mockResolvedValueOnce({ data: {} })
+
     const store = useAuthStore()
-    store.logout()
+    await store.logout()
 
     expect(store.token).toBeNull()
     expect(store.isAuthenticated).toBe(false)

@@ -1,21 +1,30 @@
 <script setup>
 import { ref, watch } from 'vue'
+import Spinner from '@/components/common/Spinner.vue'
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
     presupuesto: { type: Object, default: null },
+    submitting: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'confirm'])
 
 const reason = ref('')
 
+// Capturamos el ID cuando el modal se abre para que persista
+// durante la transición de salida (cuando props.presupuesto ya es null)
+const capturedId = ref(null)
+watch(
+    () => props.presupuesto,
+    (p) => { if (p) capturedId.value = p.id },
+    { immediate: true },
+)
+
 watch(
     () => props.visible,
     (val) => {
-        if (val) {
-            reason.value = ''
-        }
+        if (val) reason.value = ''
     },
 )
 
@@ -24,9 +33,8 @@ function handleClose() {
 }
 
 function handleConfirm() {
-    if (reason.value.trim()) {
-        emit('confirm', reason.value.trim())
-    }
+    if (props.submitting || !reason.value.trim() || capturedId.value == null) return
+    emit('confirm', reason.value.trim(), capturedId.value)
 }
 
 function handleOverlayClick(e) {
@@ -70,9 +78,10 @@ function handleOverlayClick(e) {
 
                     <!-- Footer -->
                     <div class="modal-footer">
-                        <button class="modal-footer-cancel" @click="handleClose">Cancelar</button>
-                        <button class="modal-footer-confirm" :disabled="!reason.trim()" @click="handleConfirm">
-                            Confirmar Rechazo
+                        <button class="modal-footer-cancel" :disabled="submitting" @click="handleClose">Cancelar</button>
+                        <button class="modal-footer-confirm" :disabled="submitting || !reason.trim()" @click="handleConfirm">
+                            <Spinner v-if="submitting" :size="14" />
+                            <span v-else>Confirmar Rechazo</span>
                         </button>
                     </div>
                 </div>

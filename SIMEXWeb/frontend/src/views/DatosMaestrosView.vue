@@ -1,12 +1,14 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import MaestroNav from '@/components/datos-maestros/MaestroNav.vue'
 import MaestroTable from '@/components/datos-maestros/MaestroTable.vue'
 import MaestroFormModal from '@/components/datos-maestros/MaestroFormModal.vue'
 
 const auth = useAuthStore()
+const router = useRouter()
 
 const LARAVEL = import.meta.env.VITE_LARAVEL_API
 const headers = { Authorization: `Bearer ${auth.token}` }
@@ -139,6 +141,11 @@ async function fetchMaestro(key) {
     const res = await axios.get(LARAVEL + config.endpoint, { headers })
     config.dataRef.value = res.data
   } catch (error) {
+    if (error.response?.status === 401) {
+      await auth.logout()
+      router.push({ name: 'login' })
+      return
+    }
     errorMessage.value = `Error al cargar ${maestrosConfig[key].label}.`
     console.error(`Error al cargar ${key}:`, error)
   } finally {
@@ -186,6 +193,11 @@ async function handleSave(data) {
     closeModal()
     await fetchMaestro(activeKey.value)
   } catch (error) {
+    if (error.response?.status === 401) {
+      await auth.logout()
+      router.push({ name: 'login' })
+      return
+    }
     console.error('Error al guardar:', error)
   }
 }
@@ -196,6 +208,11 @@ async function handleDelete(row) {
     await axios.delete(LARAVEL + config.endpoint + '/' + row.id, { headers })
     await fetchMaestro(activeKey.value)
   } catch (error) {
+    if (error.response?.status === 401) {
+      await auth.logout()
+      router.push({ name: 'login' })
+      return
+    }
     console.error('Error al eliminar:', error)
   }
 }

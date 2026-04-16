@@ -1,10 +1,12 @@
 <script setup>
+import { computed } from 'vue'
+
 const props = defineProps({
   shipment: { type: Object, required: true },
   role: { type: String, default: 'admin' },
 })
 
-const emit = defineEmits(['update-status', 'upload-document'])
+defineEmits(['update-status'])
 
 function formatDate(dateStr) {
   if (!dateStr) return 'Pendiente'
@@ -13,25 +15,14 @@ function formatDate(dateStr) {
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
 }
 
-const statusOptions = [
-  { value: 'embalaje',           label: 'Embalaje',       color: '#e5e7eb', textColor: '#4b5563' },
-  { value: 'carga',              label: 'Carga',           color: '#dbeafe', textColor: '#1a6fb5' },
-  { value: 'transporte',         label: 'Transporte',      color: '#dbeafe', textColor: '#1a6fb5' },
-  { value: 'aduana_exp',         label: 'Aduana Exp.',     color: '#fef3c7', textColor: '#b45309' },
-  { value: 'manip_origen',       label: 'Manip. Origen',   color: '#dbeafe', textColor: '#1a6fb5' },
-  { value: 'flete',              label: 'Flete',           color: '#dbeafe', textColor: '#1a6fb5' },
-  { value: 'manip_destino',      label: 'Manip. Destino',  color: '#dbeafe', textColor: '#1a6fb5' },
-  { value: 'aduana_imp',         label: 'Aduana Imp.',     color: '#fef3c7', textColor: '#b45309' },
-  { value: 'transporte_destino', label: 'Transp. Destino', color: '#dbeafe', textColor: '#1a6fb5' },
-  { value: 'descarga',           label: 'Descarga',        color: '#d1fae5', textColor: '#047857' },
-]
-
-function handleFileSelect(event) {
-  const file = event.target.files[0]
-  if (!file) return
-  emit('upload-document', props.shipment.id, { name: file.name, ready: true })
-  event.target.value = ''
-}
+const statusOptions = computed(() =>
+  (props.shipment?.steps || []).map((name) => ({
+    value: name,
+    label: name,
+    color: '#dbeafe',
+    textColor: '#1a6fb5',
+  })),
+)
 </script>
 
 <template>
@@ -46,27 +37,6 @@ function handleFileSelect(event) {
         >{{ shipment.statusLabel }}</span>
       </div>
       <div class="detail-header-right">
-        <span class="detail-transport-badge">
-          <!-- Ship -->
-          <svg v-if="shipment.transport === 'ship'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" />
-            <path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 7.76" />
-            <path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6" />
-            <line x1="12" y1="1" x2="12" y2="5" />
-          </svg>
-          <!-- Truck -->
-          <svg v-else-if="shipment.transport === 'truck'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="1" y="3" width="15" height="13" rx="1" />
-            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-            <circle cx="5.5" cy="18.5" r="2.5" />
-            <circle cx="18.5" cy="18.5" r="2.5" />
-          </svg>
-          <!-- Plane -->
-          <svg v-else-if="shipment.transport === 'plane'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
-          </svg>
-          <span>{{ shipment.transportLabel }}</span>
-        </span>
         <span class="detail-incoterm" :style="{ background: shipment.incotermColor || '#1a6fb5' }">
           {{ shipment.incoterm }}
         </span>
@@ -74,7 +44,7 @@ function handleFileSelect(event) {
     </div>
 
     <!-- Admin Status Control -->
-    <div v-if="role === 'admin'" class="detail-step-control">
+    <div v-if="role === 'admin' && statusOptions.length" class="detail-step-control">
       <span class="detail-step-label">Estado:</span>
       <div class="status-btn-row">
         <button
@@ -209,41 +179,6 @@ function handleFileSelect(event) {
           </div>
         </div>
 
-        <!-- Documentación -->
-        <div class="data-block">
-          <h3 class="detail-section-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
-            Documentación
-          </h3>
-          <div class="docs-list">
-            <div v-for="doc in shipment.documents" :key="doc.name" class="doc-item">
-              <span class="doc-item-name">{{ doc.name }}</span>
-              <div class="doc-item-actions">
-                <span :class="['doc-item-status', doc.ready ? 'doc-item-status--ready' : 'doc-item-status--pending']">
-                  <svg v-if="doc.ready" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <polyline points="22 4 12 14.01 9 11.01" />
-                  </svg>
-                  <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                  </svg>
-                </span>
-                <label class="doc-upload-btn" :title="'Subir ' + doc.name">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                  </svg>
-                  <input type="file" style="display:none" @change="handleFileSelect($event)" />
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>

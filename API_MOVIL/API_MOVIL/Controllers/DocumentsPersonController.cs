@@ -1,11 +1,14 @@
 ﻿using API_MOVIL.Models;
 using API_MOVIL.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace API_MOVIL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DocumentsPersonController : ControllerBase
     {
         private readonly Simex06Context _context;

@@ -267,6 +267,10 @@ public partial class Simex06Context : DbContext
                 .HasForeignKey(d => d.OriginId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_client_requests_origin_location");
+
+            entity.Property(e => e.Responsability).HasMaxLength(10)
+            .IsUnicode(false)
+            .HasColumnName("responsability");
         });
 
         modelBuilder.Entity<CommercialOffer>(entity =>

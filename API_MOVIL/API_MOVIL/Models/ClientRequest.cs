@@ -34,4 +34,6 @@ public partial class ClientRequest
     public virtual Location Destination { get; set; }
 
     public virtual Location Origin { get; set; }
+
+    public string? Responsability { get; set; } 
 }

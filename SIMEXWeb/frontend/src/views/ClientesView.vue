@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import ClientesStats from '@/components/clientes/ClientesStats.vue'
 import ClientesFilters from '@/components/clientes/ClientesFilters.vue'
@@ -8,10 +9,20 @@ import ClientesList from '@/components/clientes/ClientesList.vue'
 import NuevaEmpresaModal from '@/components/clientes/NuevaEmpresaModal.vue'
 import NuevoUsuarioModal from '@/components/clientes/NuevoUsuarioModal.vue'
 import UsuariosList from '@/components/clientes/UsuariosList.vue'
+import Spinner from '@/components/common/Spinner.vue'
+
+const LARAVEL = import.meta.env.VITE_LARAVEL_API
+const NET = import.meta.env.VITE_NET_API
+
+const auth = useAuthStore()
+const router = useRouter()
+const headers = { Authorization: `Bearer ${auth.token}` }
 
 const clientes = ref([])
-
-const empresaNames = computed(() => clientes.value.map((c) => c.company_name))
+const roles = ref([])
+const loading = ref(false)
+const submittingEmpresa = ref(false)
+const submittingUsuario = ref(false)
 
 const activeTab = ref('empresas')
 const searchQuery = ref('')
@@ -54,18 +65,44 @@ function closeDropdownOutside(e) {
     }
 }
 
-const LARAVEL = import.meta.env.VITE_LARAVEL_API
-const auth = useAuthStore()
+function mapCliente(c) {
+    return {
+        ...c,
+        initial: (c.company_name || '?')[0].toUpperCase(),
+        active: true,
+        operations: '—',
+        lastActivity: '—',
+    }
+}
+
+async function fetchClientes() {
+    try {
+        const res = await axios.get(LARAVEL + '/clients', { headers })
+        clientes.value = res.data.map(mapCliente)
+    } catch (error) {
+        if (error.response?.status === 401) {
+            await auth.logout()
+            router.push({ name: 'login' })
+        }
+    }
+}
+
+async function fetchRoles() {
+    try {
+        const res = await axios.get(LARAVEL + '/roles', { headers })
+        roles.value = res.data
+    } catch {
+        // Si falla, seguimos sin roles precargados
+    }
+}
 
 onMounted(async () => {
     document.addEventListener('click', closeDropdownOutside)
+    loading.value = true
     try {
-        const res = await axios.get(LARAVEL + '/clients', {
-            headers: { Authorization: `Bearer ${auth.token}` },
-        })
-        clientes.value = res.data
-    } catch (error) {
-        console.error('Error al cargar clientes:', error)
+        await Promise.all([fetchClientes(), fetchRoles()])
+    } finally {
+        loading.value = false
     }
 })
 onUnmounted(() => document.removeEventListener('click', closeDropdownOutside))
@@ -84,14 +121,50 @@ function openContactoModal() {
     showContactoModal.value = true
 }
 
-function handleEmpresaSubmit(data) {
-    console.log('Nueva empresa:', data)
-    showEmpresaModal.value = false
+async function handleEmpresaSubmit(data) {
+    if (submittingEmpresa.value) return
+    submittingEmpresa.value = true
+    try {
+        await axios.post(NET + '/Clients', {
+            companyName: data.company_name,
+            vatNumber: data.vat_number,
+            address: data.address,
+            country: data.country,
+            postalCode: data.postal_code,
+            contactName: data.contact_name,
+            email: data.email,
+            phone: data.phone,
+        })
+        showEmpresaModal.value = false
+        await fetchClientes()
+    } catch (error) {
+        console.error('Error al crear empresa:', error)
+    } finally {
+        submittingEmpresa.value = false
+    }
 }
 
-function handleContactoSubmit(data) {
-    console.log('Nuevo contacto:', data)
-    showContactoModal.value = false
+async function handleContactoSubmit(data) {
+    if (submittingUsuario.value) return
+    submittingUsuario.value = true
+    try {
+        await axios.post(NET + '/Users', {
+            firstName: data.first_name,
+            lastName: data.last_name,
+            email: data.email,
+            phoneNumber: data.phone,
+            passwordHash: data.password,
+            roleId: data.role_id || null,
+            clientId: data.empresa_id || null,
+            isActive: true,
+        })
+        showContactoModal.value = false
+        await fetchClientes()
+    } catch (error) {
+        console.error('Error al crear usuario:', error)
+    } finally {
+        submittingUsuario.value = false
+    }
 }
 </script>
 
@@ -134,17 +207,24 @@ function handleContactoSubmit(data) {
                 </Transition>
             </div>
         </div>
-        <ClientesStats />
+        <ClientesStats :total-empresas="clientes.length" :total-usuarios="allUsers.length" />
         <ClientesFilters :active-tab="activeTab" :search-query="searchQuery" @update:active-tab="activeTab = $event"
             @update:search-query="searchQuery = $event" />
-        <ClientesList v-if="activeTab === 'empresas'" :clientes="filteredClientes" />
-        <UsuariosList v-else :usuarios="allUsers" />
+
+        <div v-if="loading" class="view-loading">
+            <Spinner :size="40" />
+        </div>
+        <template v-else>
+            <ClientesList v-if="activeTab === 'empresas'" :clientes="filteredClientes" />
+            <UsuariosList v-else :usuarios="allUsers" />
+        </template>
 
         <!-- Modals -->
-        <NuevaEmpresaModal :visible="showEmpresaModal" @close="showEmpresaModal = false"
-            @submit="handleEmpresaSubmit" />
-        <NuevoUsuarioModal :visible="showContactoModal" :empresas="empresaNames" @close="showContactoModal = false"
-            @submit="handleContactoSubmit" />
+        <NuevaEmpresaModal :visible="showEmpresaModal" :submitting="submittingEmpresa"
+            @close="showEmpresaModal = false" @submit="handleEmpresaSubmit" />
+        <NuevoUsuarioModal :visible="showContactoModal" :empresas="clientes" :roles="roles"
+            :submitting="submittingUsuario"
+            @close="showContactoModal = false" @submit="handleContactoSubmit" />
     </div>
 </template>
 
@@ -228,5 +308,13 @@ function handleContactoSubmit(data) {
 .dropdown-leave-to {
     opacity: 0;
     transform: translateY(-4px);
+}
+
+.view-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 0;
+    color: var(--accent-blue);
 }
 </style>

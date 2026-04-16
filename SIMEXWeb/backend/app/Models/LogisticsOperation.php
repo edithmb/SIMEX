@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Incoterm;
 
 class LogisticsOperation extends Model
 {
@@ -25,6 +27,34 @@ class LogisticsOperation extends Model
     ];
 
     protected $attributes = ['status' => 'preparation'];
+
+    protected $appends = ['incoterm_steps'];
+
+    public function getIncotermStepsAttribute(): array
+    {
+        $offer = $this->commercialOffer;
+        if (!$offer || !$offer->incoterm || !$offer->clientRequest) {
+            return [];
+        }
+
+        $responsability = $offer->clientRequest->responsability;
+        if (!$responsability) {
+            return [];
+        }
+
+        return Incoterm::where('incoterm_type_id', $offer->incoterm->incoterm_type_id)
+            ->where('responsability', $responsability)
+            ->orderBy('order_num')
+            ->with('trackingStep:id,name')
+            ->get()
+            ->map(fn ($i) => [
+                'id'             => $i->id,
+                'order'          => $i->order_num,
+                'name'           => $i->trackingStep?->name,
+                'responsability' => $i->responsability,
+            ])
+            ->all();
+    }
 
     protected function casts(): array
     {
@@ -62,5 +92,10 @@ class LogisticsOperation extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function logisticsOperationDocuments(): HasMany
+    {
+        return $this->hasMany(LogisticsOperationDocument::class);
     }
 }

@@ -1,20 +1,5 @@
 <script setup>
-import { shallowRef } from 'vue'
-
-const emit = defineEmits(['update:search', 'update:transport', 'update:status', 'update:incoterm'])
-
-const activeTransport = shallowRef('todos')
-
-const transportFilters = [
-  { key: 'todos', label: 'Todos', icon: 'filter' },
-  { key: 'maritimo', label: 'Marítimo', icon: 'ship' },
-  { key: 'aereo', label: 'Aéreo', icon: 'plane' },
-  { key: 'terrestre', label: 'Terrestre', icon: 'truck' },
-]
-
-function selectTransport(key) {
-  activeTransport.value = key
-}
+const emit = defineEmits(['update:search', 'update:status', 'update:incoterm'])
 </script>
 
 <template>
@@ -32,40 +17,6 @@ function selectTransport(key) {
           placeholder="Buscar por referencia, cliente..."
           id="tracking-search"
         />
-      </div>
-
-      <!-- Transport type buttons -->
-      <div class="tracking-filters-transport">
-        <button
-          v-for="t in transportFilters"
-          :key="t.key"
-          :class="['tracking-filters-btn', { 'tracking-filters-btn--active': activeTransport === t.key }]"
-          @click="selectTransport(t.key)"
-        >
-          <!-- Filter icon -->
-          <svg v-if="t.icon === 'filter'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-          </svg>
-          <!-- Ship -->
-          <svg v-else-if="t.icon === 'ship'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" />
-            <path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 7.76" />
-            <path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6" />
-            <line x1="12" y1="1" x2="12" y2="5" />
-          </svg>
-          <!-- Plane -->
-          <svg v-else-if="t.icon === 'plane'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
-          </svg>
-          <!-- Truck -->
-          <svg v-else-if="t.icon === 'truck'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="1" y="3" width="15" height="13" rx="1" />
-            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-            <circle cx="5.5" cy="18.5" r="2.5" />
-            <circle cx="18.5" cy="18.5" r="2.5" />
-          </svg>
-          <span>{{ t.label }}</span>
-        </button>
       </div>
 
       <!-- Incoterm dropdown -->

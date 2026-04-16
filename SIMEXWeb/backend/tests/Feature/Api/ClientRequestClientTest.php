@@ -30,6 +30,7 @@ test('client user can create a request', function () {
         'comments' => 'Test request',
         'origin_id' => $origin->id,
         'destination_id' => $destination->id,
+        'responsability' => 'BUYER',
     ], authHeaders($token));
 
     $response->assertStatus(201);
