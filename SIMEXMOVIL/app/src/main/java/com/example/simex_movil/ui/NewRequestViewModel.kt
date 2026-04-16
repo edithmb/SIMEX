@@ -19,7 +19,7 @@ class NewRequestViewModel : ViewModel() {
     private val _estado = MutableLiveData<SolicitudState>()
     val estado: LiveData<SolicitudState> = _estado
 
-    fun crearSolicitudCotizacion(token: String, datos: Request) {
+    fun crearSolicitudCotizacion(token: String, datos: RequestOffer) {
         _estado.value = SolicitudState.Loading
 
         viewModelScope.launch {
