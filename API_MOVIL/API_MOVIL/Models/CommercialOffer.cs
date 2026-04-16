@@ -55,6 +55,8 @@ public partial class CommercialOffer
 
     public virtual LogisticsOperation LogisticsOperation { get; set; }
 
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
     public virtual Port OriginPort { get; set; }
 
     public virtual User UpdatedByNavigation { get; set; }

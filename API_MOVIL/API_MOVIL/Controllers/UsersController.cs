@@ -99,11 +99,11 @@ namespace API_MOVIL.Controllers
             }
 
             //leer token
-            var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userToken)) return Unauthorized("Token inválido.");
-            existingUser.UpdatedBy = int.Parse(userToken);
+            //var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //if (string.IsNullOrEmpty(userToken)) return Unauthorized("Token inválido.");
+            //existingUser.UpdatedBy = int.Parse(userToken);
 
-            //existingUser.UpdatedBy = 1;
+            existingUser.UpdatedBy = 1;
 
             existingUser.FirstName = updateUser.FirstName;
             existingUser.LastName = updateUser.LastName;
@@ -140,11 +140,11 @@ namespace API_MOVIL.Controllers
             }
 
             //leer token
-            var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userToken)) return Unauthorized("Token inválido.");
-            user.DeletedBy = int.Parse(userToken);
+            //var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //if (string.IsNullOrEmpty(userToken)) return Unauthorized("Token inválido.");
+            //user.DeletedBy = int.Parse(userToken);
 
-            //user.DeletedBy = 1;
+            user.DeletedBy = 1;
 
 
             user.IsActive = false;
