@@ -48,12 +48,12 @@ class SignInActivity : AppCompatActivity() {
                     btnLogin.text = "Iniciar Sesión"
 
                     //guardamos los datos
-                    val sharedPreferences = getSharedPreferences("Mis preferencias", MODE_PRIVATE)
+                    val sharedPreferences = getSharedPreferences("PreferenciasUsuario", MODE_PRIVATE)
                     with(sharedPreferences.edit()) {
                         putString("token", state.token)
                         putString("nombre", state.firstName)
                         putString("rol", state.roleName)
-                        //agregar cliente_id despues
+                        putInt("client_id", state.userId)
 
                         apply()
                     }
@@ -62,7 +62,7 @@ class SignInActivity : AppCompatActivity() {
 
                     val destino = when (state.roleName.lowercase()) {
                         "cliente" -> HomeClientActivity::class.java
-                        "agente comercial" -> HomeAgentActivity::class.java
+                        "agente comercial", "agente" -> HomeAgentActivity::class.java
                         else -> {
                             Toast.makeText(this,"Rol no reconocido", Toast.LENGTH_SHORT).show()
                             null

@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.simex_movil.network.DniSocketManager
 import com.example.simex_movil.ui.PerfilState
@@ -67,6 +68,8 @@ class ProfileActivity: AppCompatActivity() {
         val rawToken = sharedPref.getString("token", "") ?: ""
         val tokenRetrofit = "Bearer $rawToken"
         idUsuarioActual = sharedPref.getInt("client_id", 0)
+
+        aplicarTemaSegunRol()
 
         dniSocketManager = DniSocketManager(this, rawToken)
 
@@ -201,5 +204,41 @@ class ProfileActivity: AppCompatActivity() {
             }
         }
         return nombre
+    }
+
+    private fun aplicarTemaSegunRol() {
+        val sharedPref = getSharedPreferences("PreferenciasUsuario", Context.MODE_PRIVATE)
+        val rol = sharedPref.getString("rol", "")?.lowercase() ?: ""
+
+        if (rol == "agente comercial" || rol == "agente") {
+
+
+
+            val colorAzulPrincipal = ContextCompat.getColor(this, R.color.blue)
+            val colorBlanco = ContextCompat.getColor(this, R.color.white)
+
+            // Pintamos los botones principales
+            val btnGuardar = findViewById<MaterialButton>(R.id.btn_guardar_cambios)
+            val btnEditar = findViewById<android.widget.Button>(R.id.btnEditarPerfil)
+            val btnSeleccionarArchivo = findViewById<MaterialButton>(R.id.btn_seleccionar_archivo)
+
+            btnGuardar?.setBackgroundColor(colorAzulPrincipal)
+            btnEditar?.setBackgroundColor(colorAzulPrincipal)
+
+            if (uriArchivoSeleccionado == null) {
+                btnSeleccionarArchivo?.setBackgroundColor(colorAzulPrincipal)
+            }
+
+            // PINTAMOS EL MENÚ INFERIOR
+            val navButton = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+            if (navButton != null) {
+                // Cambiamos el fondo del menú a Azul
+                navButton.setBackgroundColor(colorAzulPrincipal)
+
+                //Cambiamos el color de los iconos y el texto a blanco
+                navButton.itemIconTintList = android.content.res.ColorStateList.valueOf(colorBlanco)
+                navButton.itemTextColor = android.content.res.ColorStateList.valueOf(colorBlanco)
+            }
+        }
     }
 }

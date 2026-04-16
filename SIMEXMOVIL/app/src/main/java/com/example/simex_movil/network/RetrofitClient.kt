@@ -5,7 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
-    private const val BASE_URL = "http://10.0.1.7:8000/api/"
+    val BASE_URL = "http://simex6-backend-a0lkj2-5b243c-51-83-192-177.traefik.me/api/"
 
     private const val DOTNET_BASE_URL = "http://10.0.1.7:5000/api/"
 

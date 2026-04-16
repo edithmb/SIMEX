@@ -55,6 +55,14 @@
             android:name=".HomeAgentActivity"
             android:exported="true">
         </activity>
+        <activity
+            android:name=".TrackingAgentActivity"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name=".TrackingActivity"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>
