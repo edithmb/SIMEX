@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.example.simex_movil.network.DniSocketManager
 import com.example.simex_movil.ui.PerfilState
 import com.example.simex_movil.ui.ProfileViewModel
 import com.example.simex_movil.ui.UserProfileRequest
@@ -25,6 +26,8 @@ class ProfileActivity: AppCompatActivity() {
     private lateinit var viewModel: ProfileViewModel
     private var idUsuarioActual: Int = 0
     private var uriArchivoSeleccionado: Uri? = null
+
+    private lateinit var dniSocketManager: DniSocketManager //
 
     //Entrar a la galeria
     private val selectorDeArchivos = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -61,12 +64,15 @@ class ProfileActivity: AppCompatActivity() {
 
         // 2. DATOS DE SESIÓN
         val sharedPref = getSharedPreferences("PreferenciasUsuario", Context.MODE_PRIVATE)
-        val token = "Bearer " + (sharedPref.getString("token", "") ?: "")
+        val rawToken = sharedPref.getString("token", "") ?: ""
+        val tokenRetrofit = "Bearer $rawToken"
         idUsuarioActual = sharedPref.getInt("client_id", 0)
+
+        dniSocketManager = DniSocketManager(this, rawToken)
 
         // 3. CARGAMOS DATOS AL ABRIR
         if (idUsuarioActual != 0) {
-            viewModel.obtenerPerfil(token, idUsuarioActual)
+            viewModel.obtenerPerfil(tokenRetrofit, idUsuarioActual)
         }
 
         // 4. BOTÓN: HABILIAR EDICIÓN
@@ -102,7 +108,7 @@ class ProfileActivity: AppCompatActivity() {
                 passwordHash = if (pass1.isNotEmpty()) pass1 else null,
                 isActive = true
             )
-            viewModel.actualizarPerfil(token, idUsuarioActual, usuarioActualizado)
+            viewModel.actualizarPerfil(tokenRetrofit, idUsuarioActual, usuarioActualizado)
         }
 
         // 6. BOTÓN: ABRIR GALERÍA
@@ -112,7 +118,8 @@ class ProfileActivity: AppCompatActivity() {
                 selectorDeArchivos.launch("*/*")
             } else {
                 // Si ya eligió una foto, la enviamos al servidor
-                enviarDniAlServidor(token)
+                Toast.makeText(this, "Iniciando túnel seguro...", Toast.LENGTH_SHORT).show()
+                subirDniConHilosYSockets(uriArchivoSeleccionado!!)
             }
         }
 
@@ -150,45 +157,37 @@ class ProfileActivity: AppCompatActivity() {
                     Toast.makeText(this, estado.message, Toast.LENGTH_LONG).show()
                 }
                 is PerfilState.Loading -> { }
+                else -> {}
             }
         }
     }
 
-    private fun enviarDniAlServidor(token: String) {
-        val uri = uriArchivoSeleccionado ?: return
+    private fun subirDniConHilosYSockets(uri: Uri) {
+        val entityId = idUsuarioActual // Usamos el ID real de SharedPreferences
+        val entityType = "Client"
+        val fileName = obtenerNombreArchivo(uri)
 
-        // 1. Copiamos la foto a un archivo real temporal
-        val archivoReal = crearArchivoTemporal(uri) ?: return
+        val btnSeleccionarArchivo = findViewById<MaterialButton>(R.id.btn_seleccionar_archivo)
 
-        // 2. Preparamos el archivo para Retrofit (Sintaxis universal)
-        val mediaTypeArchivo = okhttp3.MediaType.parse("multipart/form-data")
-        val requestFile = okhttp3.RequestBody.create(mediaTypeArchivo, archivoReal)
-        val bodyArchivo = MultipartBody.Part.createFormData("archive", archivoReal.name, requestFile)
+        dniSocketManager.connectAndUpload(
+            uri = uri,
+            entityId = entityId,
+            entityType = entityType,
+            fileName = fileName,
+            onStatusUpdate = { mensajeDelServidor ->
+                // Actualizamos la interfaz en el hilo principal
+                runOnUiThread {
+                    Toast.makeText(this, mensajeDelServidor, Toast.LENGTH_LONG).show()
 
-        // 3. Preparamos el ID del cliente (Sintaxis universal)
-        val mediaTypeTexto = okhttp3.MediaType.parse("text/plain")
-        val bodyId = okhttp3.RequestBody.create(mediaTypeTexto, idUsuarioActual.toString())
-
-        // 4. Lo enviamos
-        viewModel.subirDni(token, bodyId, bodyArchivo)
-    }
-
-    private fun crearArchivoTemporal(uri: Uri): File? {
-        return try {
-            val inputStream = contentResolver.openInputStream(uri) ?: return null
-            val nombre = obtenerNombreArchivo(uri)
-            val archivoTemp = File(cacheDir, nombre)
-            val outputStream = FileOutputStream(archivoTemp)
-
-            inputStream.copyTo(outputStream)
-
-            inputStream.close()
-            outputStream.close()
-            archivoTemp
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+                    // Si el servidor confirma el éxito, reseteamos el botón a su estado original
+                    if (mensajeDelServidor.contains("Éxito", ignoreCase = true) || mensajeDelServidor.contains("uploaded", ignoreCase = true)) {
+                        uriArchivoSeleccionado = null
+                        btnSeleccionarArchivo.text = "Subir archivo"
+                        btnSeleccionarArchivo.setBackgroundColor(android.graphics.Color.parseColor("#5C82B1"))
+                    }
+                }
+            }
+        )
     }
 
     private fun obtenerNombreArchivo(uri: Uri): String {
