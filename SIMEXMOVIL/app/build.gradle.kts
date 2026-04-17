@@ -57,6 +57,8 @@ dependencies {
     implementation ("com.microsoft.signalr:signalr:7.0.14")
     // manejo de hilos
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    //juego unity
+    implementation(project(":unityLibrary"))
     implementation(libs.androidx.ui.test)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
