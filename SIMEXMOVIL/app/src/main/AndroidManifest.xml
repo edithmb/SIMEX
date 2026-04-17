@@ -14,6 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SIMEXMOVIL"
         android:usesCleartextTraffic="true"
+        tools:replace="android:icon,android:label,android:theme,android:allowBackup"
         >
         <activity
             android:name=".SignInActivity"

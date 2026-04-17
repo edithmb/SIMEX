@@ -46,7 +46,7 @@ class TrackingActivity : AppCompatActivity() {
         // 3. PREPARAMOS EL MESERO (ViewModel)
         viewModel = ViewModelProvider(this).get(TrackingViewModel::class.java)
 
-        val sharedPref = getSharedPreferences("Mis Preferencias", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("PreferenciasUsuario", Context.MODE_PRIVATE)
         val token = "Bearer " + (sharedPref.getString("token", "") ?: "")
 
         // 4. ESCUCHAMOS CUANDO EL MESERO TRAIGA EL PLATO
