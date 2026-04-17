@@ -1,5 +1,6 @@
 package com.example.simex_movil.network
 
+import com.example.simex_movil.ui.Notificacion
 import com.example.simex_movil.ui.UpdateLogisticsStatusRequest
 import com.example.simex_movil.ui.UpdateStatusResponse
 import com.example.simex_movil.ui.UserProfileRequest
@@ -49,4 +50,17 @@ interface DotNetApiService {
         @Header("Authorization") token: String,
         @Body request: UpdateLogisticsStatusRequest
     ): retrofit2.Response<UpdateStatusResponse>
+
+    // 1. Pedir las notificaciones sin leer
+    @GET("api/Notifications/unread")
+    suspend fun getNotificacionesSinLeer(
+        @Header("Authorization") token: String
+    ): retrofit2.Response<List<Notificacion>>
+
+    // 2. Avisar que ya la leímos (para cuando toquen la tarjeta)
+    @PUT("api/Notifications/{id}/read")
+    suspend fun marcarNotificacionLeida(
+        @Header("Authorization") token: String,
+        @Path("id") notificacionId: Int
+    ): retrofit2.Response<Void> // Usamos Void porque .NET solo devuelve un success: true
 }

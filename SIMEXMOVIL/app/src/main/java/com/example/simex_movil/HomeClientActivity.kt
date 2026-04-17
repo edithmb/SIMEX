@@ -4,12 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.simex_movil.ui.HomeViewModel
+import com.example.simex_movil.ui.NotificacionesViewModel
 import com.example.simex_movil.ui.OperacionesAdapter
 import com.example.simex_movil.ui.TrackingActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -27,6 +30,39 @@ class HomeClientActivity : AppCompatActivity() {
         navButton.selectedItemId = R.id.nav_game
 
         menuConfiguration(this, navButton)
+
+        // --- SISTEMA DE NOTIFICACIONES (CAMPANITA SUPERIOR) ---
+
+        val btnNotificaciones = findViewById<ImageView>(R.id.btnNotificaciones)
+        val puntoNotificacion = findViewById<View>(R.id.puntoNotificacion)
+
+        val notificacionesViewModel = ViewModelProvider(this).get(NotificacionesViewModel::class.java)
+
+        // 1. Escuchamos al ViewModel para encender o apagar TU puntito rojo
+        notificacionesViewModel.cantidadSinLeer.observe(this) { cantidad ->
+            if (cantidad > 0) {
+                // ¡Si hay mensajes, hacemos visible tu punto rojo!
+                puntoNotificacion.visibility = android.view.View.VISIBLE
+            } else {
+                // Si es 0, lo volvemos a esconder
+                puntoNotificacion.visibility = android.view.View.GONE
+            }
+        }
+
+        // 2. Programamos qué pasa cuando tocan la campanita
+        btnNotificaciones.setOnClickListener {
+            // Viajamos a la pantalla donde se verán las notificaciones
+            val intent = Intent(this, NotificationsActivity::class.java)
+            startActivity(intent)
+        }
+
+        // 3. Extraemos el Token y mandamos a revisar a .NET
+        val sharedPreferencias = getSharedPreferences("PreferenciasUsuario", Context.MODE_PRIVATE)
+        val token23 = sharedPreferencias.getString("token", "") ?: ""
+
+        if (token23.isNotEmpty()) {
+            notificacionesViewModel.revisarNotificaciones("Bearer $token23")
+        }
 
         val rvOperaciones = findViewById<RecyclerView>(R.id.listaSeguimientos)
         rvOperaciones.layoutManager = LinearLayoutManager(this)
