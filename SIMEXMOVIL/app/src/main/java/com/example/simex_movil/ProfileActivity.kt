@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.simex_movil.network.DniSocketManager
+import com.example.simex_movil.ui.DniRecordRequest
 import com.example.simex_movil.ui.PerfilState
 import com.example.simex_movil.ui.ProfileViewModel
 import com.example.simex_movil.ui.UserProfileRequest
@@ -169,28 +170,43 @@ class ProfileActivity: AppCompatActivity() {
     }
 
     private fun subirDniConHilosYSockets(uri: Uri) {
-        val entityId = idUsuarioActual // Usamos el ID real de SharedPreferences
-        val entityType = "Client"
         val fileName = obtenerNombreArchivo(uri)
-
         val btnSeleccionarArchivo = findViewById<MaterialButton>(R.id.btn_seleccionar_archivo)
 
         dniSocketManager.connectAndUpload(
             uri = uri,
-            entityId = entityId,
-            entityType = entityType,
             fileName = fileName,
             onStatusUpdate = { mensajeDelServidor ->
-                // Actualizamos la interfaz en el hilo principal
+                // Actualizamos los toast del proceso
                 runOnUiThread {
                     Toast.makeText(this, mensajeDelServidor, Toast.LENGTH_LONG).show()
+                }
+            },
+            onSucces = {
+                fileName, claveAES ->
+                // archivo guardado y encriptado entonces avisamos a la api
+                runOnUiThread {
+                    Toast.makeText(this, "DNI Seguro. Guardando registro en BD...", Toast.LENGTH_LONG).show()
 
-                    // Si el servidor confirma el éxito, reseteamos el botón a su estado original
-                    if (mensajeDelServidor.contains("Éxito", ignoreCase = true) || mensajeDelServidor.contains("uploaded", ignoreCase = true)) {
-                        uriArchivoSeleccionado = null
-                        btnSeleccionarArchivo.text = "Subir archivo"
-                        btnSeleccionarArchivo.setBackgroundColor(android.graphics.Color.parseColor("#5C82B1"))
-                    }
+
+                    // texto para api .net
+                    val requestAnotacionBD = DniRecordRequest(
+                        entityId = idUsuarioActual,
+                        entityType = "Client",
+                        fileName = fileName,
+                        filePath = "/dnis_seguros/$fileName",
+                        encryptionKey = claveAES // La llave que generó el móvil en Base64
+                    )
+
+                    // Llamamos al ViewModel para que Retrofit se lo envíe a .NET
+                    val sharedPref = getSharedPreferences("PreferenciasUsuario", Context.MODE_PRIVATE)
+                    val tokenRetrofit = "Bearer " + (sharedPref.getString("token", "") ?: "")
+
+                    viewModel.guardarDniEnBD(tokenRetrofit, requestAnotacionBD)
+                    // resetear boton
+                    uriArchivoSeleccionado = null
+                    btnSeleccionarArchivo.text = "Subir archivo"
+                    btnSeleccionarArchivo.setBackgroundColor(android.graphics.Color.parseColor("#5C82B1"))
                 }
             }
         )

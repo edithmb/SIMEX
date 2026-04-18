@@ -7,7 +7,7 @@ object RetrofitClient {
 
     val BASE_URL = "http://simex6-backend-a0lkj2-5b243c-51-83-192-177.traefik.me/api/"
 
-    private const val DOTNET_BASE_URL = "http://10.0.1.7:5000/api/"
+    private const val DOTNET_BASE_URL = "http://simex6-net-f841id-fa1522-51-83-192-177.traefik.me/api/"
 
     val apiService: LaravelApiService by lazy {
         Retrofit.Builder()

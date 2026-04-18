@@ -26,3 +26,7 @@ data class UpdateStatusResponse(
     val newStatus: String,
     val deliveredAt: String?
 )
+
+// info para .net para cambiar estado de operacion logistica
+
+

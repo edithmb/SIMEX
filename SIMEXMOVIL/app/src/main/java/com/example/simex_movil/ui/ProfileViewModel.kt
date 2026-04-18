@@ -56,19 +56,19 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
-    // 3. SUBIR EL DNI (POST)
-    fun subirDni(token: String, clientId: RequestBody, archivoDni: MultipartBody.Part) {
+    // 3. SUBIR EL DNI
+    fun guardarDniEnBD(token: String, request: DniRecordRequest) {
         _estado.value = PerfilState.Loading
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.dotNetApiService.uploadDni(token, archivoDni, clientId)
+                val response = RetrofitClient.dotNetApiService.recordDniMetadata(token, request)
                 if (response.isSuccessful) {
                     _estado.value = PerfilState.SuccessUploadDni
                 } else {
-                    _estado.value = PerfilState.Error("Error al subir DNI: ${response.code()}")
+                    _estado.value = PerfilState.Error("Error al guardar DNI en BD: ${response.code()}")
                 }
             } catch (e: Exception) {
-                _estado.value = PerfilState.Error("Fallo de red al subir: ${e.message}")
+                _estado.value = PerfilState.Error("Fallo de red al guardar: ${e.message}")
             }
         }
     }
