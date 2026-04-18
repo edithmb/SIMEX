@@ -1,5 +1,10 @@
 package com.example.simex_movil.network
 
+import com.example.simex_movil.ui.UpdateLogisticsStatusRequest
+import com.example.simex_movil.ui.UpdateStatusResponse
+import com.example.simex_movil.ui.UserProfileRequest
+import com.example.simex_movil.ui.UserResponse
+import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -13,31 +18,35 @@ import retrofit2.http.Path
 
 interface DotNetApiService {
 
-    @GET("Clients/{id}")
-    suspend fun getClientProfile(
-        @Path("id") clientId: Int,
+// 1. OBTENER PERFIL (GET)
+    @GET("Users/{id}")
+    suspend fun getUserProfile(
+        @Path("id") userId: Int,
         @Header("Authorization") token: String
-    ): Response<ClientResponse>
+    ): Response<UserResponse>
 
-    //Actualizar los datos del perfil (PUT)
-    @PUT("Clients/{id}")
-    suspend fun updateClientProfile(
-        @Path("id") clientId: Int,
+    // 2. ACTUALIZAR PERFIL (PUT)
+    @PUT("Users/{id}")
+    suspend fun updateUserProfile(
+        @Path("id") userId: Int,
         @Header("Authorization") token: String,
-        @Body clientData: ClientResponse
-    ): Response<String>
+        @Body userData: UserProfileRequest
+    ): Response<Void>
 
-    //Descargar el DNI desencriptado
-    @GET("DocumentsPerson/download/{id}")
-    suspend fun downloadDni(
-        @Path("id") documentId: Int,
-        @Header("Authorization") token: String
-    ): Response<ResponseBody>
-
+    // 3. SUBIR DNI (POST Multipart)
     @Multipart
     @POST("DocumentsPerson/upload")
     suspend fun uploadDni(
         @Header("Authorization") token: String,
-        @Part archive: okhttp3.MultipartBody.Part
-    ): retrofit2.Response<Void>
+        @Part archive: MultipartBody.Part,
+        @Part("clientId") clientId: okhttp3.RequestBody
+    ): Response<Void>
+
+    // cambio de estado
+    @PUT("LogisticsOperations/{id}/status")
+    suspend fun changeTrackingStatus(
+        @Path("id") id: Int,
+        @Header("Authorization") token: String,
+        @Body request: UpdateLogisticsStatusRequest
+    ): retrofit2.Response<UpdateStatusResponse>
 }
