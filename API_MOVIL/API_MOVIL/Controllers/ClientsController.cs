@@ -47,7 +47,7 @@ namespace API_MOVIL.Controllers
             if (string.IsNullOrEmpty(userToken)) return Unauthorized("invalid token");
             client.CreatedBy = int.Parse(userToken);
 
-            
+
             //client.CreatedBy = 1; 
             client.CreatedAt = DateTime.UtcNow;
 

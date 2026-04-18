@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace API_MOVIL.Hubs
 {
-    //[Authorize]
+    [Authorize]
     public class DocumentsPersonHub : Hub
     {
         private readonly Simex06Context _context;

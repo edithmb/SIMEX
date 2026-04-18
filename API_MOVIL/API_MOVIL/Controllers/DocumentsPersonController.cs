@@ -49,5 +49,56 @@ namespace API_MOVIL.Controllers
                 return StatusCode(500, $"Error al desencriptar: {ex.Message}");
             }
         }
+
+        [HttpPost("record")]
+        public async Task<IActionResult> RecordDni([FromBody] DniRecordRequest request)
+        {
+            try
+            {
+                //leer token 
+                var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                int realUserId = 1;
+                if (!string.IsNullOrEmpty(userToken))
+                {
+                    realUserId = int.Parse(userToken); // Transformamos el "1" (String) a 1 (Int)
+                }
+
+                var newDni = new PersonalDocument
+                {
+                    PersonalDocumentTypeId = 1, // Tipo 1 = DNI
+                    EntityType = request.EntityType,
+                    EntityId = request.EntityId,
+                    FileName = request.FileName,
+                    FilePath = request.FilePath,
+                    FileSizeBytes = 0, // Como el archivo lo guarda Kotlin, podemos dejarlo en 0 o no usarlo
+                    MimeType = "application/octet-stream",
+                    IsEncrypted = true,
+                    EncryptionKey = request.EncryptionKey,
+                    UploadedBy = realUserId,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                // guardar cambios
+                _context.PersonalDocuments.Add(newDni);
+                await _context.SaveChangesAsync();
+                return Ok(new { Message = "DNI registrado en BD con éxito", Id = newDni.Id });
+
+            }
+            catch(Exception ex) 
+            {
+                return StatusCode(500, $"Error al guardar en BD: {ex.Message}");
+            }
+        }
+
+        // DTO para recibir los datos de Android
+        public class DniRecordRequest
+        {
+            public int EntityId { get; set; }
+            public string EntityType { get; set; } = string.Empty;
+            public string FileName { get; set; } = string.Empty;
+            public string FilePath { get; set; } = string.Empty;
+            public string EncryptionKey { get; set; } = string.Empty;
+        }
     }
 }
