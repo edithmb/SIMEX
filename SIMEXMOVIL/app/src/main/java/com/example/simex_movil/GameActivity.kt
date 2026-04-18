@@ -20,9 +20,9 @@ class GameActivity: AppCompatActivity() {
 
         val btnSimulador = findViewById<Button>(R.id.btnAbrirSimulador)
 
-        btnSimulador.setOnClickListener {
-            val intent = Intent(this, com.unity3d.player.UnityPlayerGameActivity::class.java)
-            startActivity(intent)
-        }
+//        btnSimulador.setOnClickListener {
+//            val intent = Intent(this, com.unity3d.player.UnityPlayerGameActivity::class.java)
+//            startActivity(intent)
+//        }
     }
 }

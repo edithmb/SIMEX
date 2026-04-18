@@ -21,3 +21,12 @@ data class UserProfileRequest(
     val passwordHash: String?,
     val isActive: Boolean = true
 )
+
+// datos dni
+data class DniRecordRequest(
+    val entityId: Int,
+    val entityType: String,
+    val fileName: String,
+    val filePath: String,
+    val encryptionKey: String
+)
