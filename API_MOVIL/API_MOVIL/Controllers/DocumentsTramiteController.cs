@@ -23,7 +23,7 @@ namespace API_MOVIL.Controllers
 
         // subir documento
         [HttpPost("upload")]
-        // [fromForm] porque es un documento adjunto no un json
+        //[fromForm] porque es un documento adjunto no un json
         public async Task<IActionResult> UploadDocument([FromForm] UploadDocumentDto request)
         {
             // validaciones 
