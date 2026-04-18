@@ -41,3 +41,11 @@ data class RequestInfoCliente(
 data class UbicacionCliente(
     val name: String
 )
+
+data class Notificacion(
+    val id: Int,
+    val title: String,
+    val message: String,
+    val isRead: Boolean,
+    val referenceId: Int?
+)
