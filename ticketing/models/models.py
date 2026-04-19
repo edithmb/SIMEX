@@ -106,7 +106,13 @@ class TicketTicketing(models.Model):
 
     # Empleado que abre el ticket
     # domain filtra para mostrar solo empleados marcados como agentes comerciales
-    empleat_id = fields.Many2one('hr.employee', string='Empleat Assignat', required=True)
+    empleat_id = fields.Many2one(
+        'hr.employee',
+        string='Empleat Assignat',
+        required=True,
+        domain="[('es_agente_comercial', '=', True)]",
+        tracking=True
+    )
 
 
 

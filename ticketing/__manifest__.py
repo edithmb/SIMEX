@@ -8,8 +8,10 @@
     'version': '1.0',
     'depends': ['base', 'hr', 'mail'],
     'data': [
+        'security/security_groups.xml',
         'security/ir.model.access.csv',
-        'views/views.xml',
+        'views/hr_employee_views.xml',
+        'views/views.xml'
     ],
     'application': True,
 }

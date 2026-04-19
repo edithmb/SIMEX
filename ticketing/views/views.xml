@@ -135,17 +135,25 @@
     </record>
 
 
-    <!-- VISTAS DEL TICKET-->
+    <!--
+    VISTAS DEL TICKET
+    Incluye 3 vistas: lista con colores, formulario con Chatter,
+    y Kanban (tablero visual por estados) -->
 
-    <!-- Vista lista de tickets -->
+    <!-- Vista lista con COLORES según el estado del ticket -->
     <record id="view_ticket_tree" model="ir.ui.view">
         <field name="name">ticket.ticketing.tree</field>
         <field name="model">ticket.ticketing</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree decoration-success="estat == 'tancada'"
+                  decoration-warning="estat == 'espera'"
+                  decoration-danger="estat == 'rebutjada'"
+                  decoration-muted="estat == 'creada'">
                 <field name="name"/>
                 <field name="operacio_id"/>
                 <field name="tipus"/>
+                <!-- estat es invisible porque ya da el color,
+                     pero lo necesitamos para que el decoration funcione -->
                 <field name="estat"/>
                 <field name="empleat_id"/>
                 <field name="data_creacio"/>
@@ -175,8 +183,7 @@
                     </group>
                 </sheet>
 
-                <!-- Chatter: historial de mensajes, emails y actividades
-                     Funciona gracias al _inherit de mail.thread -->
+                <!-- Chatter: historial de mensajes, emails y actividades -->
                 <div class="oe_chatter">
                     <field name="message_follower_ids"/>
                     <field name="activity_ids"/>
@@ -186,11 +193,63 @@
         </field>
     </record>
 
-    <!-- Acción que abre la lista de tickets -->
+    <!-- Vista KANBAN del ticket
+         Muestra los tickets como tarjetas agrupadas por estado.
+         Es como un tablero Trello: cada columna es un estado. -->
+    <record id="view_ticket_kanban" model="ir.ui.view">
+        <field name="name">ticket.ticketing.kanban</field>
+        <field name="model">ticket.ticketing</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="estat">
+                <!-- Campos que necesitamos dentro de la tarjeta -->
+                <field name="name"/>
+                <field name="tipus"/>
+                <field name="estat"/>
+                <field name="empleat_id"/>
+                <field name="operacio_id"/>
+
+                <!-- Plantilla visual de cada tarjeta del kanban -->
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record">
+                            <div class="oe_kanban_content">
+
+                                <!-- Título del ticket -->
+                                <strong>
+                                    <field name="name"/>
+                                </strong>
+
+                                <!-- Operación asociada -->
+                                <div class="text-muted">
+                                    <field name="operacio_id"/>
+                                </div>
+
+                                <!-- Tipo de ticket con badge de color -->
+                                <div class="mt4">
+                                    <span t-attf-class="badge #{record.tipus.value == 'Reclamació' ? 'text-bg-danger' : record.tipus.value == 'Consulta' ? 'text-bg-primary' : 'text-bg-success'}">
+                                        <field name="tipus"/>
+                                    </span>
+                                </div>
+
+                                <!-- Empleado asignado -->
+                                <div class="mt4">
+                                    👤 <field name="empleat_id"/>
+                                </div>
+
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Acción que abre tickets con las 3 vistas disponibles:
+         lista, formulario y kanban -->
     <record id="action_ticket" model="ir.actions.act_window">
         <field name="name">Tickets</field>
         <field name="res_model">ticket.ticketing</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,kanban,form</field>
     </record>
 
 
