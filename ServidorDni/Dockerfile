@@ -1,17 +1,13 @@
-# 1. Usamos una imagen muy ligerita que ya tiene Java preinstalado
-FROM eclipse-temurin:21-jre-alpine
-
-# 2. Le decimos a Docker en qué carpeta de su sistema virtual vamos a trabajar
+# ETAPA 1: Compilar
+FROM gradle:8-jdk21-alpine AS builder
 WORKDIR /app
+COPY . .
+RUN gradle jar --no-daemon
 
-# 3. Copiamos el archivo .jar
-COPY out/artifacts/ServidorDni_jar/ServidorDni.jar app.jar
-
-# 4. Creamos la carpeta de DNIs seguros dentro del contenedor para que no dé error
+# ETAPA 2: Ejecutar
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=builder /app/build/libs/*.jar app.jar
 RUN mkdir dnis_seguros
-
-# 5. Le avisamos a Docker de que vamos a usar el puerto 8888
 EXPOSE 8888
-
-# 6. ¡El comando para encender el servidor cuando arranque Docker!
 ENTRYPOINT ["java", "-jar", "app.jar"]
