@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_ticketing_ticketing,ticketing.ticketing,model_ticketing_ticketing,base.group_user,1,1,1,1
+access_cliente_ticketing,access.cliente.ticketing,model_cliente_ticketing,base.group_user,1,1,1,1
+access_operacio_ticketing,access.operacio.ticketing,model_operacio_ticketing,base.group_user,1,1,1,1
+access_ticket_ticketing,access.ticket.ticketing,model_ticket_ticketing,base.group_user,1,1,1,1

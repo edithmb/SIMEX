@@ -1,60 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <data>
-    <!-- explicit list view definition -->
-<!--
-    <record model="ir.ui.view" id="ticketing.list">
-      <field name="name">ticketing list</field>
-      <field name="model">ticketing.ticketing</field>
-      <field name="arch" type="xml">
-        <tree>
-          <field name="name"/>
-          <field name="value"/>
-          <field name="value2"/>
-        </tree>
-      </field>
-    </record>
--->
 
-    <!-- actions opening views on models -->
-<!--
-    <record model="ir.actions.act_window" id="ticketing.action_window">
-      <field name="name">ticketing window</field>
-      <field name="res_model">ticketing.ticketing</field>
-      <field name="view_mode">tree,form</field>
-    </record>
--->
+    <!--VISTAS DEL CLIENTE-->
 
-    <!-- server action to the one above -->
-<!--
-    <record model="ir.actions.server" id="ticketing.action_server">
-      <field name="name">ticketing server</field>
-      <field name="model_id" ref="model_ticketing_ticketing"/>
-      <field name="state">code</field>
-      <field name="code">
-        action = {
-          "type": "ir.actions.act_window",
-          "view_mode": "tree,form",
-          "res_model": model._name,
-        }
-      </field>
+    <!-- Vista lista de clientes: muestra todos los clientes en formato tabla -->
+    <record id="view_cliente_tree" model="ir.ui.view">
+        <field name="name">cliente.ticketing.tree</field>
+        <field name="model">cliente.ticketing</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="nom"/>
+                <field name="cognom"/>
+                <field name="telefon"/>
+                <field name="email"/>
+            </tree>
+        </field>
     </record>
--->
 
-    <!-- Top menu item -->
-<!--
-    <menuitem name="ticketing" id="ticketing.menu_root"/>
--->
-    <!-- menu categories -->
-<!--
-    <menuitem name="Menu 1" id="ticketing.menu_1" parent="ticketing.menu_root"/>
-    <menuitem name="Menu 2" id="ticketing.menu_2" parent="ticketing.menu_root"/>
--->
-    <!-- actions -->
-<!--
-    <menuitem name="List" id="ticketing.menu_1_list" parent="ticketing.menu_1"
-              action="ticketing.action_window"/>
-    <menuitem name="Server to list" id="ticketing" parent="ticketing.menu_2"
-              action="ticketing.action_server"/>
--->
-  </data>
+    <!-- Vista formulario de cliente: muestra el detalle de un cliente
+         Incluye una pestaña con sus operaciones de transporte -->
+    <record id="view_cliente_form" model="ir.ui.view">
+        <field name="name">cliente.ticketing.form</field>
+        <field name="model">cliente.ticketing</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Identificació">
+                            <field name="name"/>
+                            <field name="nom"/>
+                            <field name="cognom"/>
+                        </group>
+                        <group string="Contacte">
+                            <field name="telefon"/>
+                            <field name="email"/>
+                            <field name="adreca"/>
+                        </group>
+                    </group>
+
+                    <!-- Pestaña que muestra las operaciones del cliente -->
+                    <notebook>
+                        <page string="Operacions de Transport">
+                            <field name="operacio_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="origen"/>
+                                    <field name="desti"/>
+                                    <field name="data"/>
+                                    <field name="incoterm"/>
+                                    <field name="estat"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción que abre la lista de clientes -->
+    <record id="action_cliente" model="ir.actions.act_window">
+        <field name="name">Clients</field>
+        <field name="res_model">cliente.ticketing</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <!--VISTAS DE LA OPERACIÓN DE TRANSPORTE-->
+
+    <!-- Vista lista de operaciones -->
+    <record id="view_operacio_tree" model="ir.ui.view">
+        <field name="name">operacio.ticketing.tree</field>
+        <field name="model">operacio.ticketing</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="origen"/>
+                <field name="desti"/>
+                <field name="data"/>
+                <field name="incoterm"/>
+                <field name="estat"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista formulario de operación
+         Incluye una pestaña con sus tickets -->
+    <record id="view_operacio_form" model="ir.ui.view">
+        <field name="name">operacio.ticketing.form</field>
+        <field name="model">operacio.ticketing</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Dades de l'Operació">
+                            <field name="name"/>
+                            <field name="client_id"/>
+                            <field name="incoterm"/>
+                            <field name="estat"/>
+                        </group>
+                        <group string="Ruta">
+                            <field name="origen"/>
+                            <field name="desti"/>
+                            <field name="data"/>
+                        </group>
+                    </group>
+
+                    <!-- Pestaña que muestra los tickets de esta operación -->
+                    <notebook>
+                        <page string="Tickets Associats">
+                            <field name="ticket_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="tipus"/>
+                                    <field name="estat"/>
+                                    <field name="empleat_id"/>
+                                    <field name="data_creacio"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción que abre la lista de operaciones -->
+    <record id="action_operacio" model="ir.actions.act_window">
+        <field name="name">Operacions de Transport</field>
+        <field name="res_model">operacio.ticketing</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <!-- VISTAS DEL TICKET-->
+
+    <!-- Vista lista de tickets -->
+    <record id="view_ticket_tree" model="ir.ui.view">
+        <field name="name">ticket.ticketing.tree</field>
+        <field name="model">ticket.ticketing</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="operacio_id"/>
+                <field name="tipus"/>
+                <field name="estat"/>
+                <field name="empleat_id"/>
+                <field name="data_creacio"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista formulario del ticket con Chatter al final -->
+    <record id="view_ticket_form" model="ir.ui.view">
+        <field name="name">ticket.ticketing.form</field>
+        <field name="model">ticket.ticketing</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Informació del Ticket">
+                            <field name="name"/>
+                            <field name="operacio_id"/>
+                            <field name="tipus"/>
+                            <field name="estat"/>
+                            <field name="empleat_id"/>
+                            <field name="data_creacio"/>
+                        </group>
+                    </group>
+                    <group string="Descripció">
+                        <field name="descripcio" nolabel="1"/>
+                    </group>
+                </sheet>
+
+                <!-- Chatter: historial de mensajes, emails y actividades
+                     Funciona gracias al _inherit de mail.thread -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción que abre la lista de tickets -->
+    <record id="action_ticket" model="ir.actions.act_window">
+        <field name="name">Tickets</field>
+        <field name="res_model">ticket.ticketing</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <!-- MENÚ PRINCIPAL
+    Menú raíz (Ticketing)
+    Submenús - aparecen en el sidebar-->
+
+    <!-- Menú raíz -->
+    <menuitem id="menu_ticketing_root"
+              name="Ticketing"
+              sequence="10"/>
+
+    <!-- Submenú Clients -->
+    <menuitem id="menu_clientes"
+              name="Clients"
+              parent="menu_ticketing_root"
+              action="action_cliente"
+              sequence="1"/>
+
+    <!-- Submenú Operaciones -->
+    <menuitem id="menu_operacions"
+              name="Operacions de Transport"
+              parent="menu_ticketing_root"
+              action="action_operacio"
+              sequence="2"/>
+
+    <!-- Submenú Tickets -->
+    <menuitem id="menu_tickets"
+              name="Tickets"
+              parent="menu_ticketing_root"
+              action="action_ticket"
+              sequence="3"/>
+
 </odoo>
