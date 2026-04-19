@@ -19,7 +19,7 @@ import javax.crypto.SecretKey
 
 class DniSocketManager(private val context: Context, private val token: String) {
     // ip del server kotlin
-    private val IP_SERVER = "192.168.8.101"
+    private val IP_SERVER = "51.83.192.177"
     private val port = 8888
 
     // funcion principal

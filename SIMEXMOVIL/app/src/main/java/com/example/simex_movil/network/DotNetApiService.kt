@@ -1,5 +1,6 @@
 package com.example.simex_movil.network
 
+import com.example.simex_movil.ui.DniRecordRequest
 import com.example.simex_movil.ui.Notificacion
 import com.example.simex_movil.ui.UpdateLogisticsStatusRequest
 import com.example.simex_movil.ui.UpdateStatusResponse
