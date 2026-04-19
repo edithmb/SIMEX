@@ -15,6 +15,14 @@ dependencies {
     implementation(kotlin("stdlib"))
 }
 
+sourceSets {
+    main {
+        kotlin {
+            srcDirs("src")
+        }
+    }
+}
+
 tasks.jar {
     manifest {
         attributes["Main-Class"] = "ServidorDniKt"
