@@ -79,7 +79,30 @@ fun atenderCliente(socket: Socket, carpetaDestino: File) {
             salida.writeUTF("OK_SUBIDO")
             salida.flush()
         } else if (accion == "BAJAR") {
-            println("El cliente quiere descargar un archivo...")
+            val nombreArchivo = entrada.readUTF()
+            println("El cliente quiere descargar el archivo: $nombreArchivo")
+
+            val archivoFisico = File(carpetaDestino, nombreArchivo)
+
+            if (!archivoFisico.exists()) {
+                salida.writeLong(-1L) // Le decimos a Android que no existe
+                salida.flush()
+            } else {
+                salida.writeLong(archivoFisico.length()) // Enviamos el tamaño
+
+                // Enviamos los bytes
+                val fileInputStream = java.io.FileInputStream(archivoFisico)
+                val buffer = ByteArray(4096)
+                var bytesLeidos: Int
+
+                while (fileInputStream.read(buffer).also { bytesLeidos = it } != -1) {
+                    salida.write(buffer, 0, bytesLeidos)
+                }
+
+                salida.flush()
+                fileInputStream.close()
+                println("Archivo $nombreArchivo enviado con éxito al cliente")
+            }
         }
     } catch (e: Exception) {
         println("atendiendo a ${e.message}")
