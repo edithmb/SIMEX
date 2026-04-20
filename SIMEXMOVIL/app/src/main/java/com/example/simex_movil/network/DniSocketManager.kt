@@ -16,6 +16,9 @@ import java.net.Socket
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
+import java.io.File
+import java.io.FileOutputStream
 
 class DniSocketManager(private val context: Context, private val token: String) {
     // ip del server kotlin
@@ -105,7 +108,7 @@ class DniSocketManager(private val context: Context, private val token: String) 
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // 1. Conectar al servidor Kotlin (Asegúrate de usar la IP/Dominio correcta)
-                val socket = Socket(IP_SERVIDOR, 8888)
+                val socket = Socket(IP_SERVER, 8888)
                 val salida = DataOutputStream(socket.getOutputStream())
                 val entrada = DataInputStream(socket.getInputStream())
 
@@ -168,4 +171,17 @@ class DniSocketManager(private val context: Context, private val token: String) 
             }
         }
     }
+}
+//Proceso inverso a generarClaveAES() ---
+private fun desencriptar(bytesEncriptados: ByteArray, claveBase64: String): ByteArray {
+    // 1. Reconstruir la llave original desde el texto de la Base de Datos
+    val claveBytes = Base64.decode(claveBase64, Base64.NO_WRAP)
+    val secretKeySpec = SecretKeySpec(claveBytes, "AES")
+
+    // 2. Preparar el motor de encriptación en "Modo Desencriptar"
+    val cipher = Cipher.getInstance("AES")
+    cipher.init(Cipher.DECRYPT_MODE, secretKeySpec)
+
+    // 3. ¡Magia! Transformar el galimatías a la foto original
+    return cipher.doFinal(bytesEncriptados)
 }
