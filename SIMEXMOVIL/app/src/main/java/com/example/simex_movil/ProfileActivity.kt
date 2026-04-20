@@ -24,6 +24,8 @@ import java.io.File
 import java.io.FileOutputStream
 
 class ProfileActivity: AppCompatActivity() {
+    private var nombreDniEnBD: String = ""
+    private var claveDniEnBD: String = ""
 
     private lateinit var viewModel: ProfileViewModel
     private var idUsuarioActual: Int = 0
@@ -152,6 +154,8 @@ class ProfileActivity: AppCompatActivity() {
                     inputLastName.setText(user.lastName)
                     inputEmail.setText(user.email)
                     inputTelephone.setText(user.phoneNumber ?: "")
+                    nombreDniEnBD = user.fileName ?: ""
+                    claveDniEnBD = user.encryptionKey ?: ""
                 }
                 is PerfilState.SuccessUpdate -> {
                     Toast.makeText(this, "Perfil actualizado con éxito", Toast.LENGTH_SHORT).show()
