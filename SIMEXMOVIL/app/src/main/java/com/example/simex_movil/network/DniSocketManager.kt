@@ -100,4 +100,72 @@ class DniSocketManager(private val context: Context, private val token: String) 
         return keyGenerator.generateKey()
 
     }
+
+    fun downloadAndDecrypt(fileName: String, claveBase64: String, onStatusUpdate: (String) -> Unit, onSuccess: (File) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // 1. Conectar al servidor Kotlin (Asegúrate de usar la IP/Dominio correcta)
+                val socket = Socket(IP_SERVIDOR, 8888)
+                val salida = DataOutputStream(socket.getOutputStream())
+                val entrada = DataInputStream(socket.getInputStream())
+
+                withContext(Dispatchers.Main) { onStatusUpdate("Solicitando archivo...") }
+
+                // 2. Pedir el archivo al servidor
+                salida.writeUTF("BAJAR")
+                salida.writeUTF(fileName)
+                salida.flush()
+
+                // 3. Leer el tamaño del archivo que nos manda el servidor
+                val tamanyoArchivo = entrada.readLong()
+
+                if (tamanyoArchivo == -1L) {
+                    withContext(Dispatchers.Main) { onStatusUpdate("Error: El archivo no existe en el servidor") }
+                    socket.close()
+                    return@launch
+                }
+
+                withContext(Dispatchers.Main) { onStatusUpdate("Descargando bytes seguros...") }
+
+                // 4. Leer los bytes encriptados
+                val buffer = ByteArray(4096)
+                val bytesEncriptadosStream = java.io.ByteArrayOutputStream()
+                var totalLeidos: Long = 0
+                var bytesLeidos: Int
+
+                while (totalLeidos < tamanyoArchivo) {
+                    bytesLeidos = entrada.read(buffer)
+                    if (bytesLeidos == -1) break
+                    bytesEncriptadosStream.write(buffer, 0, bytesLeidos)
+                    totalLeidos += bytesLeidos
+                }
+
+                socket.close() // Cerramos túnel
+                val bytesEncriptados = bytesEncriptadosStream.toByteArray()
+
+                withContext(Dispatchers.Main) { onStatusUpdate("Desencriptando...") }
+
+                // 5. Desencriptar usando la clave que vino de .NET
+                val bytesOriginales = desencriptar(bytesEncriptados, claveBase64)
+
+                // 6. Guardar el archivo en la memoria del móvil (Carpeta Downloads)
+                val downloadsFolder = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
+                val archivoFinal = File(downloadsFolder, "Desencriptado_$fileName")
+
+                FileOutputStream(archivoFinal).use { output ->
+                    output.write(bytesOriginales)
+                }
+
+                withContext(Dispatchers.Main) {
+                    onSuccess(archivoFinal)
+                }
+
+            } catch (e: Exception) {
+                android.util.Log.e("SOCKET_DOWNLOAD", "Error al descargar", e)
+                withContext(Dispatchers.Main) {
+                    onStatusUpdate("Error de red: ${e.message ?: "desconocido"}")
+                }
+            }
+        }
+    }
 }
