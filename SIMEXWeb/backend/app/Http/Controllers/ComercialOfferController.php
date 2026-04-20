@@ -38,6 +38,16 @@ class ComercialOfferController extends Controller
             'created_by' => auth()->id(),
         ]);
 
+        try {
+            Http::post('http://simex6-net-f841id-fa1522-51-83-192-177.traefik.me/api/notifications/trigger', [
+                'clientId'  => $offer->client_id,
+                'reference' => $offer->reference,
+                'offerId'   => $offer->id
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error enviando notificación a .NET: ' . $e->getMessage());
+        }
+
         return response()->json($offer, 201);
     }
 
