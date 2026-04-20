@@ -1,9 +1,12 @@
 ﻿using API_MOVIL.Models;
 using API_MOVIL.Services;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace API_MOVIL.Hubs
 {
+    [Authorize]
     public class DocumentsPersonHub : Hub
     {
         private readonly Simex06Context _context;
@@ -21,6 +24,13 @@ namespace API_MOVIL.Hubs
         {
             try
             {
+                // leer tokn
+                var userToken = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userToken)) throw new HubException("Invalid token access.");
+                int realUserId = int.Parse(userToken);
+
+                //int realUserId = 1; //prueba
+
                 await Clients.Caller.SendAsync("Receivemessage", "Receiving and encrypting the dni..."); // avisar que llego el archivo
                 byte[] originalFile = Convert.FromBase64String(base64File); // convertir el texto a bytes reales
 
@@ -46,7 +56,7 @@ namespace API_MOVIL.Hubs
                     MimeType = "application/octet-stream", // Archivo binario irreconocible
                     IsEncrypted = true,
                     EncryptionKey = result.GeneratedKey,
-                    UploadedBy = 1,
+                    UploadedBy = realUserId,
                     CreatedAt = DateTime.UtcNow
                 };
                 

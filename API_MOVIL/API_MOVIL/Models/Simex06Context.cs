@@ -55,6 +55,8 @@ public partial class Simex06Context : DbContext
 
     public virtual DbSet<Migration> Migrations { get; set; }
 
+    public virtual DbSet<Notification> Notifications { get; set; }
+
     public virtual DbSet<PersonalDocument> PersonalDocuments { get; set; }
 
     public virtual DbSet<PersonalDocumentsType> PersonalDocumentsTypes { get; set; }
@@ -71,7 +73,7 @@ public partial class Simex06Context : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=vps-5d4cfa08.vps.ovh.net;Database=simex06;User Id=simex06;Password=diversion2.0;Trusted_Connection=False;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=vps-5d4cfa08.vps.ovh.net;Database=simex06;User Id=simex06;Password=diversion2.0;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -244,6 +246,10 @@ public partial class Simex06Context : DbContext
                 .HasColumnType("decimal(8, 2)")
                 .HasColumnName("gross_weight_kg");
             entity.Property(e => e.OriginId).HasColumnName("origin_id");
+            entity.Property(e => e.Responsability)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("responsability");
             entity.Property(e => e.VolumeM3)
                 .HasColumnType("decimal(8, 2)")
                 .HasColumnName("volume_m3");
@@ -732,6 +738,40 @@ public partial class Simex06Context : DbContext
                 .IsRequired()
                 .HasMaxLength(255)
                 .HasColumnName("migration");
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__notifica__3213E83FC78248C8");
+
+            entity.ToTable("notifications");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.IsRead).HasColumnName("is_read");
+            entity.Property(e => e.Message)
+                .IsRequired()
+                .IsUnicode(false)
+                .HasColumnName("message");
+            entity.Property(e => e.ReferenceId).HasColumnName("reference_id");
+            entity.Property(e => e.Title)
+                .IsRequired()
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("title");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.Reference).WithMany(p => p.Notifications)
+                .HasForeignKey(d => d.ReferenceId)
+                .HasConstraintName("FK_notifications_offers");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Notifications)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_notifications_users");
         });
 
         modelBuilder.Entity<PersonalDocument>(entity =>

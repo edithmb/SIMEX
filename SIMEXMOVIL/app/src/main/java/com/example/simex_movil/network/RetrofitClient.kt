@@ -5,7 +5,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
-    private const val BASE_URL = "http://10.0.2.2:8000/api/"
+    val BASE_URL = "http://simex6-backend-a0lkj2-5b243c-51-83-192-177.traefik.me/api/"
+
+    private const val DOTNET_BASE_URL = "http://simex6-net-f841id-fa1522-51-83-192-177.traefik.me/api/"
 
     val apiService: LaravelApiService by lazy {
         Retrofit.Builder()
@@ -14,4 +16,13 @@ object RetrofitClient {
             .build()
             .create(LaravelApiService::class.java)
     }
+
+    val dotNetApiService: DotNetApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(DOTNET_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(DotNetApiService::class.java)
+    }
+
 }

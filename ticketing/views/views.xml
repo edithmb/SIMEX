@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--VISTAS DEL CLIENTE-->
+
+    <!-- Vista lista de clientes: muestra todos los clientes en formato tabla -->
+    <record id="view_cliente_tree" model="ir.ui.view">
+        <field name="name">cliente.ticketing.tree</field>
+        <field name="model">cliente.ticketing</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="nom"/>
+                <field name="cognom"/>
+                <field name="telefon"/>
+                <field name="email"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista formulario de cliente: muestra el detalle de un cliente
+         Incluye una pestaña con sus operaciones de transporte -->
+    <record id="view_cliente_form" model="ir.ui.view">
+        <field name="name">cliente.ticketing.form</field>
+        <field name="model">cliente.ticketing</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Identificació">
+                            <field name="name"/>
+                            <field name="nom"/>
+                            <field name="cognom"/>
+                        </group>
+                        <group string="Contacte">
+                            <field name="telefon"/>
+                            <field name="email"/>
+                            <field name="adreca"/>
+                        </group>
+                    </group>
+
+                    <!-- Pestaña que muestra las operaciones del cliente -->
+                    <notebook>
+                        <page string="Operacions de Transport">
+                            <field name="operacio_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="origen"/>
+                                    <field name="desti"/>
+                                    <field name="data"/>
+                                    <field name="incoterm"/>
+                                    <field name="estat"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción que abre la lista de clientes -->
+    <record id="action_cliente" model="ir.actions.act_window">
+        <field name="name">Clients</field>
+        <field name="res_model">cliente.ticketing</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <!--VISTAS DE LA OPERACIÓN DE TRANSPORTE-->
+
+    <!-- Vista lista de operaciones -->
+    <record id="view_operacio_tree" model="ir.ui.view">
+        <field name="name">operacio.ticketing.tree</field>
+        <field name="model">operacio.ticketing</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="origen"/>
+                <field name="desti"/>
+                <field name="data"/>
+                <field name="incoterm"/>
+                <field name="estat"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista formulario de operación
+         Incluye una pestaña con sus tickets -->
+    <record id="view_operacio_form" model="ir.ui.view">
+        <field name="name">operacio.ticketing.form</field>
+        <field name="model">operacio.ticketing</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Dades de l'Operació">
+                            <field name="name"/>
+                            <field name="client_id"/>
+                            <field name="incoterm"/>
+                            <field name="estat"/>
+                        </group>
+                        <group string="Ruta">
+                            <field name="origen"/>
+                            <field name="desti"/>
+                            <field name="data"/>
+                        </group>
+                    </group>
+
+                    <!-- Pestaña que muestra los tickets de esta operación -->
+                    <notebook>
+                        <page string="Tickets Associats">
+                            <field name="ticket_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="tipus"/>
+                                    <field name="estat"/>
+                                    <field name="empleat_id"/>
+                                    <field name="data_creacio"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción que abre la lista de operaciones -->
+    <record id="action_operacio" model="ir.actions.act_window">
+        <field name="name">Operacions de Transport</field>
+        <field name="res_model">operacio.ticketing</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <!--
+    VISTAS DEL TICKET
+    Incluye 3 vistas: lista con colores, formulario con Chatter,
+    y Kanban (tablero visual por estados) -->
+
+    <!-- Vista lista con COLORES según el estado del ticket -->
+    <record id="view_ticket_tree" model="ir.ui.view">
+        <field name="name">ticket.ticketing.tree</field>
+        <field name="model">ticket.ticketing</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="estat == 'tancada'"
+                  decoration-warning="estat == 'espera'"
+                  decoration-danger="estat == 'rebutjada'"
+                  decoration-muted="estat == 'creada'">
+                <field name="name"/>
+                <field name="operacio_id"/>
+                <field name="tipus"/>
+                <!-- estat es invisible porque ya da el color,
+                     pero lo necesitamos para que el decoration funcione -->
+                <field name="estat"/>
+                <field name="empleat_id"/>
+                <field name="data_creacio"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista formulario del ticket con Chatter al final -->
+    <record id="view_ticket_form" model="ir.ui.view">
+        <field name="name">ticket.ticketing.form</field>
+        <field name="model">ticket.ticketing</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Informació del Ticket">
+                            <field name="name"/>
+                            <field name="operacio_id"/>
+                            <field name="tipus"/>
+                            <field name="estat"/>
+                            <field name="empleat_id"/>
+                            <field name="data_creacio"/>
+                        </group>
+                    </group>
+                    <group string="Descripció">
+                        <field name="descripcio" nolabel="1"/>
+                    </group>
+                </sheet>
+
+                <!-- Chatter: historial de mensajes, emails y actividades -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista KANBAN del ticket
+         Muestra los tickets como tarjetas agrupadas por estado.
+         Es como un tablero Trello: cada columna es un estado. -->
+    <record id="view_ticket_kanban" model="ir.ui.view">
+        <field name="name">ticket.ticketing.kanban</field>
+        <field name="model">ticket.ticketing</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="estat">
+                <!-- Campos que necesitamos dentro de la tarjeta -->
+                <field name="name"/>
+                <field name="tipus"/>
+                <field name="estat"/>
+                <field name="empleat_id"/>
+                <field name="operacio_id"/>
+
+                <!-- Plantilla visual de cada tarjeta del kanban -->
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record">
+                            <div class="oe_kanban_content">
+
+                                <!-- Título del ticket -->
+                                <strong>
+                                    <field name="name"/>
+                                </strong>
+
+                                <!-- Operación asociada -->
+                                <div class="text-muted">
+                                    <field name="operacio_id"/>
+                                </div>
+
+                                <!-- Tipo de ticket con badge de color -->
+                                <div class="mt4">
+                                    <span t-attf-class="badge #{record.tipus.value == 'Reclamació' ? 'text-bg-danger' : record.tipus.value == 'Consulta' ? 'text-bg-primary' : 'text-bg-success'}">
+                                        <field name="tipus"/>
+                                    </span>
+                                </div>
+
+                                <!-- Empleado asignado -->
+                                <div class="mt4">
+                                    👤 <field name="empleat_id"/>
+                                </div>
+
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Acción que abre tickets con las 3 vistas disponibles:
+         lista, formulario y kanban -->
+    <record id="action_ticket" model="ir.actions.act_window">
+        <field name="name">Tickets</field>
+        <field name="res_model">ticket.ticketing</field>
+        <field name="view_mode">tree,kanban,form</field>
+    </record>
+
+
+    <!-- MENÚ PRINCIPAL
+    Menú raíz (Ticketing)
+    Submenús - aparecen en el sidebar-->
+
+    <!-- Menú raíz -->
+    <menuitem id="menu_ticketing_root"
+              name="Ticketing"
+              sequence="10"/>
+
+    <!-- Submenú Clients -->
+    <menuitem id="menu_clientes"
+              name="Clients"
+              parent="menu_ticketing_root"
+              action="action_cliente"
+              sequence="1"/>
+
+    <!-- Submenú Operaciones -->
+    <menuitem id="menu_operacions"
+              name="Operacions de Transport"
+              parent="menu_ticketing_root"
+              action="action_operacio"
+              sequence="2"/>
+
+    <!-- Submenú Tickets -->
+    <menuitem id="menu_tickets"
+              name="Tickets"
+              parent="menu_ticketing_root"
+              action="action_ticket"
+              sequence="3"/>
+
+</odoo>

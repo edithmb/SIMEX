@@ -1,0 +1,22 @@
+# ETAPA 1: Base para ejecución
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 8080
+
+# ETAPA 2: Construcción
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["API_MOVIL.csproj", "./"]
+RUN dotnet restore "./API_MOVIL.csproj"
+COPY . .
+RUN dotnet build "API_MOVIL.csproj" -c Release -o /app/build
+
+# ETAPA 3: Publicación
+FROM build AS publish
+RUN dotnet publish "API_MOVIL.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# ETAPA 4: Imagen final
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "API_MOVIL.dll"]

@@ -25,6 +25,8 @@ public partial class ClientRequest
 
     public string Estado { get; set; }
 
+    public string Responsability { get; set; }
+
     public virtual Client Client { get; set; }
 
     public virtual ICollection<CommercialOffer> CommercialOffers { get; set; } = new List<CommercialOffer>();

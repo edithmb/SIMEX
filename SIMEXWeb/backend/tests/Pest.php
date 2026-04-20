@@ -26,9 +26,17 @@ expect()->extend('toBeOne', function () {
 |--------------------------------------------------------------------------
 */
 
-function createAuthenticatedUser(array $attributes = []): array
+function createAuthenticatedUser(array $attributes = [], string $role = 'admin'): array
 {
-    $user = \App\Models\User::factory()->create($attributes);
+    $roleModel = \App\Models\Role::firstOrCreate(
+        ['name' => $role],
+        ['description' => ucfirst($role)]
+    );
+
+    $user = \App\Models\User::factory()->create(array_merge(
+        ['role_id' => $roleModel->id],
+        $attributes
+    ));
     $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($user);
 
     return [$user, $token];

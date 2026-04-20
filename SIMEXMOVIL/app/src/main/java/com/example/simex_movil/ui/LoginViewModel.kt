@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 //Estados de la pantalla al momento de iniciar sesion
 sealed class LoginState {
     object Loading : LoginState()
-    data class Success(val token: String, val firstName: String, val roleName: String) : LoginState()
+    data class Success(val token: String, val firstName: String, val roleName: String, val userId: Int) : LoginState()
     data class Error(val message: String) : LoginState()
 }
 
@@ -37,7 +37,8 @@ class LoginViewModel : ViewModel(){
                     val token = data.token
                     val nombre = data.user.first_name
                     val nombreRol = data.user.role.name
-                    _loginState.value = LoginState.Success(token, nombre, nombreRol)
+                    val idUsuario = data.user.id
+                    _loginState.value = LoginState.Success(token, nombre, nombreRol, idUsuario)
                 } else {
                     _loginState.value = LoginState.Error("Credenciales incorrectas")
                 }

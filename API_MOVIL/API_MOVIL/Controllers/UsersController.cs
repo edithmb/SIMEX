@@ -1,12 +1,15 @@
 ﻿using API_MOVIL.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace API_MOVIL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly Simex06Context _context;
@@ -59,6 +62,14 @@ namespace API_MOVIL.Controllers
                 return BadRequest(ModelState);
             }
 
+            //leer token
+             var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userToken)) return Unauthorized("Token inválido.");
+            newUser.CreatedBy = int.Parse(userToken);
+
+            //newUser.CreatedBy = 1;
+
+
             newUser.CreatedAt = DateTime.UtcNow;
             newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newUser.PasswordHash);
 
@@ -87,12 +98,19 @@ namespace API_MOVIL.Controllers
 
             }
 
+            //leer token
+            //var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //if (string.IsNullOrEmpty(userToken)) return Unauthorized("Token inválido.");
+            //existingUser.UpdatedBy = int.Parse(userToken);
+
+            existingUser.UpdatedBy = 1;
+
             existingUser.FirstName = updateUser.FirstName;
             existingUser.LastName = updateUser.LastName;
             existingUser.PhoneNumber = updateUser.PhoneNumber;
             existingUser.IsActive = updateUser.IsActive;
 
-            existingUser.UpdatedAt = DateTime.Now;
+            existingUser.UpdatedAt = DateTime.UtcNow;
             if (updateUser.UpdatedBy != null)
             {
                 existingUser.UpdatedBy = updateUser.UpdatedBy;
@@ -121,8 +139,16 @@ namespace API_MOVIL.Controllers
                 return NotFound("This user doesn't exist");
             }
 
+            //leer token
+            //var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //if (string.IsNullOrEmpty(userToken)) return Unauthorized("Token inválido.");
+            //user.DeletedBy = int.Parse(userToken);
+
+            user.DeletedBy = 1;
+
+
             user.IsActive = false;
-            user.DeletedAt = DateTime.Now;
+            user.DeletedAt = DateTime.UtcNow;
             user.DeletedBy = deletedBy;
 
             try

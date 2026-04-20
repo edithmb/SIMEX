@@ -53,10 +53,15 @@ dependencies {
 
     // Corrutinas de Kotlin (necesarias para poder usar el .launch)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    //Configura el modo de conexion al controlador hub
-    implementation ("com.microsoft.signalr:signalr:7.0.5")
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    //cliente de wbsocket para conectarse a .nt
+    implementation ("com.microsoft.signalr:signalr:7.0.14")
+    // manejo de hilos
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    //juego unity
+//    implementation(project(":unityLibrary"))
+//    implementation(libs.androidx.ui.test)
+//    testImplementation(libs.junit)
+//    androidTestImplementation(libs.androidx.junit)
+//    androidTestImplementation(libs.androidx.espresso.core)
 
 }

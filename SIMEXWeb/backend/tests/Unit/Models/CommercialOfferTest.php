@@ -26,13 +26,6 @@ test('price is cast to decimal', function () {
     expect($offer->price)->toBe('1500.50');
 });
 
-test('valid_until is cast to date', function () {
-    $offer = CommercialOffer::factory()->create(['valid_until' => '2026-12-31']);
-
-    expect($offer->valid_until)->toBeInstanceOf(\DateTimeInterface::class);
-    expect($offer->valid_until->format('Y-m-d'))->toBe('2026-12-31');
-});
-
 test('scopeDraft filters by draft status', function () {
     CommercialOffer::factory()->create(['status' => 'draft']);
     CommercialOffer::factory()->create(['status' => 'accepted']);

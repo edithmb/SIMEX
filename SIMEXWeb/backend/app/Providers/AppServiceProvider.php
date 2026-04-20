@@ -15,9 +15,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Registrar driver dblib para SQL Server via FreeTDS
         DB::extend('dblib', function($config) {
-            return new \Illuminate\Database\Connection(
+            return new \Illuminate\Database\SqlServerConnection(
                 new \PDO(
-                    'dblib:host=' . $config['host'] . ',' . ($config['port'] ?? 1433) . ';dbname=' . $config['database'],
+                    'dblib:host=' . $config['host'] . ':' . ($config['port'] ?? 1433) . ';dbname=' . $config['database'],
                     $config['username'] ?? '',
                     $config['password'] ?? '',
                     [
