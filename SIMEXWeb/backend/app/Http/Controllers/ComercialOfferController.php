@@ -9,6 +9,7 @@ use App\Models\LogisticsOperation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class ComercialOfferController extends Controller
 {
