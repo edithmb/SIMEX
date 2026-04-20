@@ -57,7 +57,12 @@ namespace API_MOVIL.Controllers
         public async Task<IActionResult> GetUnreadNotifications()
         {
             // Extraemos el ID del usuario del Token de seguridad
-            var userId = int.Parse(User.FindFirst("id")?.Value ?? "0");
+            var userId = int.Parse(
+                User.FindFirst("sub")?.Value ??
+                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ??
+                User.FindFirst("id")?.Value ??
+                "0"
+            );
 
             var notificaciones = await _context.Notifications
                 .Where(n => n.UserId == userId && n.IsRead == false) // Solo las no leídas
@@ -71,7 +76,12 @@ namespace API_MOVIL.Controllers
         [HttpPut("{id}/read")]
         public async Task<IActionResult> MarkAsRead(int id)
         {
-            var userId = int.Parse(User.FindFirst("id")?.Value ?? "0");
+            var userId = int.Parse(
+                User.FindFirst("sub")?.Value ??
+                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ??
+                User.FindFirst("id")?.Value ??
+                "0"
+            );
 
             var notificacion = await _context.Notifications
                 .FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
