@@ -22,6 +22,6 @@ dependencyResolutionManagement {
 rootProject.name = "SIMEX-MOVIL"
 include(":app")
 
-include(":unityLibrary")
-project(":unityLibrary").projectDir = File("unityLibrary/unityLibrary")
+//include(":unityLibrary")
+//project(":unityLibrary").projectDir = File("unityLibrary/unityLibrary")
  

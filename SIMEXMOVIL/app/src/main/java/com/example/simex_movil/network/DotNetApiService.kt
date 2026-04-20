@@ -1,5 +1,6 @@
 package com.example.simex_movil.network
 
+import com.example.simex_movil.ui.DniRecordRequest
 import com.example.simex_movil.ui.Notificacion
 import com.example.simex_movil.ui.UpdateLogisticsStatusRequest
 import com.example.simex_movil.ui.UpdateStatusResponse
@@ -34,14 +35,12 @@ interface DotNetApiService {
         @Body userData: UserProfileRequest
     ): Response<Void>
 
-    // 3. SUBIR DNI (POST Multipart)
-    @Multipart
-    @POST("DocumentsPerson/upload")
-    suspend fun uploadDni(
+    // enviar dni
+    @POST("DocumentsPerson/record")
+    suspend fun recordDniMetadata(
         @Header("Authorization") token: String,
-        @Part archive: MultipartBody.Part,
-        @Part("clientId") clientId: okhttp3.RequestBody
-    ): Response<Void>
+        @Body request: DniRecordRequest
+    ): retrofit2.Response<com.google.gson.JsonObject>
 
     // cambio de estado
     @PUT("LogisticsOperations/{id}/status")

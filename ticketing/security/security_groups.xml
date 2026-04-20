@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="module_category_ticketing" model="ir.module.category">
+            <field name="name">Ticketing</field>
+            <field name="description">Nivells d'accés per al mòdul de Ticketing i Transports.</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="group_ticketing_user" model="res.groups">
+            <field name="name">Usuari</field>
+            <field name="category_id" ref="module_category_ticketing"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Usuari estàndard que pot gestionar tickets i operacions.</field>
+        </record>
+
+        <record id="group_ticketing_manager" model="res.groups">
+            <field name="name">Responsable</field>
+            <field name="category_id" ref="module_category_ticketing"/>
+            <field name="implied_ids" eval="[(4, ref('group_ticketing_user'))]"/>
+            <field name="comment">Responsable amb permisos avançats sobre el mòdul.</field>
+        </record>
+
+    </data>
+</odoo>

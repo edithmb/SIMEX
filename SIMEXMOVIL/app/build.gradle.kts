@@ -58,10 +58,10 @@ dependencies {
     // manejo de hilos
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     //juego unity
-    implementation(project(":unityLibrary"))
-    implementation(libs.androidx.ui.test)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+//    implementation(project(":unityLibrary"))
+//    implementation(libs.androidx.ui.test)
+//    testImplementation(libs.junit)
+//    androidTestImplementation(libs.androidx.junit)
+//    androidTestImplementation(libs.androidx.espresso.core)
 
 }

@@ -9,7 +9,7 @@ namespace API_MOVIL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly Simex06Context _context;
@@ -63,11 +63,11 @@ namespace API_MOVIL.Controllers
             }
 
             //leer token
-            // var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            // if (string.IsNullOrEmpty(userToken)) return Unauthorized("Token inválido.");
-            // newUser.CreatedBy = int.Parse(userToken);
+             var userToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userToken)) return Unauthorized("Token inválido.");
+            newUser.CreatedBy = int.Parse(userToken);
 
-            newUser.CreatedBy = 1;
+            //newUser.CreatedBy = 1;
 
 
             newUser.CreatedAt = DateTime.UtcNow;
