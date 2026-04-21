@@ -24,6 +24,8 @@ import java.io.File
 import java.io.FileOutputStream
 
 class ProfileActivity: AppCompatActivity() {
+    private var nombreDniEnBD: String = ""
+    private var claveDniEnBD: String = ""
 
     private lateinit var viewModel: ProfileViewModel
     private var idUsuarioActual: Int = 0
@@ -58,6 +60,7 @@ class ProfileActivity: AppCompatActivity() {
         val inputLastName = findViewById<EditText>(R.id.inputLastName)
         val inputEmail = findViewById<EditText>(R.id.inputEmail)
         val inputTelephone = findViewById<EditText>(R.id.inputTelephoneNumber)
+        val btnDescargarDni = findViewById<MaterialButton>(R.id.btn_descargar_dni)
 
         val inputPassword = findViewById<EditText>(R.id.inputPassword)
         val inputConfirmarPass = findViewById<EditText>(R.id.inputConfirmarPass)
@@ -92,6 +95,18 @@ class ProfileActivity: AppCompatActivity() {
             seccionPassword.visibility = View.VISIBLE
             btnGuardar.visibility = View.VISIBLE
             btnEditar.visibility = View.GONE
+        }
+
+        btnDescargarDni.setOnClickListener {
+            val fileNameGuardado = "aqui_el_nombre_de_la_bd.pdf"
+            val claveAESGuardada = "aqui_la_clave_de_la_bd="
+
+            if (fileNameGuardado.isNotEmpty() && claveAESGuardada.isNotEmpty()) {
+                Toast.makeText(this, "Conectando al servidor para descargar...", Toast.LENGTH_SHORT).show()
+                descargarYVerDni(fileNameGuardado, claveAESGuardada)
+            } else {
+                Toast.makeText(this, "No hay ningún DNI registrado en tu perfil", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // 5. BOTÓN: GUARDAR PERFIL
@@ -139,6 +154,8 @@ class ProfileActivity: AppCompatActivity() {
                     inputLastName.setText(user.lastName)
                     inputEmail.setText(user.email)
                     inputTelephone.setText(user.phoneNumber ?: "")
+                    nombreDniEnBD = user.fileName ?: ""
+                    claveDniEnBD = user.encryptionKey ?: ""
                 }
                 is PerfilState.SuccessUpdate -> {
                     Toast.makeText(this, "Perfil actualizado con éxito", Toast.LENGTH_SHORT).show()
@@ -207,6 +224,23 @@ class ProfileActivity: AppCompatActivity() {
                     uriArchivoSeleccionado = null
                     btnSeleccionarArchivo.text = "Subir archivo"
                     btnSeleccionarArchivo.setBackgroundColor(android.graphics.Color.parseColor("#5C82B1"))
+                }
+            }
+        )
+    }
+
+    private fun descargarYVerDni(fileName: String, claveAES: String) {
+        dniSocketManager.downloadAndDecrypt(
+            fileName = fileName,
+            claveBase64 = claveAES,
+            onStatusUpdate = { mensaje ->
+                runOnUiThread {
+                    Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show()
+                }
+            },
+            onSuccess = { archivoDesencriptado ->
+                runOnUiThread {
+                    Toast.makeText(this, "¡Archivo descargado y desencriptado con éxito!", Toast.LENGTH_LONG).show()
                 }
             }
         )

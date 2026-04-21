@@ -8,7 +8,9 @@ data class UserResponse(
     val email: String,
     val phoneNumber: String?,
     val passwordHash: String?,
-    val isActive: Boolean
+    val isActive: Boolean,
+    val fileName: String?,
+    val encryptionKey: String?
 )
 
 //Envia los datos actualizados (PUT)
