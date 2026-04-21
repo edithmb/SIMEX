@@ -1,4 +1,15 @@
 <script setup>
+/**
+ * @component SolicitudesTable
+ * @description Tabla de solicitudes con columna de acciones visible sólo
+ * para admin. Emite `crear-presupuesto` con la solicitud cuando el admin
+ * hace click en la acción correspondiente.
+ *
+ * @prop {object[]} solicitudes
+ * @prop {string}   [role='admin'] Rol de vista activo.
+ *
+ * @emits crear-presupuesto Con la solicitud seleccionada.
+ */
 const props = defineProps({
   solicitudes: { type: Array, required: true },
   role: { type: String, default: 'admin' },

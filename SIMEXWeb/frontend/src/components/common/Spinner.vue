@@ -1,4 +1,13 @@
 <script setup>
+/**
+ * @component Spinner
+ * @description Indicador de carga SVG animado. Hereda el color del
+ * contenedor (`stroke: currentColor`) para combinarse con el estilo del
+ * entorno donde se use.
+ *
+ * @prop {number} [size=16]   Ancho y alto del SVG en píxeles.
+ * @prop {number} [stroke=4]  Grosor de la línea del círculo (stroke-width).
+ */
 defineProps({
   size:   { type: Number, default: 16 },
   stroke: { type: Number, default: 4 },

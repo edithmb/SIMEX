@@ -1,4 +1,20 @@
 <script setup>
+/**
+ * @component RechazarPresupuestoModal
+ * @description Modal de confirmación de rechazo: exige un motivo escrito
+ * y lo emite junto con el id en `confirm`.
+ *
+ * Como en `AprobarPresupuestoModal`, captura el id en un watch local
+ * para que sobreviva a la transición de salida (el padre pone el prop a
+ * `null` al cerrar).
+ *
+ * @prop {boolean} [visible=false]
+ * @prop {object|null} [presupuesto=null]
+ * @prop {boolean} [submitting=false]
+ *
+ * @emits close
+ * @emits confirm  Con `(reason: string, id: number)`.
+ */
 import { ref, watch } from 'vue'
 import Spinner from '@/components/common/Spinner.vue'
 
@@ -21,6 +37,7 @@ watch(
     { immediate: true },
 )
 
+// Al abrir, reseteamos el motivo para que el usuario no reutilice uno anterior
 watch(
     () => props.visible,
     (val) => {
@@ -28,15 +45,25 @@ watch(
     },
 )
 
+/** Emite `close`. */
 function handleClose() {
     emit('close')
 }
 
+/**
+ * Valida que haya motivo no vacío e id capturado y emite `confirm`.
+ * No-op en envío en curso.
+ */
 function handleConfirm() {
     if (props.submitting || !reason.value.trim() || capturedId.value == null) return
     emit('confirm', reason.value.trim(), capturedId.value)
 }
 
+/**
+ * Cierra solo si el click ocurrió sobre el overlay.
+ *
+ * @param {MouseEvent} e
+ */
 function handleOverlayClick(e) {
     if (e.target === e.currentTarget) {
         handleClose()

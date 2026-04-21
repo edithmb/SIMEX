@@ -8,14 +8,25 @@ use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
+/**
+ * Action de Fortify que valida y crea un nuevo usuario durante el registro.
+ *
+ * Combina las reglas de perfil y de contraseña (traits) y delega la
+ * persistencia en el modelo `User` (cuyo cast `hashed` hashea la contraseña
+ * antes de almacenar).
+ */
 class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules, ProfileValidationRules;
 
     /**
-     * Validate and create a newly registered user.
+     * Valida el payload de registro y crea el usuario.
      *
-     * @param  array<string, string>  $input
+     * @param  array<string, string> $input Payload con `name`, `email`,
+     *                                      `password` y `password_confirmation`.
+     * @return User                  Usuario recién creado.
+     *
+     * @throws \Illuminate\Validation\ValidationException Si el payload es inválido.
      */
     public function create(array $input): User
     {

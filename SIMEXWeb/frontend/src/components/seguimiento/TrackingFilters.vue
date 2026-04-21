@@ -1,4 +1,17 @@
 <script setup>
+/**
+ * @component TrackingFilters
+ * @description Fila de filtros sobre el panel de seguimiento: búsqueda
+ * libre, selector de Incoterm y selector de estado.
+ *
+ * Actualmente sólo declara los emits — los selectores todavía no están
+ * enlazados a un estado reactivo (demo). Al integrar enlazar con
+ * `v-model` usando estos eventos.
+ *
+ * @emits update:search
+ * @emits update:status
+ * @emits update:incoterm
+ */
 const emit = defineEmits(['update:search', 'update:status', 'update:incoterm'])
 </script>
 

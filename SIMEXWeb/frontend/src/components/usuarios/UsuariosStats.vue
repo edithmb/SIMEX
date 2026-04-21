@@ -1,4 +1,9 @@
 <script setup>
+/**
+ * @component UsuariosStats
+ * @description KPIs del módulo de usuarios. Valores *demo* hardcodeados;
+ * reemplazar por props o fetchs al integrar con backend real.
+ */
 import StatCard from '@/components/dashboard/StatCard.vue'
 </script>
 

@@ -7,9 +7,19 @@ use App\Models\ClientRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador de solicitudes de cotización para el rol administrador.
+ *
+ * Permite ver todas las solicitudes del sistema (sin restricción por
+ * cliente) y darlas de alta en nombre de cualquier cliente.
+ */
 class ClientRequestAdminController extends Controller
 {
-    
+    /**
+     * Listado global de solicitudes con cliente, origen, destino y ofertas.
+     *
+     * @return JsonResponse
+     */
     public function index(): JsonResponse
     {
         $clientRequests = ClientRequest::with(['client', 'origin', 'destination', 'commercialOffers'])->get();
@@ -17,6 +27,16 @@ class ClientRequestAdminController extends Controller
         return response()->json($clientRequests);
     }
 
+    /**
+     * Crea una solicitud de cotización en nombre de un cliente.
+     *
+     * La solicitud se inserta con estado inicial `enviado` y `created_by`
+     * igual al usuario autenticado. Si `comments` no viene en el payload
+     * se persiste una cadena vacía para cumplir el NOT NULL de la BD.
+     *
+     * @param  Request $request Payload validado inline.
+     * @return JsonResponse HTTP 201 con la solicitud creada.
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([

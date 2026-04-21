@@ -1,4 +1,17 @@
 <script setup>
+/**
+ * @component StatCard
+ * @description Tarjeta de KPI usada en el dashboard. Muestra título,
+ * valor numérico y, opcionalmente, una tendencia porcentual con color
+ * según dirección. El icono se selecciona entre un conjunto fijo.
+ *
+ * @prop {string} title          Título del indicador.
+ * @prop {string} value          Valor formateado a mostrar (string para conservar formato local).
+ * @prop {string} [trend='']     Porcentaje de tendencia; si está vacío se oculta el bloque de tendencia.
+ * @prop {string} [trendLabel='vs mes anterior']  Etiqueta secundaria que acompaña al porcentaje.
+ * @prop {'up'|'down'} [trendDirection='up']  Dirección de la tendencia (flecha y color).
+ * @prop {'truck'|'money'|'offers'|'check'|'box'} [icon='box']  Icono a mostrar.
+ */
 const props = defineProps({
   title: { type: String, required: true },
   value: { type: String, required: true },

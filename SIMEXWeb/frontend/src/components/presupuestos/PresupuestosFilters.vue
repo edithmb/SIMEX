@@ -1,4 +1,15 @@
 <script setup>
+/**
+ * @component PresupuestosFilters
+ * @description Barra de filtros de la pantalla de presupuestos:
+ * búsqueda libre + botones de filtro por estado.
+ *
+ * @prop {string} [activeFilter='Todos']
+ * @prop {string} [searchQuery='']
+ *
+ * @emits update:activeFilter
+ * @emits update:searchQuery
+ */
 const props = defineProps({
     activeFilter: { type: String, default: 'Todos' },
     searchQuery: { type: String, default: '' },

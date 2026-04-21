@@ -1,4 +1,12 @@
 <script setup>
+/**
+ * @component RecentOperations
+ * @description Widget del dashboard con un resumen de las últimas
+ * operaciones logísticas. El listado actual es *demo* hardcodeado; al
+ * integrar con backend real, `operations` debe derivarse de
+ * `/logistics-operations` mapeado a esta forma plana (con colores por
+ * estado).
+ */
 const operations = [
   {
     id: 1,

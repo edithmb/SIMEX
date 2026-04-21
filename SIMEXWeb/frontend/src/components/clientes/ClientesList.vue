@@ -1,4 +1,16 @@
 <script setup>
+/**
+ * @component ClientesList
+ * @description Listado de empresas cliente en formato tarjeta expandible.
+ * Cada tarjeta muestra la info de la empresa y, al expandirse, los
+ * usuarios asociados con su rol.
+ *
+ * La paleta de colores de avatar se reparte cíclicamente por índice, y
+ * la paleta de rol se cachea por nombre (`rolCache`) para que un rol
+ * concreto tenga siempre el mismo color durante la sesión.
+ *
+ * @prop {object[]} clientes Listado de empresas mapeadas.
+ */
 import { ref } from 'vue'
 
 defineProps({
@@ -7,12 +19,24 @@ defineProps({
 
 const avatarColors = ['#1a6fb5', '#047857', '#b45309', '#6d28d9', '#be185d', '#0f766e', '#4338ca', '#dc2626']
 
+/**
+ * Devuelve un color de avatar determinístico para el índice dado.
+ *
+ * @param {number} index
+ * @returns {string} Hex color.
+ */
 function getAvatarColor(index) {
     return avatarColors[index % avatarColors.length]
 }
 
 const expandedId = ref(null)
 
+/**
+ * Alterna la tarjeta expandida: si ya estaba abierta la cierra, si no la
+ * abre y cierra cualquier otra (sólo una expandida a la vez).
+ *
+ * @param {number|string} id
+ */
 function toggleExpand(id) {
     expandedId.value = expandedId.value === id ? null : id
 }
@@ -29,6 +53,14 @@ const rolPalette = [
 const rolCache = {}
 let rolPaletteIdx = 0
 
+/**
+ * Devuelve un par `{background, color}` consistente por nombre de rol.
+ * La primera vez que aparece un rol se le asigna el siguiente color de
+ * la paleta y se cachea para conservarlo en sucesivas llamadas.
+ *
+ * @param {string|null|undefined} rolName
+ * @returns {{background:string, color:string}}
+ */
 function rolStyle(rolName) {
     if (!rolName) return { background: '#e5e7eb', color: '#4b5563' }
     if (!rolCache[rolName]) {

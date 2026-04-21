@@ -1,4 +1,11 @@
 <script setup>
+/**
+ * @component UsuariosTable
+ * @description Tabla de usuarios con avatar inicial (color rotatorio),
+ * nombre completo, rol con badge coloreado y estado activo/inactivo.
+ *
+ * @prop {object[]} usuarios
+ */
 defineProps({
     usuarios: { type: Array, required: true },
 })
@@ -16,26 +23,56 @@ const statusColors = {
 
 const avatarColors = ['#1a6fb5', '#047857', '#b45309', '#6d28d9', '#be185d']
 
+/**
+ * Estilo del badge para un rol dado; fallback a gris.
+ * @param {string} roleName
+ * @returns {{bg:string,color:string}}
+ */
 function getRolStyle(roleName) {
     return rolColors[roleName] || { bg: '#e5e7eb', color: '#6b7280' }
 }
 
+/**
+ * Estilo del badge de estado.
+ * @param {boolean} isActive
+ * @returns {{bg:string,color:string}}
+ */
 function getStatusStyle(isActive) {
     return isActive ? statusColors['Activo'] : statusColors['Inactivo']
 }
 
+/**
+ * Etiqueta del estado.
+ * @param {boolean} isActive
+ * @returns {'Activo'|'Inactivo'}
+ */
 function getStatusLabel(isActive) {
     return isActive ? 'Activo' : 'Inactivo'
 }
 
+/**
+ * Devuelve un color de avatar determinístico por índice.
+ * @param {number} i
+ * @returns {string}
+ */
 function getAvatarColor(i) {
     return avatarColors[i % avatarColors.length]
 }
 
+/**
+ * Concatena las iniciales de `first_name` + `last_name`.
+ * @param {{first_name?:string,last_name?:string}} u
+ * @returns {string}
+ */
 function getInitials(u) {
     return (u.first_name?.[0] || '') + (u.last_name?.[0] || '')
 }
 
+/**
+ * Nombre completo del usuario.
+ * @param {{first_name:string,last_name:string}} u
+ * @returns {string}
+ */
 function getFullName(u) {
     return u.first_name + ' ' + u.last_name
 }

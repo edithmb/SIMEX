@@ -5,10 +5,17 @@ namespace App\Concerns;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
+/**
+ * Trait con las reglas de validación reutilizables para contraseñas.
+ *
+ * `Password::default()` se configura desde `AppServiceProvider::configureDefaults`
+ * — en producción exige 12 caracteres, mayúsculas/minúsculas, números, símbolos
+ * y comprobación de filtraciones; en dev queda sin restricciones extra.
+ */
 trait PasswordValidationRules
 {
     /**
-     * Get the validation rules used to validate passwords.
+     * Reglas aplicables a una nueva contraseña: formato + confirmación (`password_confirmation`).
      *
      * @return array<int, Rule|array<mixed>|string>
      */
@@ -18,7 +25,7 @@ trait PasswordValidationRules
     }
 
     /**
-     * Get the validation rules used to validate the current password.
+     * Reglas aplicables a la contraseña actual (para confirmar acciones sensibles).
      *
      * @return array<int, Rule|array<mixed>|string>
      */

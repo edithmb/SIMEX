@@ -1,4 +1,13 @@
 <script setup>
+/**
+ * @component PresupuestosView
+ * @description Listado de ofertas comerciales (presupuestos) con filtros,
+ * búsqueda y acciones de aprobar/rechazar.
+ *
+ * Cambia de endpoint según el rol real (admin ve todo; cliente ve sólo
+ * los suyos vía `/commercial-offers/mine`). El estado del backend se
+ * mapea a etiquetas en español para la tabla.
+ */
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useRoleStore } from '@/stores/role'
@@ -23,6 +32,14 @@ const submittingReject = ref(false)
 
 const statusMap = { draft: 'Enviado', accepted: 'Aceptado', rejected: 'Rechazado' }
 
+/**
+ * Aplana una oferta del backend a la forma que espera la tabla: nombres
+ * ya resueltos, precio numérico y fecha formateada en es-ES. Cualquier
+ * valor ausente se sustituye por `'—'` para no romper el render.
+ *
+ * @param {object} item Oferta con relaciones `client`, `incoterm`, `origin_port`, …
+ * @returns {object}
+ */
 function mapPresupuesto(item) {
     return {
         id: item.id,
@@ -41,6 +58,12 @@ function mapPresupuesto(item) {
     }
 }
 
+/**
+ * Carga el listado paginado de ofertas desde el endpoint adecuado y mapea
+ * los resultados. La respuesta del backend es un paginator (`res.data.data`).
+ *
+ * @returns {Promise<void>}
+ */
 async function fetchPresupuestos() {
     loading.value = true
     try {
@@ -63,6 +86,13 @@ watch(() => roleStore.currentRole, () => {
     fetchPresupuestos()
 })
 
+/**
+ * Resultado de aplicar filtro (estado traducido) y búsqueda (referencia
+ * + nombre de cliente) sobre `presupuestos`.
+ *
+ * @type {import('vue').ComputedRef<object[]>}
+ */
+
 const activeFilter = ref('Todos')
 const searchQuery = ref('')
 
@@ -84,16 +114,35 @@ const showApproveModal = ref(false)
 const showRejectModal = ref(false)
 const selectedPresupuesto = ref(null)
 
+/**
+ * Abre el modal de aprobación para el presupuesto seleccionado.
+ *
+ * @param {object} p Presupuesto mapeado.
+ */
 function openApproveModal(p) {
     selectedPresupuesto.value = p
     showApproveModal.value = true
 }
 
+/**
+ * Abre el modal de rechazo para el presupuesto seleccionado.
+ *
+ * @param {object} p Presupuesto mapeado.
+ */
 function openRejectModal(p) {
     selectedPresupuesto.value = p
     showRejectModal.value = true
 }
 
+/**
+ * Llama al endpoint `approve` del backend. Al aprobarse se crea la
+ * `LogisticsOperation` asociada (lo hace el backend dentro de una
+ * transacción). El listado se refresca siempre (éxito o error) para que
+ * la tabla refleje el estado real.
+ *
+ * @param {number|string} id Id de la oferta a aprobar.
+ * @returns {Promise<void>}
+ */
 async function handleApprove(id) {
     if (submittingApprove.value) return
     submittingApprove.value = true
@@ -109,6 +158,14 @@ async function handleApprove(id) {
     }
 }
 
+/**
+ * Rechaza una oferta enviando el motivo proporcionado por el usuario.
+ * Reentrancia bloqueada por `submittingReject`.
+ *
+ * @param {string} reason Motivo de rechazo validado por el modal.
+ * @param {number|string} id Id de la oferta a rechazar.
+ * @returns {Promise<void>}
+ */
 async function handleReject(reason, id) {
     if (submittingReject.value) return
     submittingReject.value = true

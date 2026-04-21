@@ -1,4 +1,12 @@
 <script setup>
+/**
+ * @component ClientesStats
+ * @description Fila con dos KPIs en la pantalla de clientes: número de
+ * empresas y usuarios totales. Delega el render en `StatCard`.
+ *
+ * @prop {number} [totalEmpresas=0]
+ * @prop {number} [totalUsuarios=0]
+ */
 import StatCard from '@/components/dashboard/StatCard.vue'
 
 const props = defineProps({

@@ -1,4 +1,15 @@
 <script setup>
+/**
+ * @component SolicitudesFilters
+ * @description Barra de filtros sobre el listado de solicitudes:
+ * búsqueda libre + 3 botones de filtro por estado.
+ *
+ * @prop {string} [activeFilter='Todos']
+ * @prop {string} [searchQuery='']
+ *
+ * @emits update:activeFilter
+ * @emits update:searchQuery
+ */
 const props = defineProps({
   activeFilter: { type: String, default: 'Todos' },
   searchQuery: { type: String, default: '' },

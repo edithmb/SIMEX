@@ -1,4 +1,20 @@
 <script setup>
+/**
+ * @component CrearPresupuestoModal
+ * @description Modal (sólo admin) para crear una oferta comercial
+ * asociada a una solicitud existente. Recibe la solicitud objetivo y
+ * los catálogos (incoterms, puertos, tipos de contenedor) desde el padre.
+ *
+ * @prop {boolean}  [visible=false]
+ * @prop {object|null} [solicitud=null]  Solicitud que se está presupuestando.
+ * @prop {object[]} [incoterms=[]]
+ * @prop {object[]} [puertos=[]]
+ * @prop {object[]} [tiposContenedor=[]]
+ * @prop {boolean}  [submitting=false]
+ *
+ * @emits close
+ * @emits submit  Con payload ya casteado con `client_request_id` rellenado.
+ */
 import { reactive } from 'vue'
 import Spinner from '@/components/common/Spinner.vue'
 
@@ -24,6 +40,7 @@ const form = reactive({
     comments: '',
 })
 
+/** Reinicia todos los campos del formulario a cadena vacía. */
 function resetForm() {
     form.reference = ''
     form.incoterm_id = ''
@@ -35,11 +52,18 @@ function resetForm() {
     form.comments = ''
 }
 
+/** Resetea el formulario y emite `close`. */
 function handleClose() {
     resetForm()
     emit('close')
 }
 
+/**
+ * Construye el payload de la oferta y emite `submit`. El id de la
+ * solicitud se toma de la prop `solicitud` (no del formulario) para
+ * impedir que el usuario lo edite manualmente. Castéa todas las FKs y
+ * el precio a `Number`.
+ */
 function handleSubmit() {
     if (props.submitting) return
     const payload = {
@@ -57,6 +81,11 @@ function handleSubmit() {
     resetForm()
 }
 
+/**
+ * Cierra el modal solo si el click ocurrió sobre el overlay.
+ *
+ * @param {MouseEvent} e
+ */
 function handleOverlayClick(e) {
     if (e.target === e.currentTarget) {
         handleClose()

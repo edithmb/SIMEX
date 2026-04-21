@@ -1,4 +1,18 @@
 <script setup>
+/**
+ * @component NuevaEmpresaModal
+ * @description Modal para dar de alta una empresa cliente. Se teleporta
+ * a `body` para escapar del stacking context del layout y soporta cierre
+ * al hacer click en el overlay (fuera del cuadro).
+ *
+ * Al cerrarse limpia el formulario — si se reabre siempre aparece vacío.
+ *
+ * @prop {boolean} [visible=false]    Controla visibilidad del modal.
+ * @prop {boolean} [submitting=false] Si se está enviando; bloquea el botón.
+ *
+ * @emits close
+ * @emits submit  Con payload `{ company_name, vat_number, ... }`.
+ */
 import { reactive } from 'vue'
 import Spinner from '@/components/common/Spinner.vue'
 
@@ -20,6 +34,11 @@ const form = reactive({
     phone: '',
 })
 
+/**
+ * Limpia el formulario y emite `close`. La limpieza se hace aquí
+ * (en lugar de en un watch sobre `visible`) para que el padre decida
+ * cuándo se resetea el estado.
+ */
 function handleClose() {
     form.company_name = ''
     form.vat_number = ''
@@ -32,11 +51,21 @@ function handleClose() {
     emit('close')
 }
 
+/**
+ * Emite `submit` con una copia plana del formulario. Bloquea envíos
+ * duplicados mirando `props.submitting`.
+ */
 function handleSubmit() {
     if (props.submitting) return
     emit('submit', { ...form })
 }
 
+/**
+ * Cierra el modal solo si el click ocurrió directamente sobre el
+ * overlay (ignora clicks dentro del cuadro, que burbujean hasta aquí).
+ *
+ * @param {MouseEvent} e
+ */
 function handleOverlayClick(e) {
     if (e.target === e.currentTarget) handleClose()
 }

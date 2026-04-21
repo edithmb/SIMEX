@@ -5,8 +5,28 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LogisticsOperation;
 
+/**
+ * Controlador de operaciones logísticas (fase de seguimiento tras aceptar una oferta).
+ *
+ * Ofrece dos listados con paginación ajustable vía `per_page`:
+ *  - `index`: todas las operaciones (vista interna).
+ *  - `getByClient`: operaciones de un `client_id` dado (vista de cliente).
+ *
+ * Ambos endpoints eager-loadean el grafo completo (oferta → incoterm, puertos,
+ * contenedor, solicitud → origen/destino/ciudad) con select explícito para
+ * minimizar payload y evitar N+1.
+ */
 class LogisticsOperationController extends Controller
 {
+    /**
+     * Listado paginado de todas las operaciones logísticas (vista admin).
+     *
+     * Acepta `per_page` por query string (por defecto 10). Devuelve además
+     * los documentos subidos a cada operación con su tipo de documento.
+     *
+     * @param  Request $request
+     * @return \Illuminate\Http\JsonResponse Paginator con operaciones enriquecidas.
+     */
     public function index(Request $request)
     {
         $perPage = (int) $request->query('per_page', 10);
@@ -91,6 +111,16 @@ class LogisticsOperationController extends Controller
         return response()->json($ops);
     }
 
+    /**
+     * Listado paginado de operaciones logísticas de un cliente concreto.
+     *
+     * Pensado para la pantalla de seguimiento del cliente: `$clientId` se
+     * pasa por ruta y filtra rigurosamente las operaciones devueltas.
+     *
+     * @param  Request     $request
+     * @param  int|string  $clientId Id del cliente cuyas operaciones se listan.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getByClient(Request $request, $clientId)
     {
         $perPage = (int) $request->query('per_page', 10);

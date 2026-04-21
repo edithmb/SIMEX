@@ -1,3 +1,14 @@
+/**
+ * @file Configuración de Vue Router: definición de rutas, carga diferida de
+ * vistas y guard global de autenticación/autorización por rol.
+ *
+ * Cada ruta puede declarar en `meta`:
+ *  - `public: true`        → accesible sin JWT.
+ *  - `title`               → título para breadcrumb/topbar.
+ *  - `breadcrumbParent`    → jerarquía mostrada encima del título.
+ *  - `roles: ['admin', …]` → lista de roles permitidos.
+ */
+
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useRoleStore } from '@/stores/role'
@@ -62,6 +73,17 @@ const router = createRouter({
   ],
 })
 
+/**
+ * Guard global que aplica 3 reglas antes de cada navegación:
+ *
+ *  1. Rutas no públicas exigen sesión válida: redirige a `/login` si falta JWT.
+ *  2. Si hay sesión y se intenta ir a `/login`, se desvía al dashboard.
+ *  3. Si la ruta declara `meta.roles`, sólo roles de esa lista pueden entrar;
+ *     el resto se redirige silenciosamente al dashboard.
+ *
+ * @param {import('vue-router').RouteLocationNormalized} to
+ * @returns {import('vue-router').RouteLocationRaw|void} Ruta a la que redirigir, o `void` para continuar.
+ */
 router.beforeEach((to) => {
   const auth = useAuthStore()
   const role = useRoleStore()

@@ -4,13 +4,28 @@ namespace App\Http\Requests\DatosMaestros;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validación para la creación de un transportista (carrier) en datos maestros.
+ *
+ * La autorización de rol se delega en el middleware que protege la ruta.
+ */
 class StoreCarrierRequest extends FormRequest
 {
+    /**
+     * Autoriza la petición. Siempre true (control de acceso en middleware).
+     *
+     * @return bool
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Reglas de validación del payload. `city_id` debe existir en `cities`.
+     *
+     * @return array<string, string>
+     */
     public function rules(): array
     {
         return [

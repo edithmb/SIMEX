@@ -1,4 +1,13 @@
 <script setup>
+/**
+ * @component SolicitudesView
+ * @description Página de solicitudes de cotización. Cambia de endpoint
+ * según el rol real del backend (`/client-requests-admin` vs
+ * `/client-requests-client`), carga en paralelo los datos auxiliares de
+ * los modales (clientes, ubicaciones, incoterms, puertos, tipos de
+ * contenedor) y orquesta los dos flujos de creación: solicitud (cliente/
+ * admin) y presupuesto (admin).
+ */
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
@@ -30,6 +39,17 @@ const incotermsList = ref([])
 const puertosList = ref([])
 const tiposContenedorList = ref([])
 
+/**
+ * Aplana una solicitud tal como la devuelve el backend en una vista
+ * plana para la tabla. Traduce relaciones anidadas a nombres listos para
+ * mostrar y normaliza la fecha a `dd/mm/aaaa` en locale español.
+ *
+ * `hasOffer` marca si existe al menos una oferta no rechazada (se usa
+ * para decidir si la solicitud está "Presupuestada" o "Enviada").
+ *
+ * @param {object} item Solicitud con relaciones `client`, `origin`, `destination`, `commercial_offers`.
+ * @returns {object} Objeto plano consumido por `SolicitudesTable`.
+ */
 function mapSolicitud(item) {
   return {
     id: item.id,
@@ -45,6 +65,15 @@ function mapSolicitud(item) {
   }
 }
 
+/**
+ * Carga el listado de solicitudes. El endpoint depende del rol real del
+ * backend (admin vs cliente) — no del rol de vista seleccionado en el
+ * sidebar, para no otorgar acceso a un cliente que simule ser admin.
+ *
+ * Si el backend devuelve 401 se fuerza logout y redirección al login.
+ *
+ * @returns {Promise<void>}
+ */
 async function fetchSolicitudes() {
   loading.value = true
   try {
@@ -63,7 +92,15 @@ async function fetchSolicitudes() {
   }
 }
 
-// 2. Función para cargar localizaciones, clientes y datos de presupuesto
+/**
+ * Precarga en paralelo los catálogos necesarios para los dos modales.
+ *
+ * La lista de clientes sólo se consulta si el rol real es admin (los
+ * usuarios cliente no tienen permiso sobre `/clients`). El resto de
+ * listas están disponibles para ambos roles.
+ *
+ * @returns {Promise<void>}
+ */
 async function cargarDatos() {
   try {
     const peticionLocalizaciones = axios.get(LARAVEL + '/locations', { headers })
@@ -108,6 +145,13 @@ onMounted(() => {
 const activeFilter = ref('Todos')
 const searchQuery = ref('')
 
+/**
+ * Resultado de aplicar el filtro activo y la caja de búsqueda sobre
+ * `solicitudes`. El filtro distingue "Enviada" vs "Presupuestada" según
+ * `hasOffer`. La búsqueda es case-insensitive sobre id y nombre de cliente.
+ *
+ * @type {import('vue').ComputedRef<object[]>}
+ */
 const filteredSolicitudes = computed(() => {
   let result = solicitudes.value
 
@@ -134,16 +178,32 @@ const filteredSolicitudes = computed(() => {
 const showPresupuestoModal = ref(false)
 const selectedSolicitud = ref(null)
 
+/**
+ * Abre el modal de creación de presupuesto para la solicitud elegida.
+ *
+ * @param {object} solicitud Solicitud mapeada (ver `mapSolicitud`).
+ */
 function openPresupuestoModal(solicitud) {
   selectedSolicitud.value = solicitud
   showPresupuestoModal.value = true
 }
 
+/** Cierra el modal de presupuesto y limpia la solicitud seleccionada. */
 function closePresupuestoModal() {
   showPresupuestoModal.value = false
   selectedSolicitud.value = null
 }
 
+/**
+ * Envía un presupuesto (oferta comercial) al backend y refresca la tabla.
+ *
+ * Reentrancia bloqueada vía `submittingPresupuesto` para evitar envíos
+ * duplicados por doble-click. Los errores se registran en consola —
+ * el modal queda abierto para que el usuario pueda reintentar.
+ *
+ * @param {object} data Payload ya validado por el modal.
+ * @returns {Promise<void>}
+ */
 async function handlePresupuestoSubmit(data) {
   if (submittingPresupuesto.value) return
   submittingPresupuesto.value = true
@@ -161,14 +221,25 @@ async function handlePresupuestoSubmit(data) {
 // Modal state — client/admin: solicitud modal
 const showSolicitudModal = ref(false)
 
+/** Abre el modal de creación de solicitud. */
 function openSolicitudModal() {
   showSolicitudModal.value = true
 }
 
+/** Cierra el modal de creación de solicitud. */
 function closeSolicitudModal() {
   showSolicitudModal.value = false
 }
 
+/**
+ * Crea una solicitud de cotización y refresca la tabla.
+ *
+ * Igual que `fetchSolicitudes`, cambia el endpoint según el rol real.
+ * Reentrancia bloqueada por `submittingSolicitud`.
+ *
+ * @param {object} data Payload ya validado por el modal.
+ * @returns {Promise<void>}
+ */
 async function handleSolicitudSubmit(data) {
   if (submittingSolicitud.value) return
   submittingSolicitud.value = true

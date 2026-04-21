@@ -1,10 +1,32 @@
 <script setup>
+/**
+ * @component AppTopbar
+ * @description Barra superior persistente: muestra el breadcrumb y el
+ * título de la página derivados de `route.meta`, un buscador global
+ * placeholder, el icono de notificaciones con badge y el avatar del
+ * usuario.
+ *
+ * Los valores del avatar y del badge son estáticos (demo); al integrar
+ * con backend real reemplazar por los datos del usuario autenticado.
+ */
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
+/**
+ * Texto que aparece como "padre" en el breadcrumb. Se toma de
+ * `route.meta.breadcrumbParent` con fallback `'Inicio'`.
+ *
+ * @type {import('vue').ComputedRef<string>}
+ */
 const breadcrumbParent = computed(() => route.meta.breadcrumbParent || 'Inicio')
+
+/**
+ * Título principal mostrado en la topbar. Fallback: `'Panel de Control'`.
+ *
+ * @type {import('vue').ComputedRef<string>}
+ */
 const pageTitle = computed(() => route.meta.title || 'Panel de Control')
 </script>
 

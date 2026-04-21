@@ -1,4 +1,16 @@
 <script setup>
+/**
+ * @component ShipmentDetail
+ * @description Panel derecho del seguimiento: detalle del envío activo
+ * con estado, timeline de pasos Incoterm, fechas ETD/ETA/ATD/ATA y
+ * datos clave de la oferta. Si el rol activo es admin, muestra botones
+ * para avanzar el estado.
+ *
+ * @prop {object} shipment
+ * @prop {string} [role='admin']
+ *
+ * @emits update-status  Con `(id, newStatus)`.
+ */
 import { computed } from 'vue'
 
 const props = defineProps({
@@ -8,6 +20,13 @@ const props = defineProps({
 
 defineEmits(['update-status'])
 
+/**
+ * Formatea una fecha a `d MMM yyyy` en español abreviado. Devuelve
+ * `'Pendiente'` si el valor es falsy.
+ *
+ * @param {string|Date|null|undefined} dateStr
+ * @returns {string}
+ */
 function formatDate(dateStr) {
   if (!dateStr) return 'Pendiente'
   const d = new Date(dateStr)
@@ -15,6 +34,12 @@ function formatDate(dateStr) {
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
 }
 
+/**
+ * Opciones de los botones de estado (una por paso Incoterm). Todos
+ * comparten estilo activo; el color por estado lo calcula el padre.
+ *
+ * @type {import('vue').ComputedRef<{value:string,label:string,color:string,textColor:string}[]>}
+ */
 const statusOptions = computed(() =>
   (props.shipment?.steps || []).map((name) => ({
     value: name,

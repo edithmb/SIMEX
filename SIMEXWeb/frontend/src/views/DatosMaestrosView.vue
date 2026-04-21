@@ -1,4 +1,15 @@
 <script setup>
+/**
+ * @component DatosMaestrosView
+ * @description Pantalla CRUD genérica para los datos maestros del
+ * sistema (países, puertos, aeropuertos, navieras, transportistas, tipos
+ * de contenedor, incoterms).
+ *
+ * La navegación lateral está declarada en `navGroups` y cada maestro en
+ * `maestrosConfig` describe endpoint, columnas y referencia reactiva a
+ * su lista. El mismo `MaestroFormModal` sirve para crear y editar,
+ * distinguido por `editingRow`.
+ */
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
@@ -116,6 +127,13 @@ const maestrosConfig = {
 // ── Maestro activo ──
 const activeKey = ref('countries')
 
+/**
+ * Información compacta del maestro actualmente activo (etiqueta,
+ * columnas visibles y datos). Se recalcula automáticamente cuando
+ * cambia `activeKey` o la lista reactiva subyacente.
+ *
+ * @type {import('vue').ComputedRef<{label:string, columns:object[], data:object[]}>}
+ */
 const activeMaestro = computed(() => {
   const config = maestrosConfig[activeKey.value]
   return {
@@ -127,7 +145,14 @@ const activeMaestro = computed(() => {
 
 const relatedData = ref({})
 
-// ── Fetch maestro genérico ──
+/**
+ * Carga el maestro identificado por `key` desde su endpoint y refresca
+ * la referencia reactiva asociada. Si no hay token fija un mensaje
+ * "no autenticado"; si el backend responde 401 fuerza logout.
+ *
+ * @param {string} key Clave definida en `maestrosConfig`.
+ * @returns {Promise<void>}
+ */
 async function fetchMaestro(key) {
   if (!auth.token) {
     errorMessage.value = 'No autenticado. Por favor inicia sesión.'
@@ -167,21 +192,36 @@ watch(activeKey, (newKey) => {
 const modalVisible = ref(false)
 const editingRow = ref(null)
 
+/** Abre el modal en modo creación (sin fila seleccionada). */
 function openAdd() {
   editingRow.value = null
   modalVisible.value = true
 }
 
+/**
+ * Abre el modal en modo edición, precargando los datos de la fila.
+ *
+ * @param {object} row
+ */
 function openEdit(row) {
   editingRow.value = row
   modalVisible.value = true
 }
 
+/** Cierra el modal y limpia la fila en edición. */
 function closeModal() {
   modalVisible.value = false
   editingRow.value = null
 }
 
+/**
+ * Persiste el formulario del modal. Si había fila en edición hace PUT al
+ * endpoint del maestro activo; en caso contrario POST. Refresca el
+ * maestro al terminar con éxito.
+ *
+ * @param {object} data Payload validado por el modal.
+ * @returns {Promise<void>}
+ */
 async function handleSave(data) {
   const config = maestrosConfig[activeKey.value]
   try {
@@ -202,6 +242,14 @@ async function handleSave(data) {
   }
 }
 
+/**
+ * Elimina la fila indicada haciendo DELETE al endpoint del maestro
+ * activo y refresca la lista. Sin confirmación — el botón ya la pide en
+ * el componente hijo.
+ *
+ * @param {object} row
+ * @returns {Promise<void>}
+ */
 async function handleDelete(row) {
   const config = maestrosConfig[activeKey.value]
   try {

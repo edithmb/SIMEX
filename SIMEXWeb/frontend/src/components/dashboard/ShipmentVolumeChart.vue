@@ -1,4 +1,13 @@
 <script setup>
+/**
+ * @component ShipmentVolumeChart
+ * @description Gráfico de líneas con el volumen mensual de envíos.
+ *
+ * Usa chart.js directamente sobre un `<canvas>` con `shallowRef` (evita
+ * el overhead de hacer la instancia reactiva). El degradado del área se
+ * recrea en `onMounted` usando el contexto 2D. Datos *demo* por ahora —
+ * reemplazar por agregación real al integrar.
+ */
 import { onMounted, shallowRef } from 'vue'
 import { Chart, registerables } from 'chart.js'
 
@@ -6,6 +15,10 @@ Chart.register(...registerables)
 
 const canvasRef = shallowRef(null)
 
+/**
+ * Crea la instancia Chart.js tras montar el canvas. Sin dataset reactivo:
+ * cambios futuros requerirán mantener la instancia y llamar a `update()`.
+ */
 onMounted(() => {
   const ctx = canvasRef.value.getContext('2d')
 

@@ -1,4 +1,10 @@
 <script setup>
+/**
+ * @component App
+ * @description Componente raíz de la aplicación. Envuelve el `RouterView`
+ * dentro de `AppLayout` (sidebar + topbar + contenido) y declara los
+ * estilos globales y las CSS custom properties del tema LogiTrack Pro.
+ */
 import AppLayout from '@/components/layout/AppLayout.vue'
 </script>
 

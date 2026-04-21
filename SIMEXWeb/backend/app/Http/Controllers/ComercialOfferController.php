@@ -11,8 +11,32 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
+/**
+ * Controlador de ofertas comerciales (presupuestos).
+ *
+ * Gestiona el ciclo de vida: creación en `draft`, listado paginado para
+ * admins y para el cliente autenticado, aprobación (que dispara la creación
+ * de la `LogisticsOperation` asociada) y rechazo con motivo.
+ *
+ * En `store` se hace además un POST best-effort al servicio .NET de
+ * notificaciones; su fallo se registra pero no aborta la creación.
+ */
 class ComercialOfferController extends Controller
 {
+    /**
+     * Crea una oferta comercial en estado `draft`.
+     *
+     * Si no se proporciona `reference`, se genera una legible
+     * `PR-{YYYY}-{NNN}` derivada del conteo actual de ofertas. `client_id`
+     * se deriva de la solicitud para evitar divergencias.
+     *
+     * El POST a `/api/notifications/trigger` del servicio .NET es
+     * best-effort: cualquier excepción se loguea y se ignora para no
+     * comprometer la creación.
+     *
+     * @param  Request $request
+     * @return JsonResponse HTTP 201 con la oferta creada.
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -52,12 +76,24 @@ class ComercialOfferController extends Controller
         return response()->json($offer, 201);
     }
 
+    /**
+     * Listado paginado (10 por página) de ofertas para roles administrativos.
+     *
+     * @return JsonResponse Paginator con ofertas enriquecidas (cliente, incoterm, puertos, contenedor).
+     */
     public function index(): JsonResponse
     {
         $offers = $this->buildOffersQuery()->paginate(10);
         return response()->json($offers);
     }
 
+    /**
+     * Listado paginado de ofertas del cliente autenticado.
+     *
+     * Filtra por `client_id` del usuario — pensado para el rol cliente.
+     *
+     * @return JsonResponse
+     */
     public function mine(): JsonResponse
     {
         $clientId = auth()->user()->client_id;
@@ -65,6 +101,22 @@ class ComercialOfferController extends Controller
         return response()->json($offers);
     }
 
+    /**
+     * Aprueba una oferta: la pasa a estado `accepted` y crea la operación logística asociada.
+     *
+     * La operación se crea en una transacción: si ya existiera una
+     * `LogisticsOperation` para la oferta, simplemente no se duplica. El
+     * estado inicial de la operación se toma del nombre del primer paso del
+     * Incoterm según la responsabilidad declarada en la solicitud; si no se
+     * puede inferir, se usa `'preparation'` como fallback.
+     *
+     * La referencia se genera como `OP-{YYYY}-{NNN}` en base al conteo actual.
+     *
+     * @param  int|string $id Id de la oferta.
+     * @return JsonResponse   Oferta refrescada tras la transacción.
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException Si la oferta no existe.
+     */
     public function approve($id): JsonResponse
     {
         $offer = CommercialOffer::with(['incoterm', 'clientRequest'])->findOrFail($id);
@@ -102,6 +154,15 @@ class ComercialOfferController extends Controller
         return response()->json($offer->fresh());
     }
 
+    /**
+     * Rechaza una oferta registrando el motivo aportado por el usuario.
+     *
+     * @param  Request    $request Debe contener `rejection_reason`.
+     * @param  int|string $id      Id de la oferta.
+     * @return JsonResponse Oferta actualizada con estado `rejected`.
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException Si la oferta no existe.
+     */
     public function reject(Request $request, $id): JsonResponse
     {
         $validated = $request->validate([
@@ -116,6 +177,15 @@ class ComercialOfferController extends Controller
         return response()->json($offer);
     }
 
+    /**
+     * Construye el query base de ofertas con eager-loading selectivo y
+     * orden descendente por fecha de creación.
+     *
+     * Centraliza el SELECT de columnas y las relaciones para evitar N+1
+     * y mantener `index`/`mine` consistentes.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     private function buildOffersQuery()
     {
         return CommercialOffer::select([

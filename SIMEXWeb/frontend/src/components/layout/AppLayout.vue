@@ -1,4 +1,13 @@
 <script setup>
+/**
+ * @component AppLayout
+ * @description Layout principal de la aplicación: sidebar fijo a la
+ * izquierda, topbar arriba y un `<main>` con scroll propio que contiene
+ * la ruta actual (pasada vía `<slot />`).
+ *
+ * Oculta el layout automáticamente en la ruta /login al no envolverse
+ * con este componente en esa página (ver `LoginView.vue`).
+ */
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppTopbar from '@/components/layout/AppTopbar.vue'
 </script>

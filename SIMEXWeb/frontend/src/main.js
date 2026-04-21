@@ -1,3 +1,15 @@
+/**
+ * @file Punto de entrada de la aplicación Vue 3.
+ *
+ * Monta la app, instala Pinia y Vue Router y registra dos interceptores
+ * globales de axios:
+ *  - Request: inyecta el JWT desde el store `auth` en cada petición.
+ *  - Response: si el backend responde 401 cierra sesión y redirige a /login.
+ *
+ * Finalmente llama a `initBackendRole()` para rehidratar el rol del
+ * usuario en sesiones que existían antes de introducir esa lógica.
+ */
+
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import axios from 'axios'
@@ -12,7 +24,13 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 
-// Interceptor REQUEST: añade el token en cada petición
+/**
+ * Interceptor de REQUEST: añade la cabecera `Authorization: Bearer <token>`
+ * a cada petición axios cuando hay token almacenado en el store.
+ *
+ * @param {import('axios').InternalAxiosRequestConfig} config
+ * @returns {import('axios').InternalAxiosRequestConfig}
+ */
 axios.interceptors.request.use((config) => {
   const auth = useAuthStore()
   if (auth.token) {
@@ -21,7 +39,14 @@ axios.interceptors.request.use((config) => {
   return config
 })
 
-// Interceptor RESPONSE: si el backend devuelve 401, hacer logout
+/**
+ * Interceptor de RESPONSE: si el backend responde 401 cerramos sesión
+ * localmente y enviamos al usuario a la pantalla de login. El rechazo se
+ * repropaga para que el código llamante pueda manejar el error si lo desea.
+ *
+ * @param {import('axios').AxiosResponse} res
+ * @returns {import('axios').AxiosResponse}
+ */
 axios.interceptors.response.use(
   (res) => res,
   async (err) => {

@@ -13,10 +13,19 @@ use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
+/**
+ * Service provider que integra Laravel Fortify con el frontend Inertia.
+ *
+ * Asigna las acciones personalizadas de creación/reset de usuarios, enlaza
+ * las vistas Inertia de los flujos de autenticación (login, registro,
+ * recuperación, 2FA…) y define los rate limiters `login` y `two-factor`.
+ */
 class FortifyServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * No se registran bindings propios en el container.
+     *
+     * @return void
      */
     public function register(): void
     {
@@ -24,7 +33,9 @@ class FortifyServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap any application services.
+     * Arranca la configuración de Fortify.
+     *
+     * @return void
      */
     public function boot(): void
     {
@@ -34,7 +45,9 @@ class FortifyServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure Fortify actions.
+     * Sustituye las acciones por defecto de Fortify por las personalizadas.
+     *
+     * @return void
      */
     private function configureActions(): void
     {
@@ -43,7 +56,12 @@ class FortifyServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure Fortify views.
+     * Enlaza cada pantalla de autenticación de Fortify con su componente
+     * Inertia correspondiente (login, reset, forgot, verify, register, 2FA,
+     * confirm-password), propagando al frontend el estado de sesión y los
+     * flags de features habilitadas.
+     *
+     * @return void
      */
     private function configureViews(): void
     {
@@ -74,7 +92,14 @@ class FortifyServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure rate limiting.
+     * Define rate limiters para login y 2FA: 5 intentos/min.
+     *
+     * - `login`: clave compuesta por email (en minúsculas, transliterado)
+     *   + IP; impide probar muchas contraseñas contra el mismo usuario y
+     *   también distribuir el ataque.
+     * - `two-factor`: clave por `login.id` almacenado en sesión.
+     *
+     * @return void
      */
     private function configureRateLimiting(): void
     {

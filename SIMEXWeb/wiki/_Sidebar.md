@@ -1,0 +1,6 @@
+- [Home](Home)
+- [Arquitectura](Arquitectura)
+- [Backend](Backend)
+- [Frontend](Frontend)
+- [Despliegue](Despliegue)
+- [CI/CD](CI-CD)

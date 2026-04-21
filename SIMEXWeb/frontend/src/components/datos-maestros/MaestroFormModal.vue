@@ -1,4 +1,19 @@
 <script setup>
+/**
+ * @component MaestroFormModal
+ * @description Modal genérico de alta/edición de un maestro. Construye
+ * el formulario dinámicamente a partir de las `columns` pasadas por el
+ * padre y precarga los valores iniciales desde `row` (si existe).
+ *
+ * @prop {boolean} visible
+ * @prop {string}  maestroLabel  Etiqueta humana del maestro activo.
+ * @prop {object[]} columns       Columnas con `{ key, label, type?, relatedKey?, displayField? }`.
+ * @prop {object|null} [row=null]  Fila en edición (null = alta).
+ * @prop {object} [relatedData={}] Catálogos para columnas `select`.
+ *
+ * @emits close
+ * @emits save Con payload plano `{ [col.key]: value, … }`.
+ */
 import { ref, watch } from 'vue'
 
 const props = defineProps({
@@ -12,12 +27,28 @@ const emit = defineEmits(['close', 'save'])
 
 const form = ref({})
 
+/**
+ * Deriva la clave de relación a partir del nombre de columna
+ * (`country_id` → `country`). Devuelve `null` si la columna no tiene clave.
+ *
+ * @param {{key:string}} col
+ * @returns {string|null}
+ */
 function getRelationKey(col) {
   if (!col?.key) return null
   if (col.key.endsWith('_id')) return col.key.slice(0, -3)
   return col.key
 }
 
+/**
+ * Calcula el valor inicial de un campo al abrir el modal en modo
+ * edición. Prioriza el valor directo (`row[col.key]`); si el campo es
+ * un select y sólo tenemos el objeto de relación eager-loaded, usa su
+ * `id`. Devuelve `''` para filas nuevas o valores ausentes.
+ *
+ * @param {object} col
+ * @returns {any}
+ */
 function getInitialValue(col) {
   if (!props.row) return ''
 
@@ -31,6 +62,8 @@ function getInitialValue(col) {
   return relationObj?.id ?? ''
 }
 
+// Cada vez que el modal se abre recalculamos el form para reflejar el
+// `row` actual (que puede venir distinto entre aperturas consecutivas)
 watch(() => props.visible, (val) => {
   if (!val) return
   const initial = {}
@@ -40,6 +73,7 @@ watch(() => props.visible, (val) => {
   form.value = initial
 })
 
+/** Emite `save` con una copia plana del formulario. */
 function handleSave() {
   emit('save', { ...form.value })
 }

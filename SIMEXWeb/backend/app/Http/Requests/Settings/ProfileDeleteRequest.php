@@ -6,12 +6,17 @@ use App\Concerns\PasswordValidationRules;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Request de eliminación de cuenta desde la sección Settings.
+ *
+ * Exige la contraseña actual para confirmar la acción irreversible.
+ */
 class ProfileDeleteRequest extends FormRequest
 {
     use PasswordValidationRules;
 
     /**
-     * Get the validation rules that apply to the request.
+     * Reglas de validación: requiere la contraseña actual para autorizar el borrado.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */

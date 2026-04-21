@@ -1,4 +1,16 @@
 <script setup>
+/**
+ * @component SeguimientoView
+ * @description Pantalla de seguimiento de operaciones logísticas: carga
+ * las operaciones desde el backend Laravel, proyecta la información a
+ * un formato plano (`Shipment`) apto para `ShipmentList` / `ShipmentDetail`
+ * y permite avanzar el estado de un envío, que se persiste contra el
+ * microservicio .NET (`VITE_NET_API`).
+ *
+ * El progreso, la etiqueta de estado y los colores se derivan de los
+ * pasos Incoterm (`incoterm_steps`) calculados dinámicamente por el
+ * backend según la responsabilidad declarada en la solicitud.
+ */
 import { ref, shallowRef, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
@@ -15,6 +27,10 @@ const router = useRouter()
 const LARAVEL = import.meta.env.VITE_LARAVEL_API
 const NET = import.meta.env.VITE_NET_API
 
+/**
+ * Paleta de colores por estado de un paso del timeline: se aplica tanto
+ * al badge de estado (fondo + texto) como a la barra de progreso.
+ */
 const STEP_COLORS = {
   pending:   { statusColor: '#e5e7eb', statusTextColor: '#4b5563', progressColor: '#9ca3af' },
   active:    { statusColor: '#dbeafe', statusTextColor: '#1a6fb5', progressColor: '#1a6fb5' },
@@ -26,12 +42,26 @@ const loading = ref(false)
 const loadError = ref(null)
 const selectedId = shallowRef(null)
 
+/**
+ * Formatea un valor numérico como precio en euros (locale es-ES).
+ * Devuelve `'—'` si el valor no es finito.
+ *
+ * @param {unknown} value
+ * @returns {string}
+ */
 function formatPrice(value) {
   const n = Number(value)
   if (!Number.isFinite(n)) return '—'
   return n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 })
 }
 
+/**
+ * Formatea una fecha como `dd/mm/aaaa` (es-ES).
+ * Devuelve `'—'` si es vacía o no parseable.
+ *
+ * @param {string|Date|null|undefined} value
+ * @returns {string}
+ */
 function formatShortDate(value) {
   if (!value) return '—'
   const d = new Date(value)
@@ -39,6 +69,18 @@ function formatShortDate(value) {
   return d.toLocaleDateString('es-ES')
 }
 
+/**
+ * Proyecta una `LogisticsOperation` con su grafo eager-loaded a la forma
+ * que consumen los componentes de seguimiento.
+ *
+ * Construye el timeline a partir de `incoterm_steps`: el índice actual
+ * es el del paso cuyo `name` coincide con `op.status`; si no hay match
+ * se asume el primer paso (`currentIdx = 0`). El progreso se calcula
+ * como `(currentIdx + 1) / total * 100`.
+ *
+ * @param {object} op Operación con `commercial_offer`, `client`, `incoterm_steps`, etc.
+ * @returns {object} Shipment listo para `ShipmentList` / `ShipmentDetail`.
+ */
 function mapToShipment(op) {
   const offer = op.commercial_offer || {}
   const req = offer.client_request || {}
@@ -95,6 +137,12 @@ function mapToShipment(op) {
   }
 }
 
+/**
+ * Hook de montaje: carga el listado de operaciones, lo mapea y
+ * selecciona la primera por defecto para mostrar el detalle. Maneja 401
+ * cerrando sesión y guarda un mensaje en `loadError` para cualquier otro
+ * fallo (se muestra dentro del panel de detalle).
+ */
 onMounted(async () => {
   loading.value = true
   try {
@@ -117,15 +165,39 @@ onMounted(async () => {
   }
 })
 
+/**
+ * Shipment actualmente seleccionado. Si el id guardado ya no existe en
+ * la lista (p.ej. se filtró), cae al primero para evitar render vacío.
+ *
+ * @type {import('vue').ComputedRef<object|null>}
+ */
 const selectedShipment = computed(() => {
   if (!shipments.value.length) return null
   return shipments.value.find((s) => s.id === selectedId.value) || shipments.value[0]
 })
 
+/**
+ * Marca el shipment indicado como seleccionado.
+ *
+ * @param {string} id
+ */
 function handleSelect(id) {
   selectedId.value = id
 }
 
+/**
+ * Aplica localmente el cambio de estado sobre un shipment (timeline,
+ * progreso y colores) y lo persiste contra el microservicio .NET.
+ *
+ * La actualización UI se hace antes de la llamada para feedback inmediato.
+ * Si la persistencia falla se registra en consola, pero la UI queda con
+ * el nuevo estado — se considera aceptable porque el próximo fetch global
+ * recuperará la verdad del backend.
+ *
+ * @param {string} id
+ * @param {string} newStatus Nombre del nuevo paso (debe existir en `steps`).
+ * @returns {Promise<void>}
+ */
 async function updateShipmentStatus(id, newStatus) {
   const shipment = shipments.value.find((s) => s.id === id)
   if (!shipment) return

@@ -1,4 +1,14 @@
 <script setup>
+/**
+ * @component ShipmentList
+ * @description Columna izquierda del panel de seguimiento: listado de
+ * envíos con referencia, cliente, ruta y marca visual de seleccionado.
+ *
+ * @prop {object[]} shipments
+ * @prop {string}   [selectedId='']
+ *
+ * @emits select  Con el `id` del envío pulsado.
+ */
 import { shallowRef } from 'vue'
 
 const props = defineProps({

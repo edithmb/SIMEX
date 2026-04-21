@@ -1,4 +1,12 @@
 <script setup>
+/**
+ * @component PresupuestosStats
+ * @description KPIs del listado de presupuestos: total, aceptados,
+ * enviados (pendientes) y valor agregado. El valor total se formatea de
+ * forma compacta (`€1,2M`, `€350K`) a partir de €1.000.
+ *
+ * @prop {object[]} [presupuestos=[]] Presupuestos mapeados (ver `PresupuestosView.mapPresupuesto`).
+ */
 import { computed } from 'vue'
 import StatCard from '@/components/dashboard/StatCard.vue'
 
@@ -9,6 +17,11 @@ const props = defineProps({
 const total = computed(() => props.presupuestos.length)
 const aceptados = computed(() => props.presupuestos.filter(p => p.status === 'Aceptado').length)
 const pendientes = computed(() => props.presupuestos.filter(p => p.status === 'Enviado').length)
+/**
+ * Suma total de los `price` formateada de forma compacta (`€…M`/`€…K`).
+ *
+ * @type {import('vue').ComputedRef<string>}
+ */
 const valorTotal = computed(() => {
     const sum = props.presupuestos.reduce((acc, p) => acc + Number(p.price || 0), 0)
     if (sum >= 1_000_000) return '€' + (sum / 1_000_000).toFixed(1) + 'M'

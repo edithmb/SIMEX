@@ -1,4 +1,21 @@
 <script setup>
+/**
+ * @component AprobarPresupuestoModal
+ * @description Modal de confirmación de aprobación de un presupuesto.
+ * Muestra un resumen del presupuesto y al confirmar emite `confirm`
+ * con el id capturado.
+ *
+ * El id se captura en un watch propio (`capturedId`) porque el padre
+ * pone `selectedPresupuesto = null` al cerrar — sin la captura perderíamos
+ * la referencia durante la transición de salida del modal.
+ *
+ * @prop {boolean} [visible=false]
+ * @prop {object|null} [presupuesto=null]
+ * @prop {boolean} [submitting=false]
+ *
+ * @emits close
+ * @emits confirm  Con el id del presupuesto.
+ */
 import { ref, watch } from 'vue'
 import Spinner from '@/components/common/Spinner.vue'
 
@@ -19,21 +36,37 @@ watch(
     { immediate: true },
 )
 
+/** Emite `close`; el padre es quien decide limpiar `presupuesto`. */
 function handleClose() {
     emit('close')
 }
 
+/**
+ * Emite `confirm` con el id capturado. No hace nada si ya se está
+ * enviando o si no hay id (p.ej. abrir el modal sin seleccionar).
+ */
 function handleConfirm() {
     if (props.submitting || capturedId.value == null) return
     emit('confirm', capturedId.value)
 }
 
+/**
+ * Cierra solo si el click ocurrió directamente sobre el overlay.
+ *
+ * @param {MouseEvent} e
+ */
 function handleOverlayClick(e) {
     if (e.target === e.currentTarget) {
         handleClose()
     }
 }
 
+/**
+ * Formatea un precio numérico como euros en locale es-ES.
+ *
+ * @param {number} price
+ * @returns {string}
+ */
 function formatPrice(price) {
     return '€' + price.toLocaleString('es-ES')
 }

@@ -1,4 +1,12 @@
 <script setup>
+/**
+ * @component DocumentosTable
+ * @description Tabla tradicional de documentos (nombre, operación,
+ * fecha, tamaño, estado, acciones). Alternativa simple a la vista por
+ * operaciones de `DocumentosView` — se usa en variantes de la pantalla.
+ *
+ * @prop {object[]} documentos
+ */
 defineProps({
     documentos: { type: Array, required: true },
 })
@@ -8,10 +16,24 @@ const statusColors = {
     Pendiente: { bg: '#fef3c7', color: '#b45309' },
 }
 
+/**
+ * Devuelve el par `{bg, color}` del badge para un estado conocido;
+ * fallback a gris neutro para estados desconocidos.
+ *
+ * @param {string} status
+ * @returns {{bg:string,color:string}}
+ */
 function getStatusStyle(status) {
     return statusColors[status] || { bg: '#e5e7eb', color: '#6b7280' }
 }
 
+/**
+ * Color del icono según tipo de archivo: rojo para PDF, verde para
+ * cualquier otro (p.ej. ofimática).
+ *
+ * @param {string} type
+ * @returns {string}
+ */
 function getFileIcon(type) {
     return type === 'PDF' ? '#ef4444' : '#10b981'
 }

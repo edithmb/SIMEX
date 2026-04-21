@@ -1,13 +1,31 @@
 <script setup>
-import { reactive } from 'vue' // Quitamos 'ref' y 'onMounted' porque ya no los usaremos aquí
+/**
+ * @component CrearSolicitudModal
+ * @description Modal de alta de solicitud de cotización. Funciona para
+ * cliente y admin: si el rol es `admin` se muestra un selector de
+ * empresa y su id se incluye en el payload; si es cliente, el backend
+ * infiere el `client_id` del usuario autenticado.
+ *
+ * Los catálogos (clientes, ubicaciones) se reciben ya cargados desde el
+ * padre — este modal no hace fetchs propios.
+ *
+ * @prop {boolean}  [visible=false]
+ * @prop {string}   [role='cliente']        Rol de vista del padre.
+ * @prop {object[]} [clientes=[]]
+ * @prop {object[]} [localizaciones=[]]
+ * @prop {boolean}  [submitting=false]
+ *
+ * @emits close
+ * @emits submit  Con payload ya casteado a número en los campos numéricos.
+ */
+import { reactive } from 'vue'
 import Spinner from '@/components/common/Spinner.vue'
 
-// --- CAMBIO 1: Recibir los datos desde el padre ---
 const props = defineProps({
     visible: { type: Boolean, default: false },
     role: { type: String, default: 'cliente' },
-    clientes: { type: Array, default: () => [] },       // Recibimos la lista de clientes
-    localizaciones: { type: Array, default: () => [] }, // Recibimos la lista de localizaciones
+    clientes: { type: Array, default: () => [] },
+    localizaciones: { type: Array, default: () => [] },
     submitting: { type: Boolean, default: false },
 })
 
@@ -23,9 +41,7 @@ const form = reactive({
     responsability: '',
 })
 
-// --- CAMBIO 2: Eliminamos los 'ref' locales y el 'onMounted' ---
-// (Ya no hacemos el fetch aquí, porque el padre nos manda los datos en los props de arriba)
-
+/** Reinicia todos los campos del formulario a cadena vacía. */
 function resetForm() {
     form.origin_id = ''
     form.destination_id = ''
@@ -36,15 +52,20 @@ function resetForm() {
     form.responsability = ''
 }
 
+/** Resetea el formulario y emite `close`. */
 function handleClose() {
     resetForm()
     emit('close')
 }
 
+/**
+ * Construye el payload a partir del formulario castejando a `Number`
+ * las FKs y los campos numéricos, y emite `submit`. Sólo incluye
+ * `client_id` cuando el rol activo es admin (el cliente no puede elegir
+ * la empresa destinataria).
+ */
 function handleSubmit() {
     if (props.submitting) return
-    // Tu lógica aquí está perfecta.
-    // Castear a Number() asegura que tu backend reciba enteros, no strings.
     const payload = {
         origin_id: Number(form.origin_id),
         destination_id: Number(form.destination_id),
@@ -61,6 +82,11 @@ function handleSubmit() {
     resetForm()
 }
 
+/**
+ * Cierra el modal solo si el click ocurrió sobre el overlay.
+ *
+ * @param {MouseEvent} e
+ */
 function handleOverlayClick(e) {
     if (e.target === e.currentTarget) {
         handleClose()

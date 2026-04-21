@@ -1,4 +1,16 @@
 <script setup>
+/**
+ * @component ClientesFilters
+ * @description Barra de filtros de la pantalla de clientes: input de
+ * búsqueda + tabs empresas/contactos. Delega el estado al padre usando
+ * la convención `v-model:*` (emite `update:activeTab`/`update:searchQuery`).
+ *
+ * @prop {string} [activeTab='empresas']
+ * @prop {string} [searchQuery='']
+ *
+ * @emits update:activeTab   Nueva pestaña activa ('empresas' | 'contactos').
+ * @emits update:searchQuery Nuevo texto de búsqueda.
+ */
 const props = defineProps({
     activeTab: { type: String, default: 'empresas' },
     searchQuery: { type: String, default: '' },

@@ -1,4 +1,16 @@
 <script setup>
+/**
+ * @component PresupuestosTable
+ * @description Tabla de presupuestos con badges coloreados por Incoterm
+ * y estado, precio formateado y columnas de acciones (Aprobar / Rechazar
+ * visibles sólo al cliente).
+ *
+ * @prop {object[]} presupuestos
+ * @prop {string}   [role='admin'] Rol de vista activo.
+ *
+ * @emits aprobar   Con el presupuesto seleccionado.
+ * @emits rechazar  Con el presupuesto seleccionado.
+ */
 const props = defineProps({
     presupuestos: { type: Array, required: true },
     role: { type: String, default: 'admin' },
@@ -25,14 +37,33 @@ const statusColors = {
     Rechazado: { bg: '#fee2e2', color: '#dc2626' },
 }
 
+/**
+ * Devuelve el estilo del badge para un Incoterm. Si no está en la
+ * paleta, aplica un gris neutro.
+ *
+ * @param {string} incoterm
+ * @returns {{bg:string,color:string}}
+ */
 function getIncotermStyle(incoterm) {
     return incotermColors[incoterm] || { bg: '#e5e7eb', color: '#6b7280' }
 }
 
+/**
+ * Devuelve el estilo del badge para un estado (ya traducido a español).
+ *
+ * @param {string} status
+ * @returns {{bg:string,color:string}}
+ */
 function getStatusStyle(status) {
     return statusColors[status] || { bg: '#e5e7eb', color: '#6b7280' }
 }
 
+/**
+ * Formatea un número como euros con separador de miles en locale es-ES.
+ *
+ * @param {number} price
+ * @returns {string}
+ */
 function formatPrice(price) {
     return '€' + price.toLocaleString('es-ES')
 }

@@ -1,4 +1,13 @@
 <script setup>
+/**
+ * @component TransportDistribution
+ * @description Doughnut chart con la distribución del volumen por modo
+ * de transporte (marítimo, aéreo, terrestre).
+ *
+ * Datos *demo* hardcodeados — reemplazar por agregación real del backend
+ * al integrar (p.ej. agrupando `commercial_offers` por tipo de contenedor
+ * / puerto / aeropuerto).
+ */
 import { onMounted, shallowRef } from 'vue'
 import { Chart, registerables } from 'chart.js'
 
@@ -6,6 +15,10 @@ Chart.register(...registerables)
 
 const canvasRef = shallowRef(null)
 
+/**
+ * Monta el gráfico doughnut de Chart.js en el canvas. Configurado con
+ * `maintainAspectRatio: false` para que respete el tamaño del contenedor.
+ */
 onMounted(() => {
   const ctx = canvasRef.value.getContext('2d')
 

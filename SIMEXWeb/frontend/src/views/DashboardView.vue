@@ -1,4 +1,11 @@
 <script setup>
+/**
+ * @component DashboardView
+ * @description Página principal post-login. Calcula cuatro KPIs de un
+ * vistazo (envíos activos, clientes, ofertas pendientes, operaciones
+ * completadas) a partir de tres llamadas paralelas al backend, y
+ * renderiza los widgets de gráficos y actividad reciente.
+ */
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
@@ -20,8 +27,19 @@ const ofertasPendientes = ref('—')
 const operacionesCompletadas = ref('—')
 const totalClientes = ref('—')
 
+/**
+ * Conjunto de valores del campo `status` que se consideran "operación
+ * completada". Se incluye `'descarga'` porque coincide con el último paso
+ * del flujo Incoterm habitual; si el backend unifica a `'completed'` en
+ * el futuro, se puede recortar esta lista.
+ */
 const completedStatuses = ['descarga', 'completed', 'completado']
 
+/**
+ * Hook de montaje: dispara tres peticiones en paralelo (operaciones,
+ * ofertas, clientes) y agrega los KPIs. Ante cualquier error registra en
+ * consola y deja los placeholders `'—'` visibles en lugar de romper la UI.
+ */
 onMounted(async () => {
     loading.value = true
     try {

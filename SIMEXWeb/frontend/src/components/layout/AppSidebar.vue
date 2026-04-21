@@ -1,4 +1,11 @@
 <script setup>
+/**
+ * @component AppSidebar
+ * @description Barra lateral de navegación. Filtra las secciones y
+ * entradas visibles según el rol actual (`useRoleStore().currentRole`),
+ * resalta la entrada activa comparando contra `route.path` y ofrece el
+ * botón de logout en el pie del sidebar.
+ */
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRoleStore } from '@/stores/role'
@@ -9,6 +16,12 @@ const router = useRouter()
 const roleStore = useRoleStore()
 const auth = useAuthStore()
 
+/**
+ * Cierra sesión y redirige a la pantalla de login. El store se encarga
+ * de limpiar el estado local aunque el backend rechace la petición.
+ *
+ * @returns {Promise<void>}
+ */
 async function handleLogout() {
   await auth.logout()
   router.push({ name: 'login' })
@@ -45,6 +58,13 @@ const allMenuSections = [
   },
 ]
 
+/**
+ * Secciones del menú filtradas por rol actual. Si una sección queda
+ * sin ítems visibles (p.ej. un cliente y la sección SISTEMA que sólo
+ * tiene rutas admin), se omite entera para no dejar etiquetas huérfanas.
+ *
+ * @type {import('vue').ComputedRef<object[]>}
+ */
 const menuSections = computed(() => {
   return allMenuSections
     .map(section => ({
@@ -54,6 +74,13 @@ const menuSections = computed(() => {
     .filter(section => section.items.length > 0)
 })
 
+/**
+ * Devuelve true si `itemRoute` coincide exactamente con la ruta actual.
+ * Se usa para aplicar la clase `--active` a la entrada del menú.
+ *
+ * @param {string} itemRoute
+ * @returns {boolean}
+ */
 const isActive = (itemRoute) => {
   return route.path === itemRoute
 }

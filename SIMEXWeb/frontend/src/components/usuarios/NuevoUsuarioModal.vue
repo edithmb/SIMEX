@@ -1,4 +1,16 @@
 <script setup>
+/**
+ * @component NuevoUsuarioModal (usuarios/)
+ * @description Modal alternativo para crear un usuario desde la
+ * pantalla de Usuarios. A diferencia del de `clientes/`, usa catálogos
+ * hardcodeados (*demo*) y reinicia `client_id` automáticamente cuando el
+ * rol deja de ser "Cliente" (id 3).
+ *
+ * @prop {boolean} [visible=false]
+ *
+ * @emits close
+ * @emits submit Con payload `{ first_name, last_name, email, phone_number, role_id, client_id, is_active }`.
+ */
 import { reactive, watch } from 'vue'
 
 const props = defineProps({
@@ -32,11 +44,13 @@ const form = reactive({
     is_active: true,
 })
 
-// Reset client_id when role is not Cliente
+// Al cambiar de rol a uno distinto de "Cliente" (3) limpiamos
+// `client_id` para evitar enviar un client id inconsistente al backend
 watch(() => form.role_id, (val) => {
     if (val !== 3) form.client_id = null
 })
 
+/** Reinicia el formulario a sus valores por defecto. */
 function resetForm() {
     form.first_name = ''
     form.last_name = ''
@@ -47,16 +61,26 @@ function resetForm() {
     form.is_active = true
 }
 
+/** Resetea el formulario y emite `close`. */
 function handleClose() {
     resetForm()
     emit('close')
 }
 
+/**
+ * Emite `submit` con los datos actuales y cierra el modal
+ * inmediatamente (flujo optimista).
+ */
 function handleSubmit() {
     emit('submit', { ...form })
     handleClose()
 }
 
+/**
+ * Cierra el modal solo si el click ocurrió sobre el overlay.
+ *
+ * @param {MouseEvent} e
+ */
 function handleOverlayClick(e) {
     if (e.target === e.currentTarget) handleClose()
 }

@@ -1,8 +1,24 @@
 <script setup>
+/**
+ * @component ConfiguracionView
+ * @description Pantalla de configuración del sistema con dos pestañas:
+ * datos de la empresa (edición solo admin) y seguridad (email, cambio de
+ * contraseña, 2FA y timeout de sesión).
+ *
+ * Nota: los datos están hardcodeados como *demo*. Sustituir
+ * `handleSave` / `handleUpdatePassword` por llamadas reales al backend
+ * al integrar esta pantalla.
+ */
 import { ref, reactive, computed } from 'vue'
 import { useRoleStore } from '@/stores/role'
 
 const roleStore = useRoleStore()
+
+/**
+ * Indica si el usuario puede editar los datos de la empresa (sólo admin).
+ *
+ * @type {import('vue').ComputedRef<boolean>}
+ */
 const canEditEmpresa = computed(() => roleStore.isAdmin)
 
 const activeTab = ref('empresa')
@@ -27,24 +43,38 @@ const security = reactive({
 const editingEmail = ref(false)
 const emailDraft = ref('')
 
+/**
+ * Entra en modo edición del email: copia el valor actual al draft para
+ * poder cancelar sin perder el original.
+ */
 function startEditEmail() {
     emailDraft.value = security.email
     editingEmail.value = true
 }
 
+/** Confirma el email editado y cierra el modo edición. */
 function saveEmail() {
     security.email = emailDraft.value
     editingEmail.value = false
 }
 
+/** Descarta los cambios del email y cierra el modo edición. */
 function cancelEditEmail() {
     editingEmail.value = false
 }
 
+/**
+ * Placeholder del botón "Guardar Cambios" — registra por consola los
+ * datos de la pestaña activa. Sustituir por llamada al backend al integrar.
+ */
 function handleSave() {
     console.log('Guardar cambios:', activeTab.value === 'empresa' ? empresa : security)
 }
 
+/**
+ * Placeholder del botón "Actualizar Contraseña". Actualmente sólo limpia
+ * los campos del formulario. Sustituir por llamada a Fortify al integrar.
+ */
 function handleUpdatePassword() {
     console.log('Actualizar contraseña')
     security.currentPassword = ''

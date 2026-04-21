@@ -1,4 +1,14 @@
 <script setup>
+/**
+ * @component ClientesView
+ * @description Pantalla de gestión de clientes (sólo admin).
+ *
+ * Muestra dos pestañas (empresas/usuarios) con búsqueda compartida y un
+ * botón "Añadir Nuevo" con dropdown para abrir el modal de Nueva Empresa
+ * o Nuevo Usuario. Las lecturas se hacen contra Laravel (`/clients`,
+ * `/roles`); las escrituras se delegan al microservicio .NET (`NET/Clients`
+ * y `NET/Users`).
+ */
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
@@ -27,6 +37,12 @@ const submittingUsuario = ref(false)
 const activeTab = ref('empresas')
 const searchQuery = ref('')
 
+/**
+ * Lista de empresas filtrada por `searchQuery` (razón social, VAT, país)
+ * case-insensitive. Devuelve la lista completa si la query está vacía.
+ *
+ * @type {import('vue').ComputedRef<object[]>}
+ */
 const filteredClientes = computed(() => {
     if (!searchQuery.value.trim()) return clientes.value
     const q = searchQuery.value.toLowerCase()
@@ -38,6 +54,13 @@ const filteredClientes = computed(() => {
     )
 })
 
+/**
+ * Unifica los usuarios de todas las empresas en una sola lista plana,
+ * preservando la razón social de cada empresa (`company_name`). Aplica
+ * después el mismo filtro textual por nombre/email/empresa.
+ *
+ * @type {import('vue').ComputedRef<object[]>}
+ */
 const allUsers = computed(() => {
     const flat = clientes.value.flatMap((c) =>
         (c.users || []).map((u) => ({ ...u, company_name: c.company_name })),
@@ -55,16 +78,30 @@ const allUsers = computed(() => {
 // Dropdown
 const showDropdown = ref(false)
 
+/** Alterna la visibilidad del dropdown "Añadir Nuevo". */
 function toggleDropdown() {
     showDropdown.value = !showDropdown.value
 }
 
+/**
+ * Cierra el dropdown cuando se hace click fuera de su wrapper. Se
+ * registra como listener global en el documento durante el ciclo de vida.
+ *
+ * @param {MouseEvent} e
+ */
 function closeDropdownOutside(e) {
     if (showDropdown.value && !e.target.closest('.clientes-header-wrapper')) {
         showDropdown.value = false
     }
 }
 
+/**
+ * Enriquece un cliente del backend con campos sólo-UI (inicial de la
+ * razón social, placeholders `'—'` para métricas aún no calculadas).
+ *
+ * @param {object} c
+ * @returns {object}
+ */
 function mapCliente(c) {
     return {
         ...c,
@@ -75,6 +112,12 @@ function mapCliente(c) {
     }
 }
 
+/**
+ * Carga el listado de clientes desde Laravel y lo enriquece con
+ * `mapCliente`. Maneja 401 cerrando sesión y redirigiendo al login.
+ *
+ * @returns {Promise<void>}
+ */
 async function fetchClientes() {
     try {
         const res = await axios.get(LARAVEL + '/clients', { headers })
@@ -87,6 +130,14 @@ async function fetchClientes() {
     }
 }
 
+/**
+ * Carga el listado de roles para poblar el select del modal de usuario.
+ *
+ * Tolerante a fallo: si no se pueden obtener se mantiene el array vacío
+ * y el modal simplemente no mostrará opciones precargadas.
+ *
+ * @returns {Promise<void>}
+ */
 async function fetchRoles() {
     try {
         const res = await axios.get(LARAVEL + '/roles', { headers })
@@ -111,16 +162,25 @@ onUnmounted(() => document.removeEventListener('click', closeDropdownOutside))
 const showEmpresaModal = ref(false)
 const showContactoModal = ref(false)
 
+/** Cierra el dropdown y abre el modal de Nueva Empresa. */
 function openEmpresaModal() {
     showDropdown.value = false
     showEmpresaModal.value = true
 }
 
+/** Cierra el dropdown y abre el modal de Nuevo Usuario. */
 function openContactoModal() {
     showDropdown.value = false
     showContactoModal.value = true
 }
 
+/**
+ * Envía una nueva empresa al microservicio .NET (campos camelCase) y
+ * refresca el listado local. Reentrancia bloqueada por `submittingEmpresa`.
+ *
+ * @param {object} data Payload del modal con claves snake_case.
+ * @returns {Promise<void>}
+ */
 async function handleEmpresaSubmit(data) {
     if (submittingEmpresa.value) return
     submittingEmpresa.value = true
@@ -144,6 +204,14 @@ async function handleEmpresaSubmit(data) {
     }
 }
 
+/**
+ * Crea un usuario nuevo vía microservicio .NET. Convierte nombres de
+ * campo del formulario a camelCase, normaliza IDs ausentes a `null` y
+ * fuerza `isActive: true` en el alta. Refresca el listado al terminar.
+ *
+ * @param {object} data Payload del modal.
+ * @returns {Promise<void>}
+ */
 async function handleContactoSubmit(data) {
     if (submittingUsuario.value) return
     submittingUsuario.value = true

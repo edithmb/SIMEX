@@ -1,4 +1,18 @@
 <script setup>
+/**
+ * @component SubirDocumentoModal
+ * @description Modal para subir un documento a una operación.
+ *
+ * Soporta drag & drop (cambia el estilo con `isDragging`) además de la
+ * selección estándar por input file. El archivo actual se muestra por
+ * nombre.
+ *
+ * @prop {boolean} [visible=false]
+ * @prop {boolean} [submitting=false]
+ *
+ * @emits close
+ * @emits submit  Con payload `{ docType, operation, fileName }`.
+ */
 import { reactive, ref } from 'vue'
 import Spinner from '@/components/common/Spinner.vue'
 
@@ -28,11 +42,23 @@ const form = reactive({
 const fileName = ref('')
 const isDragging = ref(false)
 
+/**
+ * Handler del `<input type="file">`: guarda el nombre del archivo
+ * seleccionado (el binario se maneja fuera del modal).
+ *
+ * @param {Event} e
+ */
 function handleFile(e) {
     const file = e.target.files?.[0]
     if (file) fileName.value = file.name
 }
 
+/**
+ * Handler de drop: aborta el comportamiento por defecto, quita el
+ * estado dragging y toma el primer archivo.
+ *
+ * @param {DragEvent} e
+ */
 function handleDrop(e) {
     e.preventDefault()
     isDragging.value = false
@@ -40,15 +66,23 @@ function handleDrop(e) {
     if (file) fileName.value = file.name
 }
 
+/**
+ * Handler de dragover: evita el comportamiento por defecto (necesario
+ * para permitir el drop) y activa el estilo de zona de arrastre.
+ *
+ * @param {DragEvent} e
+ */
 function handleDragOver(e) {
     e.preventDefault()
     isDragging.value = true
 }
 
+/** Desactiva el estilo de zona de arrastre al salir. */
 function handleDragLeave() {
     isDragging.value = false
 }
 
+/** Resetea el formulario y emite `close`. */
 function handleClose() {
     form.docType = 'Bill of Lading (BL)'
     form.operation = ''
@@ -56,11 +90,20 @@ function handleClose() {
     emit('close')
 }
 
+/**
+ * Emite `submit` con los metadatos del documento. No-op si ya se está
+ * enviando.
+ */
 function handleSubmit() {
     if (props.submitting) return
     emit('submit', { ...form, fileName: fileName.value })
 }
 
+/**
+ * Cierra el modal solo si el click ocurrió sobre el overlay.
+ *
+ * @param {MouseEvent} e
+ */
 function handleOverlayClick(e) {
     if (e.target === e.currentTarget) handleClose()
 }

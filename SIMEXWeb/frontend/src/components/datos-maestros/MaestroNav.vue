@@ -1,4 +1,15 @@
 <script setup>
+/**
+ * @component MaestroNav
+ * @description Navegación lateral de la pantalla de datos maestros.
+ * Renderiza grupos con una etiqueta y una lista de botones por grupo;
+ * emite `select` con la `key` del maestro pulsado.
+ *
+ * @prop {Array<{label:string, items:Array<{key:string,label:string}>}>} groups
+ * @prop {string} activeKey Clave del maestro activo (para resaltar).
+ *
+ * @emits select Con la `key` del maestro seleccionado.
+ */
 defineProps({
   groups: { type: Array, required: true },
   activeKey: { type: String, required: true },

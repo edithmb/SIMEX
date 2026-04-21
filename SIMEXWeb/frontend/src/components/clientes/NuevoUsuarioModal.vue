@@ -1,4 +1,17 @@
 <script setup>
+/**
+ * @component NuevoUsuarioModal (clientes/)
+ * @description Modal de alta de usuario desde la pantalla de Clientes.
+ * Permite asignar empresa y rol desde los catálogos pasados por el padre.
+ *
+ * @prop {boolean}  [visible=false]
+ * @prop {object[]} [empresas=[]]    Empresas disponibles (lista con id + company_name).
+ * @prop {object[]} [roles=[]]       Roles disponibles.
+ * @prop {boolean}  [submitting=false]
+ *
+ * @emits close
+ * @emits submit  Con payload `{ first_name, last_name, empresa_id, email, phone, password, role_id }`.
+ */
 import { reactive } from 'vue'
 import Spinner from '@/components/common/Spinner.vue'
 
@@ -21,16 +34,23 @@ const form = reactive({
     role_id: '',
 })
 
+/** Limpia el formulario y emite `close`. */
 function handleClose() {
     Object.assign(form, { first_name: '', last_name: '', empresa_id: '', email: '', phone: '', password: '', role_id: '' })
     emit('close')
 }
 
+/** Emite `submit` con una copia del formulario; no-op si ya se está enviando. */
 function handleSubmit() {
     if (props.submitting) return
     emit('submit', { ...form })
 }
 
+/**
+ * Cierra solo si el click ocurre sobre el overlay (no sobre el cuadro).
+ *
+ * @param {MouseEvent} e
+ */
 function handleOverlayClick(e) {
     if (e.target === e.currentTarget) handleClose()
 }

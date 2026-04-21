@@ -1,4 +1,11 @@
 <script setup>
+/**
+ * @component RecentActivity
+ * @description Panel de actividad reciente del dashboard. Actualmente
+ * usa un listado *demo* hardcodeado; al integrar con backend real
+ * sustituir `activities` por los datos obtenidos del endpoint de
+ * auditoría/actividad.
+ */
 const activities = [
   {
     id: 1,

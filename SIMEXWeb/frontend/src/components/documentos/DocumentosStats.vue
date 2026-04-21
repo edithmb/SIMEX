@@ -1,4 +1,10 @@
 <script setup>
+/**
+ * @component DocumentosStats
+ * @description KPIs del módulo documental. Valores actualmente *demo*
+ * hardcodeados; reemplazar por props o fetchs cuando se integre con
+ * backend real.
+ */
 import StatCard from '@/components/dashboard/StatCard.vue'
 </script>
 

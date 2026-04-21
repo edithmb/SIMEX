@@ -5,8 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * Controlador de lectura de clientes para la pantalla de gestión interna.
+ *
+ * Devuelve un listado enriquecido con los usuarios activos de cada cliente
+ * y su rol, usando select explícito para no exponer columnas sensibles
+ * (p.ej. `password_hash`, auditoría).
+ */
 class ClientController extends Controller
 {
+    /**
+     * Lista los clientes con sus usuarios activos y el rol de cada uno.
+     *
+     * Se excluyen usuarios inactivos (`is_active = false`) y se cargan
+     * únicamente las columnas necesarias para la vista de clientes.
+     *
+     * @return JsonResponse
+     */
     public function index(): JsonResponse
     {
         $clients = Client::select([

@@ -1,4 +1,11 @@
 <script setup>
+/**
+ * @component SolicitudesStats
+ * @description Fila de KPIs sobre el total de solicitudes, cuántas
+ * están pendientes de presupuesto y cuántas ya han sido presupuestadas.
+ *
+ * @prop {object[]} [solicitudes=[]] Solicitudes mapeadas (ver `SolicitudesView.mapSolicitud`).
+ */
 import { computed } from 'vue'
 import StatCard from '@/components/dashboard/StatCard.vue'
 
@@ -6,8 +13,11 @@ const props = defineProps({
     solicitudes: { type: Array, default: () => [] },
 })
 
+/** @type {import('vue').ComputedRef<number>} Total de solicitudes. */
 const total = computed(() => props.solicitudes.length)
+/** @type {import('vue').ComputedRef<number>} Solicitudes sin oferta aún. */
 const sinOferta = computed(() => props.solicitudes.filter(s => !s.hasOffer).length)
+/** @type {import('vue').ComputedRef<number>} Solicitudes con al menos una oferta no rechazada. */
 const conOferta = computed(() => props.solicitudes.filter(s => s.hasOffer).length)
 </script>
 

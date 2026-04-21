@@ -1,4 +1,12 @@
 <script setup>
+/**
+ * @component UsuariosList
+ * @description Listado plano de todos los usuarios (de todas las
+ * empresas) con avatar inicial, empresa, cargo y badge de rol con color
+ * por tipo. Traduce los códigos de rol a etiquetas legibles.
+ *
+ * @prop {object[]} usuarios Lista plana de usuarios (ver `ClientesView.allUsers`).
+ */
 defineProps({
     usuarios: { type: Array, required: true },
 })
@@ -17,6 +25,12 @@ const rolColors = {
     administrador: { bg: '#ede9fe', color: '#5b21b6' },
 }
 
+/**
+ * Devuelve la inicial en mayúscula del nombre, o `'?'` si no hay nombre.
+ *
+ * @param {string|null|undefined} name
+ * @returns {string}
+ */
 function getInitial(name) {
     return name?.charAt(0).toUpperCase() ?? '?'
 }

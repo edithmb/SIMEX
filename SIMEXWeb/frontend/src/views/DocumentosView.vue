@@ -1,4 +1,13 @@
 <script setup>
+/**
+ * @component DocumentosView
+ * @description Gestión documental agrupada por operación logística.
+ *
+ * Lee operaciones y sus documentos desde Laravel y delega las acciones
+ * de subida/descarga al microservicio .NET. El componente tolera que el
+ * backend use snake_case o camelCase en la respuesta (coincidencia en
+ * `mapOperacion`), útil cuando se mezclan respuestas de los dos stacks.
+ */
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
@@ -20,7 +29,15 @@ const loading = ref(false)
 const showModal = ref(false)
 const submittingUpload = ref(false)
 
-// Carga todas las operaciones logísticas con sus documentos
+/**
+ * Carga todas las operaciones logísticas con sus documentos asociados.
+ *
+ * Pide hasta 100 por página (más que suficiente para la pantalla) y es
+ * tolerante a si el backend devuelve un array plano o un paginator
+ * (`res.data.data`). Maneja 401 cerrando sesión.
+ *
+ * @returns {Promise<void>}
+ */
 async function fetchOperaciones() {
     loading.value = true
     try {
@@ -39,6 +56,15 @@ async function fetchOperaciones() {
     }
 }
 
+/**
+ * Proyecta una operación del backend a la forma que consume la vista:
+ * cabecera con referencia/ruta (origen → destino) y lista plana de
+ * documentos con estado normalizado. Sopporta ambas variantes de
+ * naming (snake_case de Laravel y camelCase del .NET).
+ *
+ * @param {object} op
+ * @returns {object}
+ */
 function mapOperacion(op) {
     const offer = op.commercial_offer || op.commercialOffer || {}
     const originPort = offer.origin_port?.name || offer.originPort?.name || '—'
@@ -64,6 +90,14 @@ function mapOperacion(op) {
     }
 }
 
+/**
+ * Normaliza el estado crudo del backend a uno de
+ * `'subido' | 'urgente' | 'pendiente'` (los tres valores con estilos
+ * definidos en la UI). Ausencia o valor desconocido cae en `'pendiente'`.
+ *
+ * @param {string|null|undefined} status
+ * @returns {'subido'|'urgente'|'pendiente'}
+ */
 function mapDocStatus(status) {
     if (!status) return 'pendiente'
     const s = status.toLowerCase()
@@ -77,6 +111,13 @@ onMounted(fetchOperaciones)
 const clientFilters = ['Todos', 'Pendiente', 'Urgente', 'Subido']
 const activeDocFilter = ref('Todos')
 
+/**
+ * Operaciones filtradas por el selector "Todos | Pendiente | Urgente |
+ * Subido". Las operaciones que quedan sin documentos tras filtrar se
+ * omiten por completo para no mostrar tarjetas vacías.
+ *
+ * @type {import('vue').ComputedRef<object[]>}
+ */
 const filteredOperationDocs = computed(() => {
     return operaciones.value
         .map((op) => {
@@ -89,7 +130,15 @@ const filteredOperationDocs = computed(() => {
         .filter((op) => op.filteredDocs.length > 0)
 })
 
-// Subir documento a .NET API
+/**
+ * Abre un `<input type="file">` volátil y al seleccionar un archivo lo
+ * sube al microservicio .NET asociado al documento indicado. Tras la
+ * subida refresca la lista para reflejar el nuevo estado.
+ *
+ * @param {object} doc Documento seleccionado (incluye `id`).
+ * @param {string} operationRef Referencia de la operación (no usada en
+ *   la request pero útil para logging/analítica futura).
+ */
 async function handleUpload(doc, operationRef) {
     const input = document.createElement('input')
     input.type = 'file'
@@ -112,7 +161,14 @@ async function handleUpload(doc, operationRef) {
     input.click()
 }
 
-// Descargar documento desde .NET API
+/**
+ * Descarga el documento indicado del microservicio .NET como blob y
+ * dispara la descarga en el navegador creando un `<a download>` temporal.
+ * Revoca el Object URL al terminar para evitar fugas de memoria.
+ *
+ * @param {object} doc Documento con `id` y `fileName`.
+ * @returns {Promise<void>}
+ */
 async function handleDownload(doc) {
     if (!doc.id) return
     try {
@@ -131,6 +187,16 @@ async function handleDownload(doc) {
     }
 }
 
+/**
+ * Handler del modal "Subir Documento": actualmente sólo registra los
+ * datos en consola y cierra el modal — la lógica de envío real se
+ * ejecuta en `handleUpload` por cada documento individual.
+ *
+ * Reentrancia bloqueada por `submittingUpload`.
+ *
+ * @param {object} data Payload del modal.
+ * @returns {Promise<void>}
+ */
 async function handleSubmit(data) {
     if (submittingUpload.value) return
     submittingUpload.value = true

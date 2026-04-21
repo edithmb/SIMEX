@@ -5,11 +5,18 @@ namespace App\Concerns;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 
+/**
+ * Trait con las reglas de validación reutilizables para datos de perfil.
+ *
+ * Permite pasar `$userId` al componer la regla `unique` para ignorar al
+ * propio usuario al editar su perfil (evita fallar `email`).
+ */
 trait ProfileValidationRules
 {
     /**
-     * Get the validation rules used to validate user profiles.
+     * Reglas completas de perfil: nombre + email (único).
      *
+     * @param  int|null $userId Id del usuario actual a ignorar en `unique`.
      * @return array<string, array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string>>
      */
     protected function profileRules(?int $userId = null): array
@@ -21,7 +28,7 @@ trait ProfileValidationRules
     }
 
     /**
-     * Get the validation rules used to validate user names.
+     * Reglas de validación del nombre (`name`).
      *
      * @return array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string>
      */
@@ -31,8 +38,10 @@ trait ProfileValidationRules
     }
 
     /**
-     * Get the validation rules used to validate user emails.
+     * Reglas de validación del email. Al editar perfil (`$userId` informado)
+     * se ignora el propio usuario en la regla `unique`.
      *
+     * @param  int|null $userId
      * @return array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string>
      */
     protected function emailRules(?int $userId = null): array

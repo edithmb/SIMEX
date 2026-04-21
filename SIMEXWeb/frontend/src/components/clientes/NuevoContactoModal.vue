@@ -1,4 +1,16 @@
 <script setup>
+/**
+ * @component NuevoContactoModal
+ * @description Modal alternativo para añadir un contacto a una empresa
+ * existente (versión más sencilla que `NuevoUsuarioModal`, sin rol ni
+ * contraseña). Se conserva por si se usa desde otra pantalla.
+ *
+ * @prop {boolean}  [visible=false]
+ * @prop {object[]} [empresas=[]]
+ *
+ * @emits close
+ * @emits submit  Con payload `{ name, empresa, email, phone, position }`.
+ */
 import { reactive } from 'vue'
 
 const props = defineProps({
@@ -16,6 +28,7 @@ const form = reactive({
     position: '',
 })
 
+/** Limpia el formulario y emite `close`. */
 function handleClose() {
     form.name = ''
     form.empresa = ''
@@ -25,11 +38,21 @@ function handleClose() {
     emit('close')
 }
 
+/**
+ * Emite `submit` y cierra inmediatamente el modal. A diferencia de otros
+ * modales no espera a que el padre confirme éxito — pensado para flujos
+ * donde no se persiste en red o se confía en el estado optimista.
+ */
 function handleSubmit() {
     emit('submit', { ...form })
     handleClose()
 }
 
+/**
+ * Cierra el modal solo si el click ocurrió sobre el overlay.
+ *
+ * @param {MouseEvent} e
+ */
 function handleOverlayClick(e) {
     if (e.target === e.currentTarget) handleClose()
 }

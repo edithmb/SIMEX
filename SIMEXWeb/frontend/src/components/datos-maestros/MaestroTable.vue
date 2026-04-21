@@ -1,4 +1,18 @@
 <script setup>
+/**
+ * @component MaestroTable
+ * @description Tabla genérica reutilizable para cualquier maestro
+ * configurado en `DatosMaestrosView.maestrosConfig`. Ofrece búsqueda
+ * local y botones de añadir/editar/eliminar. Resuelve automáticamente
+ * las FKs a etiquetas legibles con `resolveSelectLabel`.
+ *
+ * @prop {object} maestro      `{ label, columns, data }` del maestro activo.
+ * @prop {object} [relatedData={}] Mapa `{ relatedKey: items[] }` para resolver selects.
+ *
+ * @emits add
+ * @emits edit    Con la fila a editar.
+ * @emits delete  Con la fila a eliminar.
+ */
 import { ref, computed } from 'vue'
 
 const props = defineProps({
@@ -9,12 +23,30 @@ defineEmits(['add', 'edit', 'delete'])
 
 const search = ref('')
 
+/**
+ * Deriva el nombre de la relación Eloquent a partir de la clave de
+ * columna: `country_id` → `country`. Si no termina en `_id`, devuelve
+ * la misma clave.
+ *
+ * @param {{key:string}} col
+ * @returns {string|null}
+ */
 function getRelationKey(col) {
   if (!col?.key) return null
   if (col.key.endsWith('_id')) return col.key.slice(0, -3)
   return col.key
 }
 
+/**
+ * Resuelve la etiqueta a mostrar para una columna de tipo `select`:
+ * primero intenta leer `row[relation][displayField]` (cuando el backend
+ * devolvió la relación eager-loaded); si no existe, busca el id en
+ * `relatedData[col.relatedKey]`. Devuelve cadena vacía si no hay match.
+ *
+ * @param {object} row
+ * @param {object} col
+ * @returns {string}
+ */
 function resolveSelectLabel(row, col) {
   const relationKey = getRelationKey(col)
   const displayField = col.displayField || 'name'
@@ -31,11 +63,26 @@ function resolveSelectLabel(row, col) {
   return match?.[displayField] ?? ''
 }
 
+/**
+ * Valor a mostrar para una celda: usa `resolveSelectLabel` en columnas
+ * tipo `select` y en el resto el valor directo.
+ *
+ * @param {object} row
+ * @param {object} col
+ * @returns {string|number}
+ */
 function getCellValue(row, col) {
   if (col.type === 'select') return resolveSelectLabel(row, col)
   return row?.[col.key] ?? ''
 }
 
+/**
+ * Filas filtradas por la caja de búsqueda. Busca el texto (case-insensitive)
+ * en el valor renderizado de cualquier columna visible — incluidas las
+ * resueltas por FK — para que la búsqueda "funcione como se ve".
+ *
+ * @type {import('vue').ComputedRef<object[]>}
+ */
 const filtered = computed(() => {
   const q = search.value.toLowerCase()
   if (!q) return props.maestro.data

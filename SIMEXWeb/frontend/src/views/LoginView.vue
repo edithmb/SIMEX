@@ -1,4 +1,10 @@
 <script setup>
+/**
+ * @component LoginView
+ * @description Pantalla de login. Delega la autenticación en
+ * `useAuthStore().login`; si tiene éxito redirige al dashboard, y si falla
+ * muestra el mensaje del backend bajo el botón.
+ */
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -12,6 +18,14 @@ const password = ref('')
 const error = ref('')
 const loading = ref(false)
 
+/**
+ * Envía el formulario de login. Mantiene `loading` activo durante la
+ * request (deshabilita el botón) y limpia el error previo antes de cada
+ * intento. El mensaje de error se toma tal cual del `Error` lanzado por
+ * el store (que ya incluye el texto del backend o un fallback).
+ *
+ * @returns {Promise<void>}
+ */
 async function handleLogin() {
   error.value = ''
   loading.value = true
