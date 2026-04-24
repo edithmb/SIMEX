@@ -11,6 +11,9 @@ services:
       - frontend
       - backend
     restart: always
+    networks:
+      - default
+      - simex-net
 
   # Tu aplicación de Vue
   frontend:
@@ -18,6 +21,8 @@ services:
     pull_policy: always
     container_name: simex-frontend
     restart: always
+    networks:
+      - default
 
   # Tu aplicación de Laravel
   backend:
@@ -30,3 +35,9 @@ services:
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
+    networks:
+      - default
+
+networks:
+  simex-net:
+    external: true

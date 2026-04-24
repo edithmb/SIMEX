@@ -10,6 +10,7 @@
  */
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppTopbar from '@/components/layout/AppTopbar.vue'
+import ChatWidget from '@/components/chat/ChatWidget.vue'
 </script>
 
 <template>
@@ -21,6 +22,7 @@ import AppTopbar from '@/components/layout/AppTopbar.vue'
         <slot />
       </main>
     </div>
+    <ChatWidget />
   </div>
 </template>
 
