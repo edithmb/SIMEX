@@ -15,10 +15,13 @@ services:
       - default
       - simex-net
 
-  # Tu aplicación de Vue
+  # Tu aplicación de Vue (build local con VITE_LARAVEL_API=/api)
   frontend:
-    image: ddelacortep/simex-daw:frontend-latest
-    pull_policy: always
+    build:
+      context: ./frontend
+      dockerfile: DOCKERFILE
+      args:
+        VITE_LARAVEL_API: /api
     container_name: simex-frontend
     restart: always
     networks:
