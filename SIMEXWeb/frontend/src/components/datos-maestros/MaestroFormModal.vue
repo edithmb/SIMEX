@@ -7,6 +7,7 @@ const props = defineProps({
   columns: { type: Array, required: true },
   row: { type: Object, default: null },
   relatedData: { type: Object, default: () => ({}) },
+  error: { type: String, default: '' },
 })
 const emit = defineEmits(['close', 'save'])
 
@@ -59,6 +60,14 @@ function handleSave() {
           </button>
         </div>
         <div class="modal-body">
+          <div v-if="error" class="error-message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            {{ error }}
+          </div>
           <div v-for="col in columns" :key="col.key" class="field">
             <label class="field-label">{{ col.label }}</label>
             <select
@@ -208,5 +217,23 @@ function handleSave() {
 
 .btn-save:hover {
   background: #1558a0;
+}
+
+.error-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #991b1b;
+  margin-bottom: 8px;
+}
+
+.error-message svg {
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 </style>
