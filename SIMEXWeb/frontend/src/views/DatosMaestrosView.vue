@@ -130,9 +130,7 @@ const modalError = ref('')
 
 function getBackendErrorMessage(error, fallback) {
   const data = error?.response?.data
-  if (!data) return fallback
-  
-  if (typeof data.error === 'string' && data.error.trim()) return data.error
+  const status = error?.response?.status
 
   if (data.errors && typeof data.errors === 'object') {
     const firstFieldErrors = Object.values(data.errors).find(
@@ -141,7 +139,7 @@ function getBackendErrorMessage(error, fallback) {
     if (firstFieldErrors) return firstFieldErrors[0]
   }
 
-  return fallback
+  return `Error ${status}: ${fallback}`
 }
 
 // ── Fetch maestro genérico ──
