@@ -25,7 +25,7 @@ class IncotermController extends Controller
     {
         $incoterms = Incoterm::with('incotermType:id,code,name')
             ->orderBy('order_num')
-            ->get(['id', 'incoterm_type_id']);
+            ->get(['id', 'incoterm_type_id']); 
 
         return response()->json($incoterms);
     }

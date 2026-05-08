@@ -115,7 +115,7 @@ const maestrosConfig = {
   },
   incoterms: {
     label: 'Incoterms',
-    endpoint: '/incoterms',
+    endpoint: '/incoterm-types',
     columns: [
       { key: 'code', label: 'Código' },
       { key: 'name', label: 'Nombre' },
@@ -144,6 +144,21 @@ const activeMaestro = computed(() => {
 })
 
 const relatedData = ref({})
+const modalError = ref('')
+
+function getBackendErrorMessage(error, fallback) {
+  const data = error?.response?.data
+  const status = error?.response?.status
+
+  if (data.errors && typeof data.errors === 'object') {
+    const firstFieldErrors = Object.values(data.errors).find(
+      value => Array.isArray(value) && value.length > 0
+    )
+    if (firstFieldErrors) return firstFieldErrors[0]
+  }
+
+  return `Error ${status}: ${fallback}`
+}
 
 /**
  * Carga el maestro identificado por `key` desde su endpoint y refresca
@@ -172,7 +187,6 @@ async function fetchMaestro(key) {
       return
     }
     errorMessage.value = `Error al cargar ${maestrosConfig[key].label}.`
-    console.error(`Error al cargar ${key}:`, error)
   } finally {
     loading.value = false
   }
@@ -195,6 +209,7 @@ const editingRow = ref(null)
 /** Abre el modal en modo creación (sin fila seleccionada). */
 function openAdd() {
   editingRow.value = null
+  modalError.value = ''
   modalVisible.value = true
 }
 
@@ -205,6 +220,7 @@ function openAdd() {
  */
 function openEdit(row) {
   editingRow.value = row
+  modalError.value = ''
   modalVisible.value = true
 }
 
@@ -212,6 +228,7 @@ function openEdit(row) {
 function closeModal() {
   modalVisible.value = false
   editingRow.value = null
+  modalError.value = ''
 }
 
 /**
@@ -238,7 +255,7 @@ async function handleSave(data) {
       router.push({ name: 'login' })
       return
     }
-    console.error('Error al guardar:', error)
+    modalError.value = getBackendErrorMessage(error, 'Error al guardar')
   }
 }
 
@@ -261,7 +278,7 @@ async function handleDelete(row) {
       router.push({ name: 'login' })
       return
     }
-    console.error('Error al eliminar:', error)
+    errorMessage.value = getBackendErrorMessage(error, 'Error al eliminar')
   }
 }
 </script>
@@ -301,6 +318,7 @@ async function handleDelete(row) {
       :columns="activeMaestro.columns"
       :row="editingRow"
       :related-data="relatedData"
+      :error="modalError"
       @close="closeModal"
       @save="handleSave"
     />
@@ -316,6 +334,10 @@ async function handleDelete(row) {
 
 .maestros-error {
   margin: 6px 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  background: #fee2e2;
   font-size: 13px;
   color: #dc2626;
 }

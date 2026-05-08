@@ -11,6 +11,7 @@ use App\Http\Controllers\ComercialOfferController;
 use App\Http\Controllers\ContainerTypeController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\IncotermController;
+use App\Http\Controllers\IncotermTypesController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\LogisticsOperationController;
 use App\Http\Controllers\PortController;
@@ -50,6 +51,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/shipping-lines', [ShippingLineController::class, 'index']);
     Route::get('/carriers', [CarrierController::class, 'index']);
     Route::get('/container-types', [ContainerTypeController::class, 'index']);
+    Route::get('/incoterm-types', [IncotermTypesController::class, 'index']);
 
     // POST/PUT/DELETE solo admin
     Route::middleware('role:admin')->group(function () {
@@ -80,5 +82,9 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/container-types', [ContainerTypeController::class, 'store']);
         Route::put('/container-types/{container_type}', [ContainerTypeController::class, 'update']);
         Route::delete('/container-types/{container_type}', [ContainerTypeController::class, 'destroy']);
+
+        Route::post('/incoterm-types', [IncotermTypesController::class, 'store']);
+        Route::put('/incoterm-types/{id}', [IncotermTypesController::class, 'update']);
+        Route::delete('/incoterm-types/{id}', [IncotermTypesController::class, 'destroy']);
     });
 });
